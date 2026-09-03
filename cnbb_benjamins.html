@@ -33,6 +33,7 @@ body::before{content:'';position:fixed;inset:0;background-image:repeating-linear
 .card-perf .card-icon{background:#6d28d9;box-shadow:0 4px 14px rgba(109,40,217,0.45);}
 .card-presence .card-icon{background:#059669;box-shadow:0 4px 14px rgba(5,150,105,0.45);}
 .card-competition .card-icon{background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 4px 14px rgba(245,158,11,0.45);}
+.card-champfrance .card-icon{background:#1d4ed8;box-shadow:0 4px 14px rgba(29,78,216,0.45);}
 .card-title{font-size:17px;font-weight:700;color:#1e3a8a;}
 .card-desc{font-size:13px;color:#374151;line-height:1.5;text-align:center;}
 .card-btn{margin-top:auto;padding:9px 24px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;letter-spacing:0.3px;transition:background 0.12s;}
@@ -40,6 +41,8 @@ body::before{content:'';position:fixed;inset:0;background-image:repeating-linear
 .card-perf .card-btn:hover{background:#6d28d9;}
 .card-presence .card-btn{background:#059669;color:#fff;}
 .card-competition .card-btn{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;}
+.card-champfrance .card-btn{background:#1d4ed8;color:#fff;}
+.card-champfrance .card-btn:hover{background:#2563eb;}
 .footer{margin-top:48px;font-size:12px;color:rgba(255,255,255,0.45);}
 /* ── PRESENCE STYLES ── */
 #pov{display:none;position:fixed;inset:0;z-index:9999;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#f1f5f9;}
@@ -210,6 +213,16 @@ td.col-holiday.checked .cell-inner{background:linear-gradient(135deg,#00ff6a 0%,
       <div class="card-desc">Prochaine compétition · Programme &amp; accès</div>
       <span class="card-btn" style="display:block;text-align:center;">Accéder →</span>
     </div>
+    <div class="card card-champfrance" onclick="openChampFrance()">
+      <div class="card-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+        </svg>
+      </div>
+      <div class="card-title">CHAMPIONNATS DE FRANCE</div>
+      <div class="card-desc">Sélections · Programme &amp; résultats</div>
+      <span class="card-btn" style="display:block;text-align:center;">Accéder →</span>
+    </div>
   </div>
   <div class="footer">Club de natation de Bourg · 5 rue La Fontaine · 01000 Bourg-en-Bresse</div>
   <div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">v1 · 28/06/2026</div>
@@ -327,6 +340,31 @@ td.col-holiday.checked .cell-inner{background:linear-gradient(135deg,#00ff6a 0%,
   </div>
 </div>
 
+<!-- ======= CHAMPIONNATS DE FRANCE OVERLAY ======= -->
+<div id="champfrance-overlay" style="display:none;position:fixed;inset:0;z-index:9998;overflow-y:auto;background:#f8fafc;font-family:'Nunito',sans-serif;">
+  <div class="header" style="position:relative;">
+    <a class='back-btn' href='/cnbb_home' style='position:absolute;left:16px;'>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Accueil
+    </a>
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex:1;">
+      <div class="logo-circle"><img id="champfrance-logo" alt="CNB"></div>
+      <div class="header-text" style="text-align:left;flex:none;">
+        <div class="header-title">BENJAMINS · CN Bourg-en-Bresse</div>
+        <div class="header-subtitle">Championnats de France – Saison 2026–2027</div>
+      </div>
+    </div>
+    <button class="perf-close" onclick="closeChampFrance()" style="position:absolute;right:16px;">✕</button>
+  </div>
+  <div style="max-width:600px;margin:40px auto;padding:0 16px;text-align:center;">
+    <div style="background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.08);padding:40px 24px;">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="1.5" style="opacity:0.5;margin-bottom:16px;"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+      <h2 style="font-size:18px;font-weight:700;color:#4c1d95;margin-bottom:8px;">Championnats de France à venir</h2>
+      <p style="color:#64748b;font-size:14px;line-height:1.6;">Les informations sur les Championnats de France Benjamins seront affichées ici prochainement.</p>
+    </div>
+  </div>
+</div>
+
 <!-- ======= SCRIPTS ======= -->
 <script>
 function openPresence() {
@@ -361,6 +399,17 @@ function openComp() {
 }
 function closeComp() {
   document.getElementById('comp-overlay').style.display = 'none';
+  document.getElementById('accueil-page').style.display = 'block';
+  document.querySelector('.btn-accueil').style.display = 'flex';
+}
+function openChampFrance() {
+  document.getElementById('champfrance-overlay').style.display = 'block';
+  document.getElementById('accueil-page').style.display = 'none';
+  document.querySelector('.btn-accueil').style.display = 'none';
+  document.getElementById('champfrance-logo').src = document.querySelector('#pov .logo-circle img').src;
+}
+function closeChampFrance() {
+  document.getElementById('champfrance-overlay').style.display = 'none';
   document.getElementById('accueil-page').style.display = 'block';
   document.querySelector('.btn-accueil').style.display = 'flex';
 }
@@ -535,7 +584,6 @@ const SWIMMERS = [
   {n:'ESSADKI Maïssane',        g:'F', y:'2014'},
   {n:'TARTAGLIONE Jade',        g:'F', y:'2014'},
   {n:'DUPRAT PAKULA Robin',     g:'H', y:'2014'},
-  {n:'KOENIG Tom',              g:'H', y:'2014'},
   {n:'OMRANI Nassim',           g:'H', y:'2014'},
   {n:'POMATHIOS Loris',         g:'H', y:'2014'},
   {n:'RAPHAËL LE DOCTE Tianao', g:'H', y:'2014'},
@@ -584,7 +632,6 @@ const mppSwimmers=[
 {n:'ESSADKI Maïssane',g:'F',y:'2014',p:[{t:'00:38.44',p:481},{t:'01:22.62',p:463},{t:'03:09.02',p:401},n,{t:'00:48.69',p:366},{t:'01:46.91',p:298},{t:'00:51.84',p:391},{t:'01:47.33',p:504},{t:'00:51.39',p:160},n,{t:'01:35.83',p:479},{t:'03:37.72',p:327}]},
 {n:'TARTAGLIONE Jade',g:'F',y:'2014',p:[{t:'00:33.35',p:746},{t:'01:14.45',p:664},{t:'02:46.06',p:640},{t:'06:08.07',p:518},{t:'00:40.46',p:670},{t:'01:25.43',p:669},{t:'00:44.65',p:649},{t:'01:42.27',p:585},{t:'00:38.19',p:633},{t:'01:31.75',p:512},{t:'01:27.61',p:641},n]},
 {n:'DUPRAT PAKULA Robin',g:'H',y:'2014',p:[{t:'00:34.89',p:527},{t:'01:18.93',p:442},{t:'02:54.50',p:375},{t:'06:23.03',p:288},{t:'00:43.77',p:380},{t:'01:38.03',p:297},{t:'00:50.56',p:312},{t:'01:52.04',p:257},{t:'00:44.13',p:253},{t:'01:55.49',p:86},{t:'01:32.54',p:373},{t:'03:18.23',p:345}]},
-{n:'KOENIG Tom',g:'H',y:'2014',p:[{t:'00:32.56',p:643},{t:'01:17.68',p:469},{t:'02:51.43',p:405},{t:'06:05.01',p:369},{t:'00:40.79',p:488},{t:'01:29.89',p:427},{t:'00:46.52',p:435},{t:'01:36.49',p:490},{t:'00:39.55',p:419},{t:'01:45.74',p:181},{t:'01:31.58',p:390},{t:'03:13.41',p:385}]},
 {n:'OMRANI Nassim',g:'H',y:'2014',p:[{t:'00:32.72',p:635},{t:'01:14.76',p:534},{t:'03:17.05',p:188},{t:'05:54.10',p:423},{t:'00:41.90',p:446},{t:'01:31.84',p:394},{t:'00:49.97',p:329},{t:'01:51.05',p:270},{t:'00:37.05',p:527},{t:'01:31.71',p:379},{t:'01:33.01',p:365},{t:'03:09.64',p:419}]},
 {n:'POMATHIOS Loris',g:'H',y:'2014',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
 {n:'RAPHAËL LE DOCTE Tianao',g:'H',y:'2014',p:[{t:'00:33.59',p:590},{t:'01:20.88',p:402},{t:'03:04.77',p:282},n,{t:'00:46.78',p:284},{t:'01:40.56',p:262},{t:'00:44.86',p:491},{t:'01:44.32',p:363},{t:'00:45.64',p:208},{t:'01:54.63',p:93},{t:'01:37.50',p:293},{t:'03:20.24',p:328}]},
@@ -625,8 +672,6 @@ const mppHistory=[
 [[{t:'00:34.28',p:694,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'00:35.28',p:639,d:'06/12/2025',l:'BELLEGARDE-SUR-VALSERINE'},{t:'00:35.01',p:653,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'00:35.17',p:645,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:35.61',p:621,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:35.64',p:620,d:'25/05/2025',l:'ISSOIRE'},{t:'00:36.01',p:601,d:'18/05/2025',l:'OYONNAX'},{t:'00:35.29',p:638,d:'05/04/2025',l:'ANNECY'},{t:'00:36.41',p:580,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:37.78',p:512,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'01:14.45',p:664,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'01:18.38',p:563,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'01:18.82',p:552,d:'06/04/2025',l:'ANNECY'}],[{t:'02:55.65',p:533,d:'06/12/2025',l:'BELLEGARDE-SUR-VALSERINE'}],[{t:'06:17.62',p:470,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'05:56.25',p:581,d:'05/04/2025',l:'ANNECY'}],[{t:'00:40.63',p:662,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'00:40.24',p:679,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'00:42.57',p:583,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'00:42.15',p:600,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:41.65',p:620,d:'06/04/2025',l:'ANNECY'}],[{t:'01:25.43',p:669,d:'15/03/2026',l:'FERNEY-VOLTAIRE'},{t:'01:30.43',p:570,d:'24/05/2025',l:'ISSOIRE'},{t:'01:32.35',p:534,d:'06/04/2025',l:'ANNECY'}],[{t:'00:43.06',p:715,d:'23/05/2026',l:'BOURGOIN-JALLIEU'},{t:'00:44.74',p:646,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'00:45.36',p:621,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'00:49.51',p:468,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'01:37.58',p:667,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'01:48.22',p:490,d:'05/04/2025',l:'ANNECY'}],[{t:'00:41.25',p:495,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'00:40.09',p:546,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:41.73',p:475,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:42.79',p:433,d:'06/04/2025',l:'ANNECY'}],[{t:'01:30.70',p:531,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'01:35.76',p:439,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'01:31.58',p:515,d:'15/03/2026',l:'FERNEY-VOLTAIRE'},{t:'01:41.74',p:341,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'01:27.61',p:641,d:'06/12/2025',l:'BELLEGARDE-SUR-VALSERINE'},{t:'01:28.82',p:616,d:'09/11/2025',l:'OYONNAX'},{t:'01:31.71',p:557,d:'25/05/2025',l:'ISSOIRE'},{t:'01:30.33',p:585,d:'18/05/2025',l:'OYONNAX'},{t:'01:32.43',p:543,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],n],
 // 16 DUPRAT PAKULA Robin
 [[{t:'00:36.70',p:444,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'00:35.82',p:483,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'00:37.94',p:391,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'00:36.43',p:456,d:'06/12/2025',l:'BELLEGARDE-SUR-VALSERINE'},{t:'00:36.85',p:437,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'00:37.89',p:393,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:37.59',p:406,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:38.44',p:371,d:'18/05/2025',l:'OYONNAX'},{t:'00:38.57',p:366,d:'18/05/2025',l:'OYONNAX'},{t:'00:37.76',p:399,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:38.24',p:379,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'01:21.32',p:393,d:'23/05/2026',l:'BOURGOIN-JALLIEU'},{t:'01:22.76',p:365,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'01:27.56',p:279,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'01:20.82',p:403,d:'15/03/2026',l:'FERNEY-VOLTAIRE'},{t:'01:20.59',p:408,d:'24/05/2025',l:'ISSOIRE'},{t:'01:26.24',p:302,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'03:03.09',p:296,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'02:58.47',p:337,d:'09/11/2025',l:'OYONNAX'},{t:'02:56.74',p:354,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'02:56.25',p:358,d:'06/04/2025',l:'ANNECY'}],n,[{t:'00:44.17',p:366,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'00:47.67',p:258,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'00:42.11',p:439,d:'06/12/2025',l:'BELLEGARDE-SUR-VALSERINE'},{t:'00:45.25',p:331,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'00:46.04',p:306,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'00:42.68',p:418,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:45.86',p:312,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:45.23',p:332,d:'06/04/2025',l:'ANNECY'}],[{t:'01:34.22',p:355,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'01:35.47',p:336,d:'15/03/2026',l:'FERNEY-VOLTAIRE'},{t:'01:41.13',p:254,d:'09/11/2025',l:'OYONNAX'},{t:'01:37.00',p:313,d:'06/04/2025',l:'ANNECY'},{t:'01:36.61',p:318,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'00:49.17',p:352,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'00:55.37',p:193,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:50.48',p:314,d:'05/04/2025',l:'ANNECY'}],[{t:'01:44.49',p:361,d:'24/05/2026',l:'BOURGOIN-JALLIEU'},{t:'01:49.02',p:297,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'01:57.81',p:190,d:'05/04/2025',l:'ANNECY'}],[{t:'00:44.80',p:233,d:'06/12/2025',l:'BELLEGARDE-SUR-VALSERINE'}],[{t:'01:55.49',p:86,d:'06/04/2025',l:'ANNECY'}],[{t:'01:32.54',p:373,d:'25/05/2025',l:'ISSOIRE'},{t:'01:36.66',p:306,d:'18/05/2025',l:'OYONNAX'},{t:'01:39.70',p:261,d:'05/04/2025',l:'ANNECY'},{t:'01:35.24',p:328,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'03:33.82',p:228,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'03:18.23',p:345,d:'29/03/2026',l:'BOURG-EN-BRESSE'}]],
-// 17 KOENIG Tom
-[[{t:'00:32.31',p:657,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'00:32.80',p:631,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'00:34.29',p:556,d:'06/12/2025',l:'BELLEGARDE-SUR-VALSERINE'},{t:'00:34.37',p:552,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'00:36.24',p:464,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:36.39',p:458,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:35.92',p:479,d:'05/04/2025',l:'ANNECY'},{t:'00:39.16',p:343,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'01:16.83',p:488,d:'24/05/2026',l:'BOURGOIN-JALLIEU'},{t:'01:15.19',p:524,d:'29/03/2026',l:'BOURG-EN-BRESSE'}],[{t:'02:48.65',p:434,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'02:51.46',p:405,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'02:55.02',p:370,d:'06/12/2025',l:'BELLEGARDE-SUR-VALSERINE'},{t:'02:57.24',p:349,d:'06/04/2025',l:'ANNECY'}],[{t:'06:05.01',p:369,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'06:23.38',p:287,d:'05/04/2025',l:'ANNECY'}],[{t:'00:40.15',p:513,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'00:39.32',p:547,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'00:43.02',p:406,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'00:41.79',p:450,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:43.17',p:401,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:43.17',p:401,d:'24/05/2025',l:'ISSOIRE'},{t:'00:44.86',p:343,d:'18/05/2025',l:'OYONNAX'},{t:'00:47.50',p:263,d:'18/05/2025',l:'OYONNAX'},{t:'00:41.65',p:456,d:'06/04/2025',l:'ANNECY'},{t:'00:45.01',p:339,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'01:27.64',p:467,d:'24/05/2026',l:'BOURGOIN-JALLIEU'},{t:'01:27.75',p:465,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'01:25.78',p:502,d:'15/03/2026',l:'FERNEY-VOLTAIRE'},{t:'01:30.54',p:416,d:'24/05/2025',l:'ISSOIRE'},{t:'01:33.17',p:372,d:'06/04/2025',l:'ANNECY'}],[{t:'00:45.67',p:463,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'00:46.81',p:425,d:'12/10/2025',l:'BOURG-EN-BRESSE'}],[{t:'01:36.49',p:490,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'01:39.45',p:440,d:'15/03/2026',l:'FERNEY-VOLTAIRE'},{t:'01:48.09',p:309,d:'05/04/2025',l:'ANNECY'},{t:'01:50.24',p:280,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'00:45.49',p:212,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'01:45.74',p:181,d:'06/04/2025',l:'ANNECY'}],[{t:'01:34.96',p:333,d:'06/12/2025',l:'BELLEGARDE-SUR-VALSERINE'},{t:'01:31.68',p:388,d:'25/05/2025',l:'ISSOIRE'},{t:'01:31.58',p:390,d:'18/05/2025',l:'OYONNAX'},{t:'01:33.54',p:356,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'03:00.17',p:509,d:'23/05/2026',l:'BOURGOIN-JALLIEU'},{t:'03:14.68',p:375,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'03:03.78',p:474,d:'29/03/2026',l:'BOURG-EN-BRESSE'},{t:'03:19.08',p:338,d:'09/11/2025',l:'OYONNAX'}]],
 // 18 OMRANI Nassim
 [[{t:'00:34.62',p:540,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'00:35.53',p:497,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:36.09',p:471,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:38.09',p:385,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'01:17.95',p:463,d:'06/12/2025',l:'BELLEGARDE-SUR-VALSERINE'},{t:'01:23.61',p:349,d:'06/04/2025',l:'ANNECY'}],[{t:'03:17.05',p:188,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'06:20.76',p:298,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'06:25.14',p:279,d:'05/04/2025',l:'ANNECY'}],[{t:'00:39.46',p:541,d:'24/05/2026',l:'BOURGOIN-JALLIEU'},{t:'00:40.91',p:484,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'00:46.67',p:287,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'00:45.40',p:326,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:44.94',p:341,d:'06/04/2025',l:'ANNECY'}],[{t:'01:29.18',p:440,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'01:34.09',p:357,d:'06/12/2025',l:'BELLEGARDE-SUR-VALSERINE'},{t:'01:38.14',p:296,d:'06/04/2025',l:'ANNECY'}],n,[{t:'01:51.05',p:270,d:'06/12/2025',l:'BELLEGARDE-SUR-VALSERINE'}],[{t:'00:39.80',p:409,d:'12/10/2025',l:'BOURG-EN-BRESSE'},{t:'00:40.05',p:399,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:41.30',p:351,d:'21/06/2025',l:'AMBÉRIEU-EN-BUGEY'},{t:'00:41.98',p:326,d:'18/05/2025',l:'OYONNAX'},{t:'00:40.20',p:393,d:'06/04/2025',l:'ANNECY'}],[{t:'01:33.08',p:357,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'},{t:'01:35.95',p:312,d:'06/12/2025',l:'BELLEGARDE-SUR-VALSERINE'},{t:'01:38.07',p:280,d:'09/11/2025',l:'OYONNAX'},{t:'01:37.30',p:292,d:'24/05/2025',l:'ISSOIRE'},{t:'01:43.85',p:203,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'01:33.01',p:365,d:'25/05/2025',l:'ISSOIRE'},{t:'01:35.45',p:325,d:'18/05/2025',l:'OYONNAX'},{t:'01:37.14',p:299,d:'05/04/2025',l:'ANNECY'},{t:'01:42.01',p:228,d:'18/01/2025',l:'AMBÉRIEU-EN-BUGEY'}],[{t:'03:12.47',p:394,d:'26/04/2026',l:'BELLEGARDE-SUR-VALSERINE'}]],
 // 19 POMATHIOS Loris
