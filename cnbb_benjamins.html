@@ -356,11 +356,41 @@ td.col-holiday.checked .cell-inner{background:linear-gradient(135deg,#00ff6a 0%,
     </div>
     <button class="perf-close" onclick="closeChampFrance()" style="position:absolute;right:16px;">✕</button>
   </div>
-  <div style="max-width:600px;margin:40px auto;padding:0 16px;text-align:center;">
-    <div style="background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.08);padding:40px 24px;">
-      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="1.5" style="opacity:0.5;margin-bottom:16px;"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
-      <h2 style="font-size:18px;font-weight:700;color:#4c1d95;margin-bottom:8px;">Championnats de France à venir</h2>
-      <p style="color:#64748b;font-size:14px;line-height:1.6;">Les informations sur les Championnats de France Benjamins seront affichées ici prochainement.</p>
+  <p class="perf-subtitle">Sélection Championnats de France · Bassin 25 m · Nés 2013 &amp; 2014 · Données FFN · <em>Cliquer sur une performance pour voir l'historique</em></p>
+  <div class="perf-legend-names">
+    <div><span class="ndot" style="background:#881337;"></span><span style="color:#881337;">Filles 2014</span></div>
+    <div><span class="ndot" style="background:#172554;"></span><span style="color:#172554;">Garçons 2014</span></div>
+    <div><span class="ndot" style="background:#9d174d;"></span><span style="color:#9d174d;">Filles 2013</span></div>
+    <div><span class="ndot" style="background:#0f172a;"></span><span style="color:#0f172a;">Garçons 2013</span></div>
+  </div>
+  <div class="perf-table-wrap">
+    <table class="perf-tbl" id="cf-main"></table>
+  </div>
+  <div class="perf-legend" id="cf-legend"></div>
+  <!-- Modal -->
+  <div class="mpp-modal-bg" id="cfModalBg">
+    <div class="mpp-modal">
+      <div class="mpp-modal-hdr">
+        <div>
+          <div class="mpp-modal-title" id="cfModalTitle"></div>
+          <div class="mpp-modal-event" id="cfModalEvent"></div>
+        </div>
+        <button class="mpp-modal-close" id="cfModalClose">✕</button>
+      </div>
+      <div class="mpp-modal-body">
+        <p class="mpp-hint" id="cfModalHint"></p>
+        <table class="mpp-modal-tbl">
+          <thead><tr>
+            <th style="width:24px;text-align:center;">#</th>
+            <th>Temps</th><th>Pts</th><th>Évol.</th><th>Date</th><th>Lieu</th>
+          </tr></thead>
+          <tbody id="cfModalBody"></tbody>
+        </table>
+        <div id="cfChartWrap" style="display:none;margin-top:20px;padding-top:16px;border-top:1px solid #f1f5f9;">
+          <div style="font-size:12px;font-weight:700;color:#6b7280;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">📈 Évolution chronologique</div>
+          <canvas id="cfChart" height="180" style="width:100%;display:block;"></canvas>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -407,6 +437,7 @@ function openChampFrance() {
   document.getElementById('accueil-page').style.display = 'none';
   document.querySelector('.btn-accueil').style.display = 'none';
   document.getElementById('champfrance-logo').src = document.querySelector('#pov .logo-circle img').src;
+  buildCFTable();
 }
 function closeChampFrance() {
   document.getElementById('champfrance-overlay').style.display = 'none';
@@ -563,6 +594,155 @@ function drawMPPChart(pts, color) {
     ctx.fillText(d+'/'+m+'/'+p.d.split('/')[2].slice(2),0,0); ctx.restore();
   });
 }
+function buildCFTable() {
+  const tbl = document.getElementById('cf-main');
+  if (!tbl || tbl.tHead) return;
+  const leg = document.getElementById('cf-legend');
+  PERF_C.forEach(c => {
+    const d = document.createElement('div');
+    d.innerHTML = `<span class="lsq" style="background:${c.bg};"></span>${c.label} pts`;
+    leg.appendChild(d);
+  });
+  const thead = tbl.createTHead();
+  const hr = thead.insertRow();
+  const thN = document.createElement('th'); thN.textContent = 'Nageur·euse'; hr.appendChild(thN);
+  E.forEach(e => { const th = document.createElement('th'); th.textContent = e; hr.appendChild(th); });
+  const cfEntries = [];
+  mppSwimmers.forEach((sw, si) => { if (sw.y === '2014') cfEntries.push({sw, hist: mppHistory[si]}); });
+  cf2013Swimmers.forEach(sw => cfEntries.push({sw, hist: null}));
+  const tbody = tbl.createTBody();
+  cfEntries.forEach(({sw, hist: swHist}) => {
+    const color = MPP_NAME_C[sw.g + sw.y] || '#881337';
+    const tr = tbody.insertRow();
+    const tdN = tr.insertCell();
+    tdN.textContent = sw.n;
+    tdN.style.color = color;
+    E.forEach((_, ei) => {
+      const td = tr.insertCell();
+      const hist = swHist && swHist[ei];
+      const perf = hist && hist.length ? hist.reduce((a, b) => b.p > a.p ? b : a, hist[0]) : null;
+      if (!perf) {
+        td.innerHTML = '<span class="m-empty">—</span>';
+      } else {
+        const c = pc(perf.p);
+        const badge = document.createElement('div');
+        badge.className = 'p-badge';
+        badge.style.background = c.bg;
+        badge.style.color = c.tx;
+        badge.innerHTML = `<span class="p-time">${perf.t}</span><span class="p-pts">${perf.p} pts</span>`;
+        if (hist.length) {
+          badge.title = `${hist.length} perf${hist.length>1?'s':''} – cliquer`;
+          badge.addEventListener('click', () => openCFModal(sw, ei, hist, c));
+        }
+        td.appendChild(badge);
+      }
+    });
+  });
+  document.getElementById('cfModalBg').addEventListener('click', e => {
+    if (e.target === document.getElementById('cfModalBg')) closeCFModal();
+  });
+  document.getElementById('cfModalClose').addEventListener('click', closeCFModal);
+}
+function closeCFModal() { document.getElementById('cfModalBg').classList.remove('open'); }
+function openCFModal(sw, ei, hist, c) {
+  const borderCol = c ? c.bg : '#6d28d9';
+  const titleEl = document.getElementById('cfModalTitle');
+  titleEl.textContent = sw.n;
+  titleEl.style.borderLeft = '4px solid ' + borderCol;
+  titleEl.style.paddingLeft = '8px';
+  document.getElementById('cfModalEvent').textContent = E[ei];
+  const hintEl = document.getElementById('cfModalHint');
+  if (!hist || !hist.length) {
+    hintEl.style.display = 'none';
+    document.getElementById('cfModalBody').innerHTML = '<tr><td colspan="6" style="color:#6b7280;padding:12px;text-align:center">Aucune performance</td></tr>';
+    document.getElementById('cfModalBg').classList.add('open');
+    return;
+  }
+  const best = hist.reduce((a, b) => b.p > a.p ? b : a, hist[0]);
+  const pco = pc(best.p);
+  const bbg = pco ? pco.bg : '#f3f4f6', btx = pco ? pco.tx : '#111827';
+  hintEl.innerHTML = `<span style="margin-right:6px;">🏆 Meilleure :</span><strong>${best.t}</strong><span style="background:${bbg};color:${btx};padding:2px 8px;border-radius:8px;font-weight:700;font-size:13px;margin-left:8px;">${best.p} pts</span><span style="font-size:12px;color:#6b7280;margin-left:10px;">${best.d||''} · ${best.l||''}</span>`;
+  hintEl.style.display = 'block';
+  function pd(d) { if(!d) return 0; const p = d.split('/'); return new Date(+p[2],+p[1]-1,+p[0]).getTime(); }
+  function t2c(t) { const [a,b] = t.split(':'), c = b.split('.'); return +a*6000+ +c[0]*100+ +c[1]; }
+  const perfs = [...hist].sort((a,b) => pd(b.d) - pd(a.d));
+  let html = '';
+  perfs.forEach((p, i) => {
+    const pc_ = pc(p.p);
+    const bg = pc_ ? pc_.bg : '#f3f4f6', tx = pc_ ? pc_.tx : '#111827';
+    const prev = perfs[i+1];
+    const diff = prev ? t2c(p.t) - t2c(prev.t) : null;
+    const evolVal = diff !== null ? (diff < 0 ? '' : '+') + (diff/100).toFixed(2) + 's' : '';
+    let evolHtml = '';
+    if (diff === null) evolHtml = '';
+    else if (diff < 0) evolHtml = `<span style="color:#16a34a;font-weight:700"><span style="font-size:20px;line-height:1">↑</span> ${evolVal}</span>`;
+    else if (diff > 0) evolHtml = `<span style="color:#dc2626;font-weight:700"><span style="font-size:20px;line-height:1">↓</span> ${evolVal}</span>`;
+    else evolHtml = `<span style="color:#3b82f6;font-weight:700">= 0.00s</span>`;
+    const isBest = p === best;
+    html += `<tr style="${isBest?'background:rgba(253,224,71,.15);':''}">
+      <td style="font-size:12px;width:24px;padding:6px 2px;text-align:center">${isBest?'🏆':'·'}</td>
+      <td style="padding:6px 8px;font-weight:700">${p.t}</td>
+      <td style="padding:6px 8px;text-align:center"><span style="background:${bg};color:${tx};padding:2px 7px;border-radius:8px;font-size:13px;font-weight:700">${p.p}</span></td>
+      <td style="padding:6px 8px;font-size:14px;white-space:nowrap">${evolHtml}</td>
+      <td style="padding:6px 8px;font-size:12px;color:#111827">${p.d||''}</td>
+      <td style="padding:6px 8px;font-size:12px;color:#111827">${p.l||''}</td>
+    </tr>`;
+  });
+  document.getElementById('cfModalBody').innerHTML = html;
+  const chartWrap = document.getElementById('cfChartWrap');
+  const chronoPts = [...hist].filter(p=>p.d).sort((a,b) => pd(a.d) - pd(b.d));
+  if (chronoPts.length >= 2) {
+    chartWrap.style.display = 'block';
+    const swColor = MPP_NAME_C[(sw.g+sw.y)] || '#db2777';
+    requestAnimationFrame(() => drawCFChart(chronoPts, swColor));
+  } else { chartWrap.style.display = 'none'; }
+  document.getElementById('cfModalBg').classList.add('open');
+}
+function drawCFChart(pts, color) {
+  const canvas = document.getElementById('cfChart');
+  if (!canvas) return;
+  function ts(s) { const[a,b]=s.split(':'),c=b.split('.');return +a*60+ +c[0]+ +c[1]/100; }
+  const data = pts.map(p => ({...p, v: ts(p.t)}));
+  const W = canvas.offsetWidth || 480, H = 180;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const PAD = {top:24, right:16, bottom:50, left:52};
+  const cW = W-PAD.left-PAD.right, cH = H-PAD.top-PAD.bottom;
+  const vals = data.map(p=>p.v);
+  const minV = Math.min(...vals)-1, maxV = Math.max(...vals)+1;
+  function xP(i){ return PAD.left + (i/(data.length-1))*cW; }
+  function yP(v){ return PAD.top + cH - ((v-minV)/(maxV-minV))*cH; }
+  ctx.clearRect(0,0,W,H);
+  for(let i=0;i<=4;i++){
+    const v=minV+(maxV-minV)*i/4, y=yP(v);
+    ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(W-PAD.right,y);
+    ctx.strokeStyle='#f1f5f9'; ctx.lineWidth=1; ctx.stroke();
+    const s=Math.round(v), lbl=(s<60?'0:'+( s<10?'0'+s:s):'1:'+( (s-60)<10?'0'+(s-60):(s-60)));
+    ctx.fillStyle='#9ca3af'; ctx.font='10px sans-serif'; ctx.textAlign='right';
+    ctx.fillText(lbl, PAD.left-5, y+4);
+  }
+  function hexA(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgba(${r},${g},${b},${a})`;}
+  const grad=ctx.createLinearGradient(0,PAD.top,0,PAD.top+cH);
+  grad.addColorStop(0,hexA(color,0.18)); grad.addColorStop(1,hexA(color,0.01));
+  ctx.beginPath(); ctx.moveTo(xP(0),yP(data[0].v));
+  data.forEach((p,i)=>{ if(i>0) ctx.lineTo(xP(i),yP(p.v)); });
+  ctx.lineTo(xP(data.length-1),PAD.top+cH); ctx.lineTo(xP(0),PAD.top+cH);
+  ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+  ctx.beginPath();
+  data.forEach((p,i)=>{ i===0?ctx.moveTo(xP(i),yP(p.v)):ctx.lineTo(xP(i),yP(p.v)); });
+  ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.stroke();
+  data.forEach((p,i)=>{
+    const x=xP(i), y=yP(p.v);
+    ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fillStyle='#2e1065'; ctx.fill();
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+    ctx.fillStyle='#1e1b4b'; ctx.font='bold 10px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(p.t.replace(/^0+:/,'').replace('00:',''), x, y-10);
+    const[d,m]=p.d.split('/');
+    ctx.fillStyle='#6b7280'; ctx.font='10px sans-serif';
+    ctx.save(); ctx.translate(x,H-PAD.bottom+12); ctx.rotate(-Math.PI/4); ctx.textAlign='right';
+    ctx.fillText(d+'/'+m+'/'+p.d.split('/')[2].slice(2),0,0); ctx.restore();
+  });
+}
 </script>
 
 <script>
@@ -610,6 +790,18 @@ const PERF_C=[
   {mn:900,mx:999,bg:'#a855f7',tx:'#faf5ff',label:'900–999'},
 ];
 const MPP_NAME_C={'F2015':'#db2777','F2014':'#881337','H2015':'#1d4ed8','H2014':'#172554'};
+MPP_NAME_C['F2013'] = '#9d174d';
+MPP_NAME_C['H2013'] = '#0f172a';
+const cf2013Swimmers=[
+  {n:'DONNIER VALENTIN Joy',   g:'F', y:'2013'},
+  {n:'DONNIER VALENTIN Zélie', g:'F', y:'2013'},
+  {n:'RIBEYRON Agathe',        g:'F', y:'2013'},
+  {n:'KOURTELI Jessym',        g:'H', y:'2013'},
+  {n:'KACEMI Lina',            g:'F', y:'2013'},
+  {n:'JAY Maelys',             g:'F', y:'2013'},
+  {n:'DUSSURGET Bastien',      g:'H', y:'2013'},
+  {n:'JOUCHOUX Lenny',         g:'H', y:'2013'},
+];
 function pc(p){if(p===null||p===undefined)return {bg:'#f3f4f6',tx:'#374151'};return PERF_C.find(x=>p>=x.mn&&p<=x.mx)||PERF_C[PERF_C.length-1];}
 const E=['50 NL','100 NL','200 NL','400 NL','50 Dos','100 Dos','50 Bra.','100 Bra.','50 Pap.','100 Pap.','100 4N','200 4N'];
 const n=null;
