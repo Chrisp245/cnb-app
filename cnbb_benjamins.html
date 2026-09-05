@@ -653,7 +653,9 @@ function buildCFTable() {
           const ok = delta <= 0;
           const q = document.createElement('div');
           q.className = 'q-line';
-          q.style.color = ok ? '#15803d' : '#b91c1c';
+          const close = !ok && delta < 500;
+          if (close) { q.style.background = '#fde047'; q.style.color = '#78350f'; q.style.borderRadius = '3px'; q.style.padding = '1px 3px'; }
+          else { q.style.color = ok ? '#15803d' : '#b91c1c'; }
           q.textContent = `Qualif ${qTime} (${ok?'−':'+'}${(Math.abs(delta)/100).toFixed(2)}s)`;
           td.appendChild(q);
         }
