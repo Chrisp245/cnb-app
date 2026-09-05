@@ -126,6 +126,7 @@ td.col-holiday.checked .cell-inner{background:linear-gradient(135deg,#00ff6a 0%,
 .p-badge:hover{transform:translateY(-1px);}
 .p-time{font-weight:700;font-size:11px;}
 .p-pts{font-size:10px;font-weight:700;opacity:.9;}
+.q-line{font-size:9px;font-weight:700;margin-top:2px;text-align:center;white-space:nowrap;}
 .perf-legend{display:flex;flex-wrap:wrap;gap:6px;margin:0 14px 14px;font-size:10px;}
 .perf-legend div{display:flex;align-items:center;gap:4px;}
 .perf-legend span.lsq{width:11px;height:11px;border-radius:2px;border:0.5px solid rgba(0,0,0,.1);flex-shrink:0;}
@@ -594,6 +595,16 @@ function drawMPPChart(pts, color) {
     ctx.fillText(d+'/'+m+'/'+p.d.split('/')[2].slice(2),0,0); ctx.restore();
   });
 }
+const QUALIF={
+F2014:{'50 NL':'30.54','100 NL':'1:07.22','200 NL':'2:27.99','400 NL':'5:06.06','50 Dos':'35.56','100 Dos':'1:18.11','50 Bra.':'39.78','100 Bra.':'1:27.49','50 Pap.':'33.49','100 Pap.':'1:17.77','200 4N':'2:48.12'},
+F2013:{'50 NL':'29.05','100 NL':'1:04.18','200 NL':'2:21.42','400 NL':'4:55.76','50 Dos':'33.66','100 Dos':'1:14.34','50 Bra.':'38.29','100 Bra.':'1:24.63','50 Pap.':'31.38','100 Pap.':'1:13.61','200 4N':'2:42.21'},
+H2014:{'50 NL':'29.36','100 NL':'1:04.94','200 NL':'2:23.69','400 NL':'4:54.42','50 Dos':'34.10','100 Dos':'1:14.26','50 Bra.':'39.35','100 Bra.':'1:26.28','50 Pap.':'32.14','100 Pap.':'1:16.55','200 4N':'2:42.39'},
+H2013:{'50 NL':'27.75','100 NL':'1:01.79','200 NL':'2:17.05','400 NL':'4:44.83','50 Dos':'32.07','100 Dos':'1:09.72','50 Bra.':'35.86','100 Bra.':'1:20.80','50 Pap.':'30.48','100 Pap.':'1:10.84','200 4N':'2:33.51'},
+};
+function cfTimeToCs(s){
+  if (s.indexOf(':') !== -1) { const [a,b]=s.split(':'), c=b.split('.'); return (+a)*6000+(+c[0])*100+(+(c[1]||0)); }
+  const c = s.split('.'); return (+c[0])*100+(+(c[1]||0));
+}
 function buildCFTable() {
   const tbl = document.getElementById('cf-main');
   if (!tbl || tbl.tHead) return;
@@ -635,6 +646,17 @@ function buildCFTable() {
           badge.addEventListener('click', () => openCFModal(sw, ei, hist, c));
         }
         td.appendChild(badge);
+        const qKey = sw.g + sw.y;
+        const qTime = QUALIF[qKey] && QUALIF[qKey][E[ei]];
+        if (qTime) {
+          const delta = cfTimeToCs(perf.t) - cfTimeToCs(qTime);
+          const ok = delta <= 0;
+          const q = document.createElement('div');
+          q.className = 'q-line';
+          q.style.color = ok ? '#15803d' : '#b91c1c';
+          q.textContent = `Qualif ${qTime} (${ok?'−':'+'}${(Math.abs(delta)/100).toFixed(2)}s)`;
+          td.appendChild(q);
+        }
       }
     });
   });
