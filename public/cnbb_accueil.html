@@ -692,7 +692,7 @@ td.col-holiday.checked .cell-inner{
 <div class="stats-bar" style="position:relative;top:auto;">
   <div class="stat-item"><strong id="stat-total">0</strong>présences enregistrées</div>
   <div class="stat-item"><strong id="stat-sessions">166</strong>séances au total</div>
-  <div class="stat-item"><strong id="stat-swimmers">36</strong>nageurs</div>
+  <div class="stat-item"><strong id="stat-swimmers">37</strong>nageurs</div>
   <div class="stat-item" id="sync-status" style="font-weight:600;"></div>
   <button type="button" onclick="resortPresence()" style="border:1px solid #c4b5fd;background:#f5f3ff;color:#4c1d95;font-weight:700;font-size:12px;border-radius:8px;padding:5px 10px;cursor:pointer;">&#8635; Trier par %</button>
 </div>
@@ -772,6 +772,7 @@ const SWIMMERS = [
   {n:'ROBERT Hector',                  g:'H', y:'2018'},
   {n:'BOZON Jules',                   g:'H', y:'2019'},
 ];
+(function(){ var el=document.getElementById('stat-swimmers'); if(el) el.textContent=SWIMMERS.length; })();
 const GROUP_COLORS = {
   'F2016': '#881337',
   'F2017': '#db2777',
