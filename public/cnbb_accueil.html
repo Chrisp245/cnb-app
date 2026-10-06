@@ -694,6 +694,7 @@ td.col-holiday.checked .cell-inner{
   <div class="stat-item"><strong id="stat-sessions">166</strong>séances au total</div>
   <div class="stat-item"><strong id="stat-swimmers">36</strong>nageurs</div>
   <div class="stat-item" id="sync-status" style="font-weight:600;"></div>
+  <button type="button" onclick="resortPresence()" style="border:1px solid #c4b5fd;background:#f5f3ff;color:#4c1d95;font-weight:700;font-size:12px;border-radius:8px;padding:5px 10px;cursor:pointer;">&#8635; Trier par %</button>
 </div>
 
 <!-- Table -->
@@ -792,6 +793,19 @@ function swimmerActiveSessions(year) {
 function swimmerTotal(idx, year) {
   return presence[idx].reduce((s, v, j) => s + (v && !isExcluded(j, year) && DATES[j].full <= TODAY ? 1 : 0), 0);
 }
+// Ordre d'affichage du tableau de presence : meilleur % de presence en premier.
+// Egalite : plus de seances suivies d'abord, puis ordre de la liste SWIMMERS.
+// Seul l'affichage est trie : les presences restent enregistrees par numero de nageur.
+function presenceOrder() {
+  const base = SWIMMERS.map((sw, i) => {
+    const active = swimmerActiveSessions(sw.y);
+    const tot = swimmerTotal(i, sw.y);
+    return { i, pct: active > 0 ? Math.round(tot / active * 100) : -1, tot };
+  });
+  base.sort((a, b) => (b.pct - a.pct) || (b.tot - a.tot) || (a.i - b.i));
+  return base.map(o => o.i);
+}
+function resortPresence() { buildTable(); }
 function avgPct() {
   const pcts = SWIMMERS.map((sw, idx) => {
     const active = swimmerActiveSessions(sw.y);
@@ -874,9 +888,10 @@ function buildTable() {
   hRow += '<th class="col-pct">%</th>';
   hRow += '</tr>';
   thead.innerHTML = hRow;
-  // Swimmer rows
+  // Swimmer rows (meilleur % de presence en premier)
   let rows = '';
-  SWIMMERS.forEach((sw, i) => {
+  presenceOrder().forEach(i => {
+    const sw = SWIMMERS[i];
     const key = sw.g + sw.y;
     const color = GROUP_COLORS[key];
     rows += `<tr class="swimmer-row" data-idx="${i}">`;
