@@ -115,6 +115,10 @@ td.col-holiday.checked .cell-inner{background:linear-gradient(135deg,#00ff6a 0%,
 .perf-tbl thead tr{background:#f3f4f6;}
 .perf-tbl th{padding:7px 8px;text-align:center;font-weight:600;color:#111827;font-size:11px;letter-spacing:.04em;text-transform:uppercase;border-right:0.5px solid #e5e7eb;}
 #mpp-main thead th,#france-main thead th{position:sticky;top:0;z-index:15;background:#f3f4f6;}
+/* Colonne des noms figee (defilement horizontal) : Benjamins + Championnat de France */
+#mpp-main thead th:first-child,#france-main thead th:first-child{position:sticky;left:0;top:0;z-index:25;background:#f3f4f6;box-shadow:2px 0 4px -1px rgba(0,0,0,.18);}
+.perf-tbl tbody td:first-child{position:sticky;left:0;z-index:10;background:#fff;box-shadow:2px 0 4px -1px rgba(0,0,0,.18);}
+.perf-tbl tbody tr:nth-child(even) td:first-child{background:#f9fafb;}
 .perf-tbl th:first-child{text-align:left;min-width:170px;}
 .perf-tbl th:last-child{border-right:none;}
 .perf-tbl td{padding:5px 6px;text-align:center;border-top:0.5px solid #e5e7eb;border-right:0.5px solid #e5e7eb;vertical-align:middle;}
@@ -299,6 +303,7 @@ td.col-holiday.checked .cell-inner{background:linear-gradient(135deg,#00ff6a 0%,
   <div class="stat-item"><strong id="stat-sessions">116</strong>séances au total</div>
   <div class="stat-item"><strong id="stat-swimmers">19</strong>nageurs</div>
   <div class="stat-item" id="sync-status" style="font-weight:600;"></div>
+  <button type="button" onclick="resortPresence()" style="border:1px solid #c4b5fd;background:#f5f3ff;color:#4c1d95;font-weight:700;font-size:12px;border-radius:8px;padding:5px 10px;cursor:pointer;">&#8635; Trier par %</button>
 </div>
 <div class="table-wrap">
   <div class="table-inner">
@@ -1018,8 +1023,18 @@ const mppHistory=[
 function swimmerActiveSessions() {
   return DATES.filter(dt => dt.full <= TODAY).length;
 }
+// Date d'arrivee d'un nageur : seules les seances a partir de cette date
+// comptent dans son total et son % de presence.
+const SWIMMER_START = {
+  'DESARBRES Maëlia': '2026-10-05',   // arrivee le lundi 5 octobre
+};
+function startDateFor(idx) {
+  const sw = SWIMMERS[idx];
+  return (sw && SWIMMER_START[sw.n]) || '0000-00-00';
+}
 function swimmerTotal(idx) {
-  return presence[idx].reduce((s,v,j) => s + (v && DATES[j].full <= TODAY ? 1 : 0), 0);
+  const start = startDateFor(idx);
+  return presence[idx].reduce((s,v,j) => s + (v && DATES[j].full <= TODAY && DATES[j].full >= start ? 1 : 0), 0);
 }
 // Jours d'entrainement (0=Lu,1=Ma,2=Me,3=Je,4=Ve) reellement suivis par
 // chaque generation : les 2015 nagent Lu/Ma/Je/Ve, les 2014 Lu/Ma/Me/Ve.
@@ -1043,12 +1058,24 @@ function weeklyPctForSwimmer(idx) {
   const relDays = relevantDaysFor(idx);
   const passedIdxs = DATES
     .map((dt,j) => ({dt,j}))
-    .filter(o => relDays.includes(o.dt.day) && o.dt.full <= TODAY)
+    .filter(o => relDays.includes(o.dt.day) && o.dt.full <= TODAY && o.dt.full >= startDateFor(idx))
     .map(o => o.j);
   if (passedIdxs.length === 0) return null;
   const attended = passedIdxs.reduce((s,j) => s + (presence[idx][j] ? 1 : 0), 0);
   return Math.round((attended / passedIdxs.length) * 100);
 }
+// Ordre d'affichage du tableau de presence : meilleur % de presence en premier.
+// Egalite : plus de seances suivies d'abord, puis ordre alphabetique (DISPLAY_ORDER).
+// Seul l'affichage est trie : les donnees restent enregistrees par numero de nageur.
+function presenceOrder() {
+  const base = DISPLAY_ORDER.map((idx, pos) => {
+    const wp = weeklyPctForSwimmer(idx);
+    return { idx, pos, pct: wp === null ? -1 : wp, tot: swimmerTotal(idx) };
+  });
+  base.sort((a, b) => (b.pct - a.pct) || (b.tot - a.tot) || (a.pos - b.pos));
+  return base.map(o => o.idx);
+}
+function resortPresence() { buildTable(); }
 function avgPct() {
   const pcts = SWIMMERS.map((_,idx) => weeklyPctForSwimmer(idx)).filter(p => p !== null);
   if (pcts.length === 0) return '–';
@@ -1121,7 +1148,7 @@ function buildTable() {
   hRow += '<th class="col-total">Total</th><th class="col-pct">%</th></tr>';
   thead.innerHTML = hRow;
   let rows = '';
-  DISPLAY_ORDER.forEach(i => {
+  presenceOrder().forEach(i => {
     const sw = SWIMMERS[i];
     const color = GROUP_COLORS[sw.g+sw.y];
     rows += `<tr class="swimmer-row" data-idx="${i}">
