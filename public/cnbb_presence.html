@@ -272,7 +272,6 @@ td.col-holiday.checked .cell-inner{
 }
 .col-date .act{display:block;width:28px;max-width:28px;overflow:hidden;font-size:11px;line-height:1.1;text-align:center}
 .col-date .act small{display:inline-block;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;line-height:1;opacity:.85;white-space:nowrap;margin-top:2px}
-th.col-stage .date-label{color:#fdba74!important}
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#1e3a5f">
@@ -459,7 +458,7 @@ function buildTable() {
   hRow += '<th class="col-name">Nageur / Date</th>';
   DATE_ORDER.forEach(j => { const dt = DATES[j];
     const dayClass = 'day-' + dt.day;
-    const holClass = dt.hol ? ' col-holiday' : (dt.stage ? ' col-stage' : '');
+    const holClass = dt.hol ? ' col-holiday' : (dt.stage ? ' col-holiday col-stage' : '');
     hRow += `<th class="col-date ${dayClass}${holClass}" title="${dt.tip ? dt.tip+' – ' : (dt.hol ? dt.hol+' – ' : '')}${dt.full}">
       <span class="day-badge" style="color:rgba(255,255,255,0.9)">${DAY_NAMES[dt.day]}</span>
       <span class="date-label">${dt.d}</span>${dt.act?'<span class="act">'+dt.act+(dt.lb?'<small>'+dt.lb+'</small>':'')+'</span>':''}
@@ -481,7 +480,7 @@ function buildTable() {
     </td>`;
     DATE_ORDER.forEach(j => { const dt = DATES[j];
       const checked = presence[i][j] ? ' checked' : '';
-      const holC = dt.hol ? ' col-holiday' : (dt.stage ? ' col-stage' : '');
+      const holC = dt.hol ? ' col-holiday' : (dt.stage ? ' col-holiday col-stage' : '');
       rows += `<td class="pres-cell day-${dt.day}${checked}${holC}" data-i="${i}" data-j="${j}" ${(dt.tip||dt.hol)?'title="'+(dt.tip||dt.hol)+'"':''}><span class="cell-inner"></span></td>`;
     });
     const tot = presence[i].reduce((s,v) => s+(v?1:0), 0);

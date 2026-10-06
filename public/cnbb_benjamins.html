@@ -200,7 +200,6 @@ td.col-holiday.checked .cell-inner{background:linear-gradient(135deg,#00ff6a 0%,
 }
 .col-date .act{display:block;width:28px;max-width:28px;overflow:hidden;font-size:11px;line-height:1.1;text-align:center}
 .col-date .act small{display:inline-block;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;line-height:1;opacity:.85;white-space:nowrap;margin-top:2px}
-th.col-stage .date-label{color:#fdba74!important}
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#1e3a5f">
@@ -1153,7 +1152,7 @@ function buildTable() {
   const tfoot = document.getElementById('tfoot');
   let hRow = '<tr><th class="col-name">Nageur / Date</th>';
   DATE_ORDER.forEach(j => { const dt = DATES[j];
-    const holClass = dt.hol ? ' col-holiday' : (dt.stage ? ' col-stage' : '');
+    const holClass = dt.hol ? ' col-holiday' : (dt.stage ? ' col-holiday col-stage' : '');
     hRow += `<th class="col-date day-${dt.day}${holClass}" title="${dt.tip ? dt.tip+' – ' : (dt.hol ? dt.hol+' – ' : '')}${dt.full}">
       <span class="day-badge" style="color:rgba(255,255,255,0.9)">${DAY_NAMES[dt.day]}</span>
       <span class="date-label">${dt.d}</span>${dt.act?'<span class="act">'+dt.act+(dt.lb?'<small>'+dt.lb+'</small>':'')+'</span>':''}</th>`;
@@ -1168,7 +1167,7 @@ function buildTable() {
       <td class="col-name"><span class="group-badge" style="background:${color}">${sw.g}${sw.y.slice(2)}</span>${sw.n}</td>`;
     DATE_ORDER.forEach(j => { const dt = DATES[j];
       const checked = presence[i][j] ? ' checked' : '';
-      const holC = dt.hol ? ' col-holiday' : (dt.stage ? ' col-stage' : '');
+      const holC = dt.hol ? ' col-holiday' : (dt.stage ? ' col-holiday col-stage' : '');
       rows += `<td class="pres-cell day-${dt.day}${checked}${holC}" data-i="${i}" data-j="${j}" ${(dt.tip||dt.hol)?'title="'+(dt.tip||dt.hol)+'"':''}><span class="cell-inner"></span></td>`;
     });
     const tot = swimmerTotal(i);
@@ -1188,7 +1187,7 @@ function buildTable() {
   fRow += `<td class="col-total" id="grand-total">${grand}</td><td class="col-pct" id="footer-pct">${avgPct()}</td></tr>`;
   fRow += '<tr class="date-footer-row"><td class="col-name" style="font-size:11px;opacity:0.7;">Date</td>';
   DATE_ORDER.forEach(j => { const dt = DATES[j];
-    const holClass = dt.hol ? ' col-holiday' : (dt.stage ? ' col-stage' : '');
+    const holClass = dt.hol ? ' col-holiday' : (dt.stage ? ' col-holiday col-stage' : '');
     fRow += `<th class="col-date day-${dt.day}${holClass}" style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;padding:4px 2px;"><span class="date-label">${dt.d}</span></th>`;
   });
   fRow += '<td class="col-total"></td><td class="col-pct"></td></tr>';
