@@ -198,8 +198,8 @@ td.col-holiday.checked .cell-inner{background:linear-gradient(135deg,#00ff6a 0%,
   tfoot tr td.col-total { font-size: 13px; }
   tfoot tr td.col-pct   { font-size: 11px; }
 }
-.col-date .act{display:block;font-size:11px;line-height:1.1;text-align:center}
-.col-date .act small{display:block;font-size:8px;opacity:.85}
+.col-date .act{display:block;width:28px;max-width:28px;overflow:hidden;font-size:11px;line-height:1.1;text-align:center}
+.col-date .act small{display:inline-block;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;line-height:1;opacity:.85;white-space:nowrap;margin-top:2px}
 th.col-stage .date-label{color:#fdba74!important}
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
@@ -1189,7 +1189,7 @@ function buildTable() {
   fRow += '<tr class="date-footer-row"><td class="col-name" style="font-size:11px;opacity:0.7;">Date</td>';
   DATE_ORDER.forEach(j => { const dt = DATES[j];
     const holClass = dt.hol ? ' col-holiday' : (dt.stage ? ' col-stage' : '');
-    fRow += `<th class="col-date day-${dt.day}${holClass}" style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;padding:4px 2px;"><span class="date-label">${dt.d}</span>${dt.act?'<span class="act">'+dt.act+(dt.lb?'<small>'+dt.lb+'</small>':'')+'</span>':''}</th>`;
+    fRow += `<th class="col-date day-${dt.day}${holClass}" style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;padding:4px 2px;"><span class="date-label">${dt.d}</span></th>`;
   });
   fRow += '<td class="col-total"></td><td class="col-pct"></td></tr>';
   tfoot.innerHTML = fRow;
