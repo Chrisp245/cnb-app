@@ -685,10 +685,11 @@ td.col-holiday.checked .cell-inner{
 </div>
 
 <!-- Stats bar -->
-<div class="stats-bar">
+<div class="stats-bar" style="position:relative;top:auto;">
   <div class="stat-item"><strong id="stat-total">0</strong>présences enregistrées</div>
   <div class="stat-item"><strong id="stat-sessions">166</strong>séances au total</div>
   <div class="stat-item"><strong id="stat-swimmers">36</strong>nageurs</div>
+  <div class="stat-item" id="sync-status" style="font-weight:600;"></div>
 </div>
 
 <!-- Table -->
@@ -715,8 +716,7 @@ function openPresence() {
   document.getElementById('accueil-page').style.display = 'none';
   document.body.style.overflow = 'auto';
   if (!document.getElementById('tbody').innerHTML) {
-    loadState();
-    buildTable();
+    (async function(){ await loadState(); buildTable(); })();
   }
 }
 
@@ -738,21 +738,20 @@ const SWIMMERS = [
   {n:'LEMASLE Constance',             g:'F', y:'2016'},
   {n:'NEVERS Elsa',                   g:'F', y:'2016'},
   {n:'REYDELLET Camille',             g:'F', y:'2016'},
-  {n:'CHOSSAT Maélys',                g:'F', y:'2017'},
   {n:'EL HASSOUNI Jenna',             g:'F', y:'2017'},
   {n:'GIRARD Alice',                  g:'F', y:'2017'},
   {n:'HALLALI Noor',                  g:'F', y:'2017'},
   {n:'PACCARD Mélody',                g:'F', y:'2017'},
   {n:'SHKOZA Jusra',                  g:'F', y:'2017'},
   {n:'TOURNIER Clarisse',             g:'F', y:'2017'},
+  {n:'BERTRAND Adèle',                 g:'F', y:'2018'},
   {n:'DINAR Nesma',                   g:'F', y:'2018'},
   {n:'GUEDES DA SILVA Vitoria',      g:'F', y:'2018'},
   {n:'KACEMI Lylia',                  g:'F', y:'2018'},
   {n:'LALLEMAND-RIBOT Anaïs',         g:'F', y:'2018'},
   {n:'MORAND Adèle',                  g:'F', y:'2018'},
-  {n:'OSMANY Mila',                   g:'F', y:'2018'},
   {n:'PIRAT Agathe',                  g:'F', y:'2018'},
-  {n:'BILLAUDY Gabriel *',            g:'H', y:'2016'},
+  {n:'BILLAUDY Gabriel',            g:'H', y:'2016'},
   {n:'FOURMOND Milo',                 g:'H', y:'2016'},
   {n:'KACEMI Kaïs-Ibrahim',           g:'H', y:'2016'},
   {n:'MORAND Gaspard',                g:'H', y:'2016'},
@@ -765,7 +764,8 @@ const SWIMMERS = [
   {n:'JANICHON Ilyes',                g:'H', y:'2017'},
   {n:'RAPHAËL Kanty',                 g:'H', y:'2017'},
   {n:'OMRANI Mohamed',                g:'H', y:'2018'},
-  {n:'VICTOR Hector',                  g:'H', y:'2018'},
+  {n:'ROBERT Hector',                  g:'H', y:'2018'},
+  {n:'BOZON Jules',                   g:'H', y:'2019'},
 ];
 const GROUP_COLORS = {
   'F2016': '#881337',
@@ -774,11 +774,12 @@ const GROUP_COLORS = {
   'H2016': '#172554',
   'H2017': '#1d4ed8',
   'H2018': '#3b82f6',
+  'H2019': '#38bdf8',
 };
 const DAY_NAMES = {0:'L',1:'Ma',2:'M',3:'J',4:'V'};
-// Jeudi en période scolaire non comptabilisé pour les 2017/2018
+// Jeudi en période scolaire non comptabilisé pour les 2017/2018/2019
 function isExcluded(j, year) {
-  return (year === '2017' || year === '2018') && DATES[j].day === 3 && !DATES[j].hol;
+  return (year === '2017' || year === '2018' || year === '2019') && DATES[j].day === 3 && !DATES[j].hol;
 }
 const TODAY = new Date().toISOString().slice(0, 10);
 function swimmerActiveSessions(year) {
@@ -799,26 +800,56 @@ function avgPct() {
 const DATES = [{d:"14/09",day:0,full:"2026-09-14"},{d:"16/09",day:2,full:"2026-09-16"},{d:"17/09",day:3,full:"2026-09-17"},{d:"18/09",day:4,full:"2026-09-18"},{d:"21/09",day:0,full:"2026-09-21"},{d:"23/09",day:2,full:"2026-09-23"},{d:"24/09",day:3,full:"2026-09-24"},{d:"25/09",day:4,full:"2026-09-25"},{d:"28/09",day:0,full:"2026-09-28"},{d:"30/09",day:2,full:"2026-09-30"},{d:"01/10",day:3,full:"2026-10-01"},{d:"02/10",day:4,full:"2026-10-02"},{d:"05/10",day:0,full:"2026-10-05"},{d:"07/10",day:2,full:"2026-10-07"},{d:"08/10",day:3,full:"2026-10-08"},{d:"09/10",day:4,full:"2026-10-09"},{d:"12/10",day:0,full:"2026-10-12"},{d:"14/10",day:2,full:"2026-10-14"},{d:"15/10",day:3,full:"2026-10-15"},{d:"16/10",day:4,full:"2026-10-16"},{d:"19/10",day:0,full:"2026-10-19",hol:"Toussaint"},{d:"20/10",day:1,full:"2026-10-20",hol:"Toussaint"},{d:"21/10",day:2,full:"2026-10-21",hol:"Toussaint"},{d:"22/10",day:3,full:"2026-10-22",hol:"Toussaint"},{d:"26/10",day:0,full:"2026-10-26",hol:"Toussaint"},{d:"27/10",day:1,full:"2026-10-27",hol:"Toussaint"},{d:"28/10",day:2,full:"2026-10-28",hol:"Toussaint"},{d:"29/10",day:3,full:"2026-10-29",hol:"Toussaint"},{d:"02/11",day:0,full:"2026-11-02"},{d:"04/11",day:2,full:"2026-11-04"},{d:"05/11",day:3,full:"2026-11-05"},{d:"06/11",day:4,full:"2026-11-06"},{d:"09/11",day:0,full:"2026-11-09"},{d:"11/11",day:2,full:"2026-11-11"},{d:"12/11",day:3,full:"2026-11-12"},{d:"13/11",day:4,full:"2026-11-13"},{d:"16/11",day:0,full:"2026-11-16"},{d:"18/11",day:2,full:"2026-11-18"},{d:"19/11",day:3,full:"2026-11-19"},{d:"20/11",day:4,full:"2026-11-20"},{d:"23/11",day:0,full:"2026-11-23"},{d:"25/11",day:2,full:"2026-11-25"},{d:"26/11",day:3,full:"2026-11-26"},{d:"27/11",day:4,full:"2026-11-27"},{d:"30/11",day:0,full:"2026-11-30"},{d:"02/12",day:2,full:"2026-12-02"},{d:"03/12",day:3,full:"2026-12-03"},{d:"04/12",day:4,full:"2026-12-04"},{d:"07/12",day:0,full:"2026-12-07"},{d:"09/12",day:2,full:"2026-12-09"},{d:"10/12",day:3,full:"2026-12-10"},{d:"11/12",day:4,full:"2026-12-11"},{d:"14/12",day:0,full:"2026-12-14"},{d:"16/12",day:2,full:"2026-12-16"},{d:"17/12",day:3,full:"2026-12-17"},{d:"18/12",day:4,full:"2026-12-18"},{d:"21/12",day:0,full:"2026-12-21",hol:"Noël"},{d:"22/12",day:1,full:"2026-12-22",hol:"Noël"},{d:"23/12",day:2,full:"2026-12-23",hol:"Noël"},{d:"28/12",day:0,full:"2026-12-28",hol:"Noël"},{d:"29/12",day:1,full:"2026-12-29",hol:"Noël"},{d:"30/12",day:2,full:"2026-12-30",hol:"Noël"},{d:"04/01",day:0,full:"2027-01-04"},{d:"06/01",day:2,full:"2027-01-06"},{d:"07/01",day:3,full:"2027-01-07"},{d:"08/01",day:4,full:"2027-01-08"},{d:"11/01",day:0,full:"2027-01-11"},{d:"13/01",day:2,full:"2027-01-13"},{d:"14/01",day:3,full:"2027-01-14"},{d:"15/01",day:4,full:"2027-01-15"},{d:"18/01",day:0,full:"2027-01-18"},{d:"20/01",day:2,full:"2027-01-20"},{d:"21/01",day:3,full:"2027-01-21"},{d:"22/01",day:4,full:"2027-01-22"},{d:"25/01",day:0,full:"2027-01-25"},{d:"27/01",day:2,full:"2027-01-27"},{d:"28/01",day:3,full:"2027-01-28"},{d:"29/01",day:4,full:"2027-01-29"},{d:"01/02",day:0,full:"2027-02-01"},{d:"03/02",day:2,full:"2027-02-03"},{d:"04/02",day:3,full:"2027-02-04"},{d:"05/02",day:4,full:"2027-02-05"},{d:"08/02",day:0,full:"2027-02-08"},{d:"10/02",day:2,full:"2027-02-10"},{d:"11/02",day:3,full:"2027-02-11"},{d:"12/02",day:4,full:"2027-02-12"},{d:"15/02",day:0,full:"2027-02-15",hol:"Hiver"},{d:"16/02",day:1,full:"2027-02-16",hol:"Hiver"},{d:"17/02",day:2,full:"2027-02-17",hol:"Hiver"},{d:"18/02",day:3,full:"2027-02-18",hol:"Hiver"},{d:"22/02",day:0,full:"2027-02-22",hol:"Hiver"},{d:"23/02",day:1,full:"2027-02-23",hol:"Hiver"},{d:"24/02",day:2,full:"2027-02-24",hol:"Hiver"},{d:"25/02",day:3,full:"2027-02-25",hol:"Hiver"},{d:"01/03",day:0,full:"2027-03-01"},{d:"03/03",day:2,full:"2027-03-03"},{d:"04/03",day:3,full:"2027-03-04"},{d:"05/03",day:4,full:"2027-03-05"},{d:"08/03",day:0,full:"2027-03-08"},{d:"10/03",day:2,full:"2027-03-10"},{d:"11/03",day:3,full:"2027-03-11"},{d:"12/03",day:4,full:"2027-03-12"},{d:"15/03",day:0,full:"2027-03-15"},{d:"17/03",day:2,full:"2027-03-17"},{d:"18/03",day:3,full:"2027-03-18"},{d:"19/03",day:4,full:"2027-03-19"},{d:"22/03",day:0,full:"2027-03-22"},{d:"24/03",day:2,full:"2027-03-24"},{d:"25/03",day:3,full:"2027-03-25"},{d:"26/03",day:4,full:"2027-03-26"},{d:"29/03",day:0,full:"2027-03-29"},{d:"31/03",day:2,full:"2027-03-31"},{d:"01/04",day:3,full:"2027-04-01"},{d:"02/04",day:4,full:"2027-04-02"},{d:"05/04",day:0,full:"2027-04-05"},{d:"07/04",day:2,full:"2027-04-07"},{d:"08/04",day:3,full:"2027-04-08"},{d:"09/04",day:4,full:"2027-04-09"},{d:"12/04",day:0,full:"2027-04-12",hol:"Printemps"},{d:"13/04",day:1,full:"2027-04-13",hol:"Printemps"},{d:"14/04",day:2,full:"2027-04-14",hol:"Printemps"},{d:"15/04",day:3,full:"2027-04-15",hol:"Printemps"},{d:"19/04",day:0,full:"2027-04-19",hol:"Printemps"},{d:"20/04",day:1,full:"2027-04-20",hol:"Printemps"},{d:"21/04",day:2,full:"2027-04-21",hol:"Printemps"},{d:"22/04",day:3,full:"2027-04-22",hol:"Printemps"},{d:"26/04",day:0,full:"2027-04-26"},{d:"28/04",day:2,full:"2027-04-28"},{d:"29/04",day:3,full:"2027-04-29"},{d:"30/04",day:4,full:"2027-04-30"},{d:"03/05",day:0,full:"2027-05-03"},{d:"05/05",day:2,full:"2027-05-05"},{d:"10/05",day:0,full:"2027-05-10"},{d:"12/05",day:2,full:"2027-05-12"},{d:"13/05",day:3,full:"2027-05-13"},{d:"14/05",day:4,full:"2027-05-14"},{d:"17/05",day:0,full:"2027-05-17"},{d:"19/05",day:2,full:"2027-05-19"},{d:"20/05",day:3,full:"2027-05-20"},{d:"21/05",day:4,full:"2027-05-21"},{d:"24/05",day:0,full:"2027-05-24"},{d:"26/05",day:2,full:"2027-05-26"},{d:"27/05",day:3,full:"2027-05-27"},{d:"28/05",day:4,full:"2027-05-28"},{d:"31/05",day:0,full:"2027-05-31"},{d:"02/06",day:2,full:"2027-06-02"},{d:"03/06",day:3,full:"2027-06-03"},{d:"04/06",day:4,full:"2027-06-04"},{d:"07/06",day:0,full:"2027-06-07"},{d:"09/06",day:2,full:"2027-06-09"},{d:"10/06",day:3,full:"2027-06-10"},{d:"11/06",day:4,full:"2027-06-11"},{d:"14/06",day:0,full:"2027-06-14"},{d:"16/06",day:2,full:"2027-06-16"},{d:"17/06",day:3,full:"2027-06-17"},{d:"18/06",day:4,full:"2027-06-18"},{d:"21/06",day:0,full:"2027-06-21"},{d:"23/06",day:2,full:"2027-06-23"},{d:"24/06",day:3,full:"2027-06-24"},{d:"25/06",day:4,full:"2027-06-25"},{d:"28/06",day:0,full:"2027-06-28"},{d:"30/06",day:2,full:"2027-06-30"}];
 // State: presence[swimmerIdx][dateIdx] = bool
 let presence = [];
+let syncOk = true;
 const STORAGE_KEY = 'cnbb_presence_2026_2027';
-function loadState() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      presence = JSON.parse(saved);
-      // Ensure correct dimensions
-      while (presence.length < SWIMMERS.length) presence.push([]);
-      presence.forEach((row, i) => {
-        while (row.length < DATES.length) row.push(false);
-      });
-    } else {
-      presence = SWIMMERS.map(() => new Array(DATES.length).fill(false));
-    }
-  } catch(e) {
-    presence = SWIMMERS.map(() => new Array(DATES.length).fill(false));
+const API_URL = '/api/presence';
+
+function emptyPresence() {
+  return SWIMMERS.map(() => new Array(DATES.length).fill(false));
+}
+function normalizePresence() {
+  while (presence.length < SWIMMERS.length) presence.push([]);
+  for (let idx = 0; idx < presence.length; idx++) {
+    if (!Array.isArray(presence[idx])) presence[idx] = [];
+    const row = presence[idx];
+    while (row.length < DATES.length) row.push(false);
   }
 }
-function saveState() {
+function saveLocalCache() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(presence)); } catch(e) {}
+}
+function setSyncIndicator() {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.textContent = syncOk ? '✓ Synchronisé' : '⚠ Hors ligne (local)';
+  el.style.color = syncOk ? '#60d394' : '#f59e0b';
+}
+function loadLocalFallback() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    presence = saved ? JSON.parse(saved) : emptyPresence();
+  } catch(e) {
+    presence = emptyPresence();
+  }
+  normalizePresence();
+}
+// Loads presence from the shared server store (Netlify Blobs via /api/presence).
+// Falls back to the browser's local copy if the server is unreachable.
+async function loadState() {
+  try {
+    const res = await fetch(API_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error('status ' + res.status);
+    const data = await res.json();
+    presence = Array.isArray(data.presence) ? data.presence : emptyPresence();
+    normalizePresence();
+    saveLocalCache();
+    syncOk = true;
+  } catch(e) {
+    console.warn('Sync serveur indisponible, utilisation des données locales.', e);
+    loadLocalFallback();
+    syncOk = false;
+  }
+  setSyncIndicator();
 }
 function buildTable() {
   const thead = document.getElementById('thead');
@@ -893,9 +924,9 @@ function updateStats() {
   const grand = presence.reduce((s,row) => s+row.reduce((a,v)=>a+(v?1:0),0), 0);
   document.getElementById('stat-total').textContent = grand;
 }
-function togglePresence(i, j) {
+async function togglePresence(i, j) {
   presence[i][j] = !presence[i][j];
-  saveState();
+  saveLocalCache();
   // Update cell
   const cell = document.querySelector(`td[data-i="${i}"][data-j="${j}"]`);
   if (cell) cell.classList.toggle('checked', presence[i][j]);
@@ -927,6 +958,21 @@ function togglePresence(i, j) {
   const fpEl = document.getElementById('footer-pct');
   if (fpEl) fpEl.textContent = avgPct();
   updateStats();
+
+  // Push this single change to the shared server store.
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({i, j, value: presence[i][j]})
+    });
+    if (!res.ok) throw new Error('status ' + res.status);
+    syncOk = true;
+  } catch(e) {
+    console.warn('Échec de synchronisation de la présence.', e);
+    syncOk = false;
+  }
+  setSyncIndicator();
 }
 // Event delegation
 document.getElementById('tbody').addEventListener('click', function(e) {
@@ -936,14 +982,27 @@ document.getElementById('tbody').addEventListener('click', function(e) {
   const j = parseInt(cell.dataset.j);
   togglePresence(i, j);
 });
-function confirmReset() {
+async function confirmReset() {
   if (confirm('Effacer toutes les présences de la saison ?')) {
-    presence = SWIMMERS.map(() => new Array(DATES.length).fill(false));
-    saveState();
+    presence = emptyPresence();
+    saveLocalCache();
     document.getElementById('thead').innerHTML = '';
     document.getElementById('tbody').innerHTML = '';
     document.getElementById('tfoot').innerHTML = '';
     buildTable();
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({reset: true})
+      });
+      if (!res.ok) throw new Error('status ' + res.status);
+      syncOk = true;
+    } catch(e) {
+      console.warn('Échec de synchronisation de la réinitialisation.', e);
+      syncOk = false;
+    }
+    setSyncIndicator();
   }
 }
 // Init
@@ -978,6 +1037,8 @@ table { border-collapse: collapse; white-space: nowrap; font-size: 13px; }
 thead tr { background: #f3f4f6; }
 th { padding: 7px 8px; text-align: center; font-weight: 600; color: #111827; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; border-right: 0.5px solid #e5e7eb; }
 th:first-child { text-align: left; min-width: 160px; }
+#main thead th { position: sticky; top: 0; z-index: 15; background: #f3f4f6; }
+#mpp-overlay .table-wrap { overflow-y: auto; max-height: 70vh; padding-top: 0; }
 th:last-child { border-right: none; }
 td { padding: 6px 8px; text-align: center; border-top: 0.5px solid #e5e7eb; border-right: 0.5px solid #e5e7eb; }
 td:first-child { text-align: left; font-weight: 600; font-size: 14px; padding-left: 10px; border-right: 0.5px solid #e5e7eb; }
@@ -1074,7 +1135,7 @@ td.clickable:active .perf-badge {
     </div>
   </div>
 </div>
-<p class="subtitle">Meilleures performances personnelles · Bassin 25 m · Nés 2016 &amp; 2017 · Données au 20 juin 2026 · · <em>Cliquer sur une performance pour voir l'historique</em></p>
+<p class="subtitle">Meilleures performances personnelles · Bassin 25 m · Nés 2016 &amp; 2017 · Données au 3 octobre 2026 · · <em>Cliquer sur une performance pour voir l'historique</em></p>
 
 <div class="legend-names">
   <div><span class="dot" style="background:#172554;"></span><span style="color:#172554;">Garçons 2016</span></div>
@@ -1083,6 +1144,7 @@ td.clickable:active .perf-badge {
   <div><span class="dot" style="background:#881337;"></span><span style="color:#881337;">Filles 2016</span></div>
   <div><span class="dot" style="background:#db2777;"></span><span style="color:#db2777;">Filles 2017</span></div>
   <div><span class="dot" style="background:#ec4899;"></span><span style="color:#ec4899;">Filles 2018</span></div>
+  <div><span class="dot" style="background:#38bdf8;"></span><span style="color:#38bdf8;">Garçons 2019</span></div>
 </div>
 
 <div class="table-wrap">
@@ -1090,7 +1152,7 @@ td.clickable:active .perf-badge {
 </div>
 
 <div class="legend-perf" id="legend"></div>
-<p class="note">Source : ffn.extranat.fr · * BILLAUDY Gabriel : aucune performance enregistrée à ce jour</p>
+<p class="note">Source : ffn.extranat.fr</p>
 
 <!-- Modal -->
 <div class="modal-bg" id="modalBg">
@@ -1147,11 +1209,11 @@ td.clickable:active .perf-badge {
       <div style="display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f59e0b,#d97706);width:64px;height:64px;border-radius:16px;box-shadow:0 4px 16px rgba(245,158,11,0.4);margin-bottom:20px;">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4"/><path d="M7 4H5a2 2 0 0 0-2 2v1a4 4 0 0 0 4 4h.5"/><path d="M17 4h2a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4h-.5"/><path d="M7 4a5 5 0 0 0 10 0V2H7v2z"/></svg>
       </div>
-      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:#f59e0b;text-transform:uppercase;margin-bottom:8px;">⚡ Prochaine compétition</div>
-      <h2 style="font-size:24px;font-weight:900;color:#1e3a5f;margin:0 0 20px;line-height:1.2;">CIRCUIT AVENIRS<br>PLOT N°3</h2>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:#16a34a;text-transform:uppercase;margin-bottom:8px;">📅 Prochaine compétition</div>
+      <h2 style="font-size:24px;font-weight:900;color:#1e3a5f;margin:0 0 20px;line-height:1.2;">CIRCUIT AVENIRS<br>PLOT N°4</h2>
       <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
-        <span style="background:#f1f5f9;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:700;color:#1e3a5f;">📅 Samedi 20 Juin 2026</span>
-        <span style="background:#f1f5f9;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:700;color:#1e3a5f;">📍 OYONNAX</span>
+        <span style="background:#f1f5f9;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:700;color:#1e3a5f;">📅 Samedi 3 Octobre 2026</span>
+        <span style="background:#f1f5f9;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:700;color:#1e3a5f;">📍 BELLEGARDE-SUR-VALSERINE</span>
         <span style="background:#f1f5f9;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:700;color:#1e3a5f;">🏊 Bassin 25 m</span>
       </div>
       <!-- Programme compact -->
@@ -1160,35 +1222,33 @@ td.clickable:active .perf-badge {
         <div style="display:flex;flex-wrap:wrap;gap:6px;">
           <span style="background:#e0e7ff;color:#3730a3;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">100 4N</span>
           <span style="background:#e0e7ff;color:#3730a3;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">200 4N</span>
-          <span style="background:#dbeafe;color:#1d4ed8;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">50 Dos</span>
-          <span style="background:#dbeafe;color:#1d4ed8;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">100 Dos</span>
-          <span style="background:#dcfce7;color:#15803d;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">50 Brasse</span>
-          <span style="background:#dcfce7;color:#15803d;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">100 Brasse</span>
-          <span style="background:#ede9fe;color:#7c3aed;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">400 NL</span>
-          <span style="background:#ede9fe;color:#7c3aed;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">200 NL</span>
           <span style="background:#fce7f3;color:#be185d;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">50 Pap</span>
-          <span style="background:#fce7f3;color:#be185d;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">100 Pap</span>
+          <span style="background:#fce7f3;color:#be185d;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">100 Pap (M)</span>
           <span style="background:#ede9fe;color:#7c3aed;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">50 NL</span>
           <span style="background:#ede9fe;color:#7c3aed;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">100 NL</span>
-          <span style="background:#fef3c7;color:#92400e;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">🔄 4×50 NL Mixtes</span>
+          <span style="background:#dcfce7;color:#15803d;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">50 Brasse</span>
+          <span style="background:#dcfce7;color:#15803d;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">100 Brasse</span>
+          <span style="background:#dbeafe;color:#1d4ed8;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">50 Dos</span>
+          <span style="background:#dbeafe;color:#1d4ed8;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">100 Dos</span>
+          <span style="background:#fef3c7;color:#92400e;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:600;">🔄 4×50 4N Mixtes</span>
         </div>
         <div style="font-size:11px;color:#9ca3af;margin-top:6px;">D/M = Dames &amp; Messieurs</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;">
-        <a href="#" onclick="openEng(); return false;"
-           style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;text-decoration:none;padding:13px 32px;border-radius:14px;font-size:15px;font-weight:800;box-shadow:0 4px 14px rgba(124,58,237,0.4);letter-spacing:0.3px;width:100%;box-sizing:border-box;text-align:center;">
-          📋 Engagements
-        </a>
         <a href="#" onclick="openChrono(); return false;"
            style="display:inline-block;background:linear-gradient(135deg,#059669,#10b981);color:#fff;text-decoration:none;padding:13px 32px;border-radius:14px;font-size:15px;font-weight:800;box-shadow:0 4px 14px rgba(5,150,105,0.4);letter-spacing:0.3px;width:100%;box-sizing:border-box;text-align:center;">
-          ⏱ Prise de chrono
+          📋 Programme
         </a>
-        <a href="https://www.liveffn.com/cgi-bin/programme.php?competition=93297&langue=fra" target="_blank"
+        <a href="https://www.liveffn.com/cgi-bin/resultats.php?competition=94487&langue=fra" target="_blank"
            style="display:inline-block;background:linear-gradient(135deg,#1e3a5f,#1d4ed8);color:#fff;text-decoration:none;padding:14px 32px;border-radius:14px;font-size:16px;font-weight:800;box-shadow:0 4px 16px rgba(29,78,216,0.35);letter-spacing:0.3px;width:100%;box-sizing:border-box;text-align:center;">
-          Accéder au live FFN ↗
+          Voir les résultats FFN ↗
         </a>
       </div>
     </div>
+
+    <!-- Liste complète des compétitions Avenirs -->
+    <div id="comp-count-all" style="text-align:center;color:#6b7280;font-size:13px;font-weight:700;margin:4px 0 14px;letter-spacing:0.3px;"></div>
+    <div id="comp-list-all"></div>
   </div>
 </div>
 
@@ -1202,22 +1262,21 @@ td.clickable:active .perf-badge {
     <div class="logo-circle"><img id="chrono-logo" alt="CNB"></div>
     <div class="header-text">
       <div class="header-title">AVENIRS · CN Bourg-en-Bresse</div>
-      <div class="header-subtitle">Prise de chrono – Circuit Avenirs Plot N°3 – 20 Juin 2026</div>
+      <div class="header-subtitle">Programme – Circuit Avenirs Plot N°4 – 3 Octobre 2026 – Bellegarde</div>
     </div>
   </div>
   <!-- Tabs -->
   <div class="cc-tabs">
     <button class="cc-tab cc-tab-active" onclick="showCCTab('programme',this)">📋 Programme</button>
-    <button class="cc-tab" onclick="showCCTab('chrono',this)">⏱ Chrono</button>
     <button class="cc-tab" onclick="showCCTab('resultats',this)">🏆 Résultats</button>
   </div>
 
   <!-- ── PROGRAMME ── -->
   <div id="cc-programme" class="cc-panel">
     <div class="cc-import-bar">
-      <a href="https://www.liveffn.com/cgi-bin/startlist.php?competition=93297&langue=fra"
+      <a href="https://www.liveffn.com/cgi-bin/startlist.php?competition=94487&langue=fra"
          target="_blank" class="cc-liveffn-btn">📡 Liste de départ FFN ↗</a>
-      <span class="cc-import-note">Disponible la veille — saisir les nageurs CNB ci-dessous</span>
+      <span class="cc-import-note">Programme complet · nageurs CNB en vert fluo</span>
     </div>
     <div id="cc-events-list"></div>
   </div>
@@ -1246,6 +1305,12 @@ td.clickable:active .perf-badge {
       <span id="cc-res-count" style="color:rgba(255,255,255,0.5);font-size:12px;"></span>
       <button class="cc-res-clear-btn" onclick="ccClearResults()">🗑 Effacer tout</button>
     </div>
+    <div id="cc-live-bar" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px 14px;margin-bottom:10px;">
+      <label style="color:#fff;font-size:13px;font-weight:700;cursor:pointer;"><input type="checkbox" id="cc-live-on" checked onchange="ccLiveToggle()"> 📡 Résultats FFN en direct</label>
+      <span id="cc-live-status" style="color:rgba(255,255,255,0.55);font-size:11px;"></span>
+      <a href="https://www.liveffn.com/cgi-bin/resultats.php?competition=94487&langue=fra" target="_blank" style="color:#93c5fd;font-size:12px;font-weight:700;text-decoration:none;">LiveFFN ↗</a>
+    </div>
+    <div id="cc-live-content"></div>
     <div id="cc-res-content"></div>
   </div>
 
@@ -1346,14 +1411,57 @@ function openChrono() {
   chronoInit();
 }
 function closeChrono() {
+  if (typeof ccLiveStop==='function') ccLiveStop();
   document.getElementById('chrono-overlay').style.display = 'none';
   document.body.style.overflow = '';
 }
 
+const MONTH_ABBR = {'01':'JANV','02':'FÉVR','03':'MARS','04':'AVR','05':'MAI','06':'JUIN','07':'JUIL','08':'AOÛT','09':'SEPT','10':'OCT','11':'NOV','12':'DÉC'};
+const MONTH_NAMES = {'01':'Janvier','02':'Février','03':'Mars','04':'Avril','05':'Mai','06':'Juin','07':'Juillet','08':'Août','09':'Septembre','10':'Octobre','11':'Novembre','12':'Décembre'};
+const AVENIRS_COMPETITIONS = [
+  {d:'2026-10-03', lbl:'Samedi 3 octobre 2026', name:'Regroupement U11 et moins (matin) + Circuit Avenirs Plot 4 (après-midi)', lieu:'Bellegarde-sur-Valserine'},
+  {d:'2026-12-05', lbl:'Samedi 5 décembre 2026 (après-midi)', name:'Finale Trophée de l’Ain (U11 et moins)', lieu:'Ambérieu-en-Bugey'},
+  {d:'2027-01-30', lbl:'Samedi 30 janvier 2027', name:'Regroupement avenirs (matin) + Circuit Avenirs Plot n°1 (après-midi, OP 14h)', lieu:"Carré d'eau", home:true},
+  {d:'2027-03-13', lbl:'Samedi 13 mars 2027', name:'Regroupement avenirs (matin) + Circuit Avenirs Plot n°2 (après-midi, OP 14h)', lieu:'Ferney-Voltaire'},
+  {d:'2027-05-02', lbl:'Dimanche 2 mai 2027', name:'Regroupement Avenirs + Interclubs U11 et moins', lieu:'Ferney-Voltaire'},
+  {d:'2027-06-05', lbl:'Samedi 5 – dimanche 6 juin 2027', name:'Coupe Plewinski (U11 et -)', lieu:'Lieu à confirmer'},
+  {d:'2027-06-19', lbl:'Samedi 19 juin 2027', name:'Circuit Avenirs Plot n°3 (après-midi, OP 14h)', lieu:'Ambérieu-en-Bugey'},
+];
+function buildAvenirsCompList() {
+  const wrap = document.getElementById('comp-list-all');
+  if (!wrap || wrap.dataset.built) return;
+  wrap.dataset.built = '1';
+  const countEl = document.getElementById('comp-count-all');
+  if (countEl) countEl.textContent = AVENIRS_COMPETITIONS.length + ' compétitions cette saison concernant les U11 et moins';
+  const upcoming = AVENIRS_COMPETITIONS.find(c => c.d >= TODAY);
+  let lastMonth = '';
+  let html = '';
+  AVENIRS_COMPETITIONS.forEach(c => {
+    const [y, m, dd] = c.d.split('-');
+    const monthKey = y + '-' + m;
+    if (monthKey !== lastMonth) {
+      lastMonth = monthKey;
+      html += `<div style="font-size:11px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1e3a5f,#1d4ed8);padding:5px 14px;border-radius:20px;display:inline-block;margin:18px 0 10px;letter-spacing:0.6px;text-transform:uppercase;">${MONTH_NAMES[m]} ${y}</div>`;
+    }
+    const isNext = upcoming && c.d === upcoming.d;
+    const isPast = c.d < TODAY;
+    html += `
+      <div style="background:#fff;border-radius:14px;box-shadow:0 3px 14px rgba(0,0,0,${isPast?'0.04':'0.09'});padding:16px 18px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;opacity:${isPast?'0.55':'1'};border:2px solid ${isNext?'#f59e0b':'transparent'};">
+        <div style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-radius:10px;padding:8px 4px;font-size:16px;font-weight:800;text-align:center;min-width:52px;line-height:1.15;">${parseInt(dd,10)}<div style="font-size:9px;font-weight:700;letter-spacing:0.4px;">${MONTH_ABBR[m]}</div></div>
+        <div style="flex:1;text-align:left;">
+          ${isNext ? '<div style="font-size:10px;font-weight:800;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">⚡ Prochaine compétition</div>' : ''}
+          <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:3px;">${c.name}</div>
+          <div style="font-size:12px;color:#64748b;">📅 ${c.lbl} &nbsp;·&nbsp; 📍 ${c.lieu}${c.home ? ' <span style="background:#ede9fe;color:#6d28d9;font-size:10px;font-weight:800;padding:1px 7px;border-radius:8px;margin-left:4px;">🏠 Domicile</span>' : ''}</div>
+        </div>
+      </div>`;
+  });
+  wrap.innerHTML = html;
+}
 function openComp() {
   document.getElementById('comp-overlay').style.display = 'block';
   document.getElementById('accueil-page').style.display = 'none';
   document.body.style.overflow = 'hidden';
+  buildAvenirsCompList();
 }
 function closeComp() {
   document.getElementById('comp-overlay').style.display = 'none';
@@ -1499,7 +1607,7 @@ const PERF_C=[
   {mn:800,mx:899,bg:'#e9d5ff',tx:'#581c87',label:'800–899'},
   {mn:900,mx:999,bg:'#a855f7',tx:'#faf5ff',label:'900–999'},
 ];
-const NAME_C={'H2016':'#172554','H2017':'#1d4ed8','H2018':'#3b82f6','F2016':'#881337','F2017':'#db2777','F2018':'#ec4899'};
+const NAME_C={'H2016':'#172554','H2017':'#1d4ed8','H2018':'#3b82f6','H2019':'#38bdf8','F2016':'#881337','F2017':'#db2777','F2018':'#ec4899'};
 function pc(p){if(p===null)return null;return PERF_C.find(x=>p>=x.mn&&p<=x.mx)||PERF_C[PERF_C.length-1];}
 function t2cs(t){const a=t.split(':'),b=a[1].split('.');return +a[0]*6000+ +b[0]*100+ +b[1];}
 const E=['50 NL','100 NL','200 NL','400 NL','50 Dos','100 Dos','50 Bra.','100 Bra.','50 Pap.','100 Pap.','100 4N','200 4N'];
@@ -1507,63 +1615,61 @@ const n=null;
 
 const swimmers=[
 {n:'BARBANDIERE RACINE Elyn',  g:'F',y:'2016',p:[{t:'00:42.96',p:295},{t:'01:46.85',p:79},{t:'03:42.63',p:151},n,{t:'00:54.95',p:196},n,{t:'00:53.55',p:340},{t:'02:04.66',p:270},{t:'01:01.75',p:8},n,{t:'01:52.16',p:226},n]},
-{n:'BILLET Céleste',           g:'F',y:'2016',p:[{t:'00:42.42',p:315},{t:'01:45.68',p:91},n,n,{t:'00:49.60',p:338},n,{t:'01:01.12',p:154},{t:'02:07.24',p:241},n,n,{t:'01:51.78',p:231},n]},
-{n:'CHATELET Lucie',           g:'F',y:'2016',p:[{t:'00:45.93',p:197},{t:'01:49.55',p:56},{t:'03:40.61',p:163},n,{t:'00:52.81',p:248},n,{t:'00:57.84',p:226},{t:'02:02.29',p:298},{t:'00:55.64',p:75},n,{t:'01:45.05',p:324},n]},
-{n:'GASQUET RODRIGUES Ginger', g:'F',y:'2016',p:[{t:'00:51.06',p:74},n,n,n,{t:'00:57.06',p:150},n,{t:'01:04.94',p:88},n,n,n,{t:'01:58.89',p:149},n]},
-{n:'JAY Chloé',                g:'F',y:'2016',p:[{t:'00:46.75',p:173},{t:'01:50.12',p:52},{t:'03:42.04',p:154},n,{t:'00:56.25',p:167},n,{t:'00:58.55',p:209},{t:'02:16.54',p:151},{t:'00:54.90',p:87},n,{t:'01:50.73',p:244},n]},
-{n:'LAINE Lina',               g:'F',y:'2016',p:[{t:'00:44.17',p:252},{t:'01:53.05',p:32},n,n,{t:'00:53.27',p:236},{t:'01:50.09',p:256},{t:'00:58.75',p:205},n,{t:'01:11.99',p:1},n,{t:'01:48.84',p:270},n]},
+{n:'BILLET Céleste',           g:'F',y:'2016',p:[{t:'00:42.42',p:315},{t:'01:45.68',p:91},n,n,{t:'00:49.60',p:338},n,{t:'00:56.32',p:263},{t:'02:07.24',p:241},n,n,{t:'01:47.02',p:295},n]},
+{n:'CHATELET Lucie',           g:'F',y:'2016',p:[{t:'00:45.93',p:197},{t:'01:43.32',p:115},{t:'03:40.61',p:163},n,{t:'00:52.81',p:248},n,{t:'00:56.27',p:265},{t:'02:02.29',p:298},{t:'00:55.64',p:75},n,{t:'01:45.05',p:324},n]},
+{n:'GASQUET RODRIGUES Ginger', g:'F',y:'2016',p:[{t:'00:51.06',p:74},{t:'01:54.87',p:22},n,n,{t:'00:57.06',p:150},n,{t:'01:04.94',p:88},n,n,n,{t:'01:58.89',p:149},n]},
+{n:'JAY Chloé',                g:'F',y:'2016',p:[{t:'00:46.75',p:173},{t:'01:44.97',p:98},{t:'03:42.04',p:154},n,{t:'00:55.07',p:193},n,{t:'00:58.55',p:209},{t:'02:03.08',p:288},{t:'00:54.90',p:87},n,{t:'01:50.73',p:244},n]},
+{n:'LAINE Lina',               g:'F',y:'2016',p:[{t:'00:44.17',p:252},{t:'01:42.16',p:129},n,n,{t:'00:53.27',p:236},{t:'01:50.09',p:256},{t:'00:55.81',p:277},n,{t:'01:11.99',p:1},n,{t:'01:48.84',p:270},n]},
 {n:'LEMASLE Constance',        g:'F',y:'2016',p:[{t:'00:49.11',p:114},n,{t:'04:05.29',p:50},n,{t:'00:56.32',p:166},n,{t:'01:07.25',p:57},n,{t:'01:00.68',p:15},n,{t:'01:50.45',p:248},n]},
-{n:'NEVERS Elsa',              g:'F',y:'2016',p:[{t:'00:45.88',p:198},n,n,n,{t:'00:56.16',p:169},n,{t:'01:03.85',p:105},n,{t:'01:01.27',p:11},n,{t:'01:59.83',p:140},n]},
-{n:'REYDELLET Camille',        g:'F',y:'2016',p:[{t:'00:43.70',p:268},n,{t:'03:35.09',p:197},n,{t:'00:52.49',p:256},{t:'01:54.60',p:201},{t:'00:56.10',p:269},n,{t:'00:50.38',p:185},{t:'01:59.55',p:122},{t:'01:45.81',p:313},n]},
-{n:'CHOSSAT Maélys',           g:'F',y:'2017',p:[{t:'00:48.96',p:117},{t:'01:46.61',p:82},{t:'04:37.18',p:1},n,{t:'00:57.63',p:139},n,{t:'00:55.13',p:295},{t:'02:18.79',p:133},{t:'00:58.71',p:33},n,{t:'01:55.54',p:185},n]},
-{n:'EL HASSOUNI Jenna',        g:'F',y:'2017',p:[{t:'00:47.19',p:161},n,{t:'03:47.24',p:126},n,{t:'00:53.67',p:226},n,{t:'01:09.81',p:31},n,{t:'00:58.35',p:37},n,{t:'01:57.45',p:164},n]},
+{n:'NEVERS Elsa',              g:'F',y:'2016',p:[{t:'00:45.88',p:198},{t:'01:48.96',p:61},n,n,{t:'00:56.16',p:169},n,{t:'01:03.85',p:105},n,{t:'01:01.27',p:11},n,{t:'01:59.83',p:140},n]},
+{n:'REYDELLET Camille',        g:'F',y:'2016',p:[{t:'00:43.70',p:268},{t:'01:40.63',p:148},{t:'03:35.09',p:197},n,{t:'00:52.49',p:256},{t:'01:54.60',p:201},{t:'00:56.10',p:269},{t:'02:01.08',p:312},{t:'00:50.38',p:185},{t:'01:59.55',p:122},{t:'01:45.81',p:313},n]},
+{n:'EL HASSOUNI Jenna',        g:'F',y:'2017',p:[{t:'00:47.19',p:161},{t:'01:51.52',p:42},{t:'03:47.24',p:126},n,{t:'00:53.67',p:226},n,{t:'01:03.96',p:104},n,{t:'00:58.35',p:37},n,{t:'01:57.45',p:164},n]},
 {n:'GIRARD Alice',             g:'F',y:'2017',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
-{n:'HALLALI Noor',             g:'F',y:'2017',p:[{t:'00:59.26',p:1},{t:'02:09.82',p:1},n,n,{t:'01:03.08',p:54},n,{t:'01:01.73',p:143},n,{t:'01:08.01',p:1},n,{t:'02:08.55',p:67},n]},
-{n:'PACCARD Mélody',           g:'F',y:'2017',p:[{t:'00:53.00',p:43},n,n,n,{t:'01:01.15',p:79},n,{t:'01:05.99',p:73},n,{t:'01:09.58',p:1},n,{t:'02:03.84',p:103},n]},
-{n:'SHKOZA Jusra',             g:'F',y:'2017',p:[{t:'00:48.11',p:137},{t:'01:52.24',p:37},n,n,{t:'00:53.15',p:239},n,{t:'01:03.25',p:115},n,{t:'01:00.17',p:19},n,{t:'01:59.74',p:141},n]},
-{n:'TOURNIER Clarisse',        g:'F',y:'2017',p:[{t:'00:46.43',p:182},{t:'01:47.18',p:76},{t:'04:00.91',p:65},n,{t:'00:49.25',p:348},{t:'01:51.63',p:236},{t:'01:06.23',p:70},n,{t:'00:55.35',p:79},n,{t:'01:55.72',p:183},n]},
+{n:'HALLALI Noor',             g:'F',y:'2017',p:[{t:'00:57.32',p:4},{t:'02:09.82',p:1},n,n,{t:'01:03.08',p:54},n,{t:'01:01.73',p:143},n,{t:'01:00.81',p:14},n,{t:'02:07.60',p:73},n]},
+{n:'PACCARD Mélody',           g:'F',y:'2017',p:[{t:'00:53.00',p:43},{t:'02:02.69',p:1},n,n,{t:'01:01.15',p:79},n,{t:'01:05.99',p:73},n,{t:'01:09.58',p:1},n,{t:'02:03.84',p:103},n]},
+{n:'SHKOZA Jusra',             g:'F',y:'2017',p:[{t:'00:48.11',p:137},{t:'01:52.24',p:37},n,n,{t:'00:53.15',p:239},n,{t:'01:03.25',p:115},n,{t:'00:59.46',p:25},n,{t:'01:56.41',p:176},n]},
+{n:'TOURNIER Clarisse',        g:'F',y:'2017',p:[{t:'00:46.43',p:182},{t:'01:47.18',p:76},{t:'04:00.91',p:65},n,{t:'00:49.25',p:348},{t:'01:51.63',p:236},{t:'01:06.23',p:70},{t:'02:19.13',p:130},{t:'00:55.35',p:79},n,{t:'01:55.72',p:183},n]},
+{n:'BERTRAND Adèle',           g:'F',y:'2018',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
 {n:'DINAR Nesma',              g:'F',y:'2018',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
 {n:'GUEDES DA SILVA Vitoria', g:'F',y:'2018',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
 {n:'KACEMI Lylia',             g:'F',y:'2018',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
 {n:'LALLEMAND-RIBOT Anaïs',    g:'F',y:'2018',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
 {n:'MORAND Adèle',             g:'F',y:'2018',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
-{n:'OSMANY Mila',              g:'F',y:'2018',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
 {n:'PIRAT Agathe',             g:'F',y:'2018',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
-{n:'BILLAUDY Gabriel *',       g:'H',y:'2016',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
-{n:'FOURMOND Milo',            g:'H',y:'2016',p:[{t:'00:43.70',p:191},{t:'01:42.61',p:85},{t:'03:27.39',p:124},n,{t:'00:49.04',p:221},n,{t:'01:01.81',p:78},n,{t:'00:53.79',p:40},n,{t:'01:47.40',p:162},n]},
-{n:'KACEMI Kaïs-Ibrahim',      g:'H',y:'2016',p:[{t:'00:44.22',p:176},{t:'01:42.89',p:82},{t:'03:30.14',p:109},n,{t:'00:50.53',p:184},n,{t:'01:03.00',p:62},n,{t:'00:54.18',p:35},n,{t:'01:51.24',p:121},n]},
-{n:'MORAND Gaspard',           g:'H',y:'2016',p:[{t:'00:43.71',p:190},{t:'01:50.73',p:26},n,n,{t:'00:48.68',p:231},n,{t:'00:58.62',p:128},{t:'02:12.45',p:65},{t:'00:56.83',p:11},n,{t:'01:49.67',p:137},n]},
-{n:'BOUVIER Jonathan',         g:'H',y:'2017',p:[{t:'00:48.68',p:75},{t:'01:57.05',p:4},{t:'03:57.75',p:13},n,{t:'00:53.49',p:120},n,{t:'01:10.28',p:5},n,{t:'01:03.56',p:1},n,{t:'01:55.70',p:82},n]},
-{n:'DARBINIAN David',          g:'H',y:'2017',p:[{t:'00:48.51',p:78},n,n,n,{t:'00:55.73',p:81},n,{t:'01:01.69',p:79},n,n,n,{t:'01:52.81',p:106},n]},
+{n:'BILLAUDY Gabriel',       g:'H',y:'2016',p:[{t:'00:45.99',p:131},{t:'01:37.69',p:136},n,n,{t:'00:54.91',p:95},n,{t:'00:58.92',p:123},n,n,n,{t:'01:48.81',p:146},n]},
+{n:'FOURMOND Milo',            g:'H',y:'2016',p:[{t:'00:43.70',p:191},{t:'01:31.75',p:214},{t:'03:27.39',p:124},n,{t:'00:49.04',p:221},{t:'01:49.65',p:153},{t:'01:01.81',p:78},n,{t:'00:53.79',p:40},n,{t:'01:47.15',p:165},n]},
+{n:'KACEMI Kaïs-Ibrahim',      g:'H',y:'2016',p:[{t:'00:44.22',p:176},{t:'01:40.84',p:102},{t:'03:30.14',p:109},n,{t:'00:50.53',p:184},n,{t:'01:03.00',p:62},n,{t:'00:54.18',p:35},n,{t:'01:51.24',p:121},n]},
+{n:'MORAND Gaspard',           g:'H',y:'2016',p:[{t:'00:43.71',p:190},{t:'01:50.73',p:26},n,n,{t:'00:48.68',p:231},n,{t:'00:58.62',p:128},{t:'02:05.51',p:116},{t:'00:56.83',p:11},n,{t:'01:49.67',p:137},n]},
+{n:'BOUVIER Jonathan',         g:'H',y:'2017',p:[{t:'00:48.68',p:75},{t:'01:57.05',p:4},{t:'03:57.75',p:13},n,{t:'00:53.49',p:120},{t:'02:00.27',p:62},{t:'01:05.08',p:39},n,{t:'01:03.56',p:1},n,{t:'01:55.70',p:82},n]},
+{n:'DARBINIAN David',          g:'H',y:'2017',p:[{t:'00:48.51',p:78},{t:'01:43.43',p:77},n,n,{t:'00:55.09',p:92},n,{t:'01:01.69',p:79},n,n,n,{t:'01:45.56',p:183},n]},
 {n:'DEMESY Maxime',            g:'H',y:'2017',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
 {n:'DEROGNAT Lyam',            g:'H',y:'2017',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
 {n:'DESCOMBES Andrew',         g:'H',y:'2017',p:[{t:'00:47.00',p:108},n,{t:'03:57.18',p:14},n,{t:'00:54.12',p:109},n,{t:'00:58.44',p:131},n,{t:'00:58.25',p:3},n,{t:'01:56.50',p:75},n]},
-{n:'HERITIER Léo',             g:'H',y:'2017',p:[{t:'00:48.68',p:75},{t:'01:57.05',p:4},n,n,{t:'00:54.66',p:99},n,{t:'01:04.87',p:41},n,{t:'01:03.56',p:1},n,{t:'01:57.85',p:65},n]},
-{n:'JANICHON Ilyes',           g:'H',y:'2017',p:[{t:'00:48.68',p:75},{t:'01:47.77',p:44},n,n,{t:'00:54.66',p:99},n,{t:'01:10.28',p:5},n,{t:'01:03.56',p:1},n,{t:'01:55.82',p:81},n]},
-{n:'RAPHAËL LE DOCTE Kanty',   g:'H',y:'2017',p:[{t:'00:50.56',p:45},n,n,n,{t:'00:59.44',p:33},n,{t:'01:03.93',p:51},n,n,n,{t:'02:08.06',p:12},n]},
+{n:'HERITIER Léo',             g:'H',y:'2017',p:[{t:'00:45.86',p:134},{t:'01:57.05',p:4},n,n,{t:'00:54.66',p:99},n,{t:'01:03.28',p:59},n,{t:'01:03.56',p:1},n,{t:'01:57.85',p:65},n]},
+{n:'JANICHON Ilyes',           g:'H',y:'2017',p:[{t:'00:48.68',p:75},{t:'01:47.77',p:44},n,n,{t:'00:54.66',p:99},{t:'02:08.44',p:20},{t:'01:10.28',p:5},n,{t:'00:51.15',p:80},n,{t:'01:55.82',p:81},n]},
+{n:'RAPHAËL LE DOCTE Kanty',   g:'H',y:'2017',p:[{t:'00:50.56',p:45},{t:'01:51.80',p:21},n,n,{t:'00:59.44',p:33},n,{t:'01:03.93',p:51},n,n,n,{t:'02:01.60',p:41},n]},
 {n:'OMRANI Mohamed',           g:'H',y:'2018',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
-{n:'VICTOR Hector',            g:'H',y:'2018',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
+{n:'ROBERT Hector',            g:'H',y:'2018',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
+{n:'BOZON Jules',              g:'H',y:'2019',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
 ];
 
 // History: history[swimmer_idx][event_idx] = [{t,p,d,l},...] sorted best first, or null
 const history=[
 [[{t:'00:42.96',p:295,d:'20/06/2026',l:'OYONNAX'},{t:'00:48.53',p:127,d:'12/10/2025',l:'BOURG'},{t:'00:52.94',p:44,d:'05/04/2025',l:'ANNECY'},{t:'00:58.97',p:1,d:'18/01/2025',l:'AMBÉRIEU'},{t:'00:59.26',p:1,d:'08/12/2024',l:'BOURG'}],[{t:'01:46.85',p:79,d:'31/01/2026',l:'FERNEY'}],[{t:'03:42.63',p:151,d:'07/03/2026',l:'AMBÉRIEU'},{t:'03:53.85',p:94,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:54.95',p:196,d:'20/06/2026',l:'OYONNAX'},{t:'00:55.02',p:194,d:'31/01/2026',l:'FERNEY'},{t:'01:00.22',p:93,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:53.55',p:340,d:'20/06/2026',l:'OYONNAX'},{t:'00:55.74',p:279,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:56.80',p:251,d:'12/10/2025',l:'BOURG'},{t:'00:58.75',p:205,d:'08/12/2024',l:'BOURG'},{t:'00:59.17',p:195,d:'05/04/2025',l:'ANNECY'},{t:'01:00.62',p:164,d:'18/05/2025',l:'OYONNAX'},{t:'01:00.73',p:162,d:'18/01/2025',l:'AMBÉRIEU'}],[{t:'02:04.66',p:270,d:'31/01/2026',l:'FERNEY'}],[{t:'01:01.75',p:8,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:53.98',p:204,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:52.16',p:226,d:'31/01/2026',l:'FERNEY'},{t:'02:05.32',p:91,d:'18/05/2025',l:'OYONNAX'},{t:'02:10.59',p:53,d:'05/04/2025',l:'ANNECY'},{t:'02:19.67',p:12,d:'18/01/2025',l:'AMBÉRIEU'}],n],
-[[{t:'00:42.42',p:315,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:45.06',p:223,d:'31/01/2026',l:'FERNEY'},{t:'00:49.07',p:115,d:'06/12/2025',l:'BELLEGARDE'}],[{t:'01:47.67',p:72,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:45.68',p:91,d:'31/01/2026',l:'FERNEY'}],n,n,[{t:'00:49.60',p:338,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:49.82',p:331,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:52.11',p:266,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:52.49',p:256,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:50.54',p:310,d:'31/01/2026',l:'FERNEY'},{t:'00:54.39',p:209,d:'06/12/2025',l:'BELLEGARDE'}],n,[{t:'01:01.12',p:154,d:'31/01/2026',l:'FERNEY'},{t:'01:05.56',p:79,d:'06/12/2025',l:'BELLEGARDE'}],[{t:'02:07.24',p:241,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,[{t:'01:51.78',p:231,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:53.98',p:204,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:57.08',p:168,d:'31/01/2026',l:'FERNEY'}],n],
-[[{t:'00:45.93',p:197,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:49.03',p:116,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:48.82',p:120,d:'31/01/2026',l:'FERNEY'},{t:'00:47.33',p:157,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:51.13',p:73,d:'12/10/2025',l:'BOURG'},{t:'00:55.17',p:18,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:54.60',p:24,d:'18/05/2025',l:'OYONNAX'},{t:'01:06.10',p:1,d:'18/01/2025',l:'AMBÉRIEU'},{t:'01:06.10',p:1,d:'08/12/2024',l:'BOURG'}],[{t:'01:49.55',p:56,d:'31/01/2026',l:'FERNEY'}],[{t:'03:40.61',p:163,d:'20/06/2026',l:'OYONNAX'},{t:'04:03.98',p:54,d:'07/03/2026',l:'AMBÉRIEU'},{t:'04:18.50',p:16,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:52.81',p:248,d:'20/06/2026',l:'OYONNAX'},{t:'00:56.63',p:159,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:59.28',p:109,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:59.68',p:102,d:'31/01/2026',l:'FERNEY'},{t:'01:09.44',p:4,d:'12/10/2025',l:'BOURG'},{t:'01:14.08',p:1,d:'18/01/2025',l:'AMBÉRIEU'}],n,[{t:'00:57.84',p:226,d:'20/06/2026',l:'OYONNAX'},{t:'00:59.53',p:187,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:04.67',p:92,d:'12/10/2025',l:'BOURG'},{t:'01:04.80',p:90,d:'21/06/2025',l:'AMBÉRIEU'},{t:'01:09.76',p:31,d:'18/01/2025',l:'AMBÉRIEU'}],[{t:'02:02.29',p:298,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'01:00.56',p:16,d:'31/01/2026',l:'FERNEY'},{t:'00:55.64',p:75,d:'06/12/2025',l:'BELLEGARDE'}],n,[{t:'01:45.05',p:324,d:'20/06/2026',l:'OYONNAX'},{t:'01:47.24',p:292,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:57.19',p:167,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:57.85',p:160,d:'31/01/2026',l:'FERNEY'},{t:'02:09.30',p:62,d:'18/05/2025',l:'OYONNAX'}],n],
-[[{t:'00:51.06',p:74,d:'20/06/2026',l:'OYONNAX'},{t:'00:55.43',p:16,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:58.80',p:1,d:'31/01/2026',l:'FERNEY'}],n,n,n,[{t:'00:57.06',p:150,d:'20/06/2026',l:'OYONNAX'},{t:'01:10.02',p:3,d:'31/01/2026',l:'FERNEY'}],n,[{t:'01:04.94',p:88,d:'20/06/2026',l:'OYONNAX'},{t:'01:05.26',p:84,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:06.19',p:71,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,n,[{t:'01:58.89',p:149,d:'20/06/2026',l:'OYONNAX'},{t:'02:01.98',p:119,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:08.41',p:68,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:18.87',p:15,d:'31/01/2026',l:'FERNEY'}],n],
-[[{t:'00:46.75',p:173,d:'20/06/2026',l:'OYONNAX'},{t:'00:52.52',p:50,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:54.06',p:30,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:54.52',p:25,d:'12/10/2025',l:'BOURG'},{t:'00:57.83',p:2,d:'05/04/2025',l:'ANNECY'},{t:'01:00.05',p:1,d:'18/01/2025',l:'AMBÉRIEU'},{t:'01:02.12',p:1,d:'08/12/2024',l:'BOURG'}],[{t:'01:50.12',p:52,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'03:42.04',p:154,d:'20/06/2026',l:'OYONNAX'},{t:'04:10.65',p:34,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:57.11',p:149,d:'31/01/2026',l:'FERNEY'},{t:'00:56.25',p:167,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:59.92',p:98,d:'12/10/2025',l:'BOURG'},{t:'00:59.81',p:100,d:'18/05/2025',l:'OYONNAX'}],n,[{t:'00:58.55',p:209,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:59.24',p:194,d:'20/06/2026',l:'OYONNAX'},{t:'00:59.65',p:185,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:02.09',p:136,d:'21/06/2025',l:'AMBÉRIEU'},{t:'01:02.64',p:126,d:'12/10/2025',l:'BOURG'},{t:'01:03.39',p:113,d:'21/06/2025',l:'AMBÉRIEU'},{t:'01:04.32',p:98,d:'18/01/2025',l:'AMBÉRIEU'},{t:'01:05.23',p:84,d:'05/04/2025',l:'ANNECY'},{t:'01:09.64',p:32,d:'08/12/2024',l:'BOURG'},{t:'01:12.87',p:10,d:'04/05/2024',l:'BOURG'}],[{t:'02:16.54',p:151,d:'31/01/2026',l:'FERNEY'}],[{t:'00:54.90',p:87,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:58.42',p:36,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:59.00',p:30,d:'31/01/2026',l:'FERNEY'},{t:'00:59.95',p:21,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:02.87',p:3,d:'21/06/2025',l:'AMBÉRIEU'},{t:'01:05.96',p:1,d:'21/06/2025',l:'AMBÉRIEU'}],n,[{t:'01:50.73',p:244,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:53.20',p:213,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:55.82',p:182,d:'31/01/2026',l:'FERNEY'},{t:'02:05.75',p:87,d:'18/05/2025',l:'OYONNAX'},{t:'02:11.29',p:49,d:'05/04/2025',l:'ANNECY'},{t:'02:12.62',p:42,d:'18/01/2025',l:'AMBÉRIEU'}],n],
-[[{t:'00:44.17',p:252,d:'20/06/2026',l:'OYONNAX'},{t:'00:48.85',p:120,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:49.39',p:108,d:'31/01/2026',l:'FERNEY'},{t:'00:51.63',p:64,d:'12/10/2025',l:'BOURG'}],[{t:'01:53.05',p:32,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,[{t:'00:53.27',p:236,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:54.94',p:196,d:'31/01/2026',l:'FERNEY'}],[{t:'01:50.09',p:256,d:'20/06/2026',l:'OYONNAX'}],[{t:'00:58.75',p:205,d:'20/06/2026',l:'OYONNAX'},{t:'00:59.66',p:185,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:00.24',p:172,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:00.63',p:164,d:'31/01/2026',l:'FERNEY'}],n,[{t:'01:11.99',p:1,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:48.84',p:270,d:'20/06/2026',l:'OYONNAX'},{t:'01:52.94',p:216,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:57.50',p:164,d:'07/03/2026',l:'AMBÉRIEU'}],n],
+[[{t:'00:42.81',p:300,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:42.42',p:315,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:45.06',p:223,d:'31/01/2026',l:'FERNEY'},{t:'00:49.07',p:115,d:'06/12/2025',l:'BELLEGARDE'}],[{t:'01:47.67',p:72,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:45.68',p:91,d:'31/01/2026',l:'FERNEY'}],n,n,[{t:'00:49.60',p:338,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:49.82',p:331,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:52.11',p:266,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:52.49',p:256,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:50.54',p:310,d:'31/01/2026',l:'FERNEY'},{t:'00:54.39',p:209,d:'06/12/2025',l:'BELLEGARDE'}],n,[{t:'00:56.32',p:263,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:01.12',p:154,d:'31/01/2026',l:'FERNEY'},{t:'01:05.56',p:79,d:'06/12/2025',l:'BELLEGARDE'}],[{t:'02:07.24',p:241,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,[{t:'01:47.02',p:295,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:51.78',p:231,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:53.98',p:204,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:57.08',p:168,d:'31/01/2026',l:'FERNEY'}],n],
+[[{t:'00:45.93',p:197,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:49.03',p:116,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:48.82',p:120,d:'31/01/2026',l:'FERNEY'},{t:'00:47.33',p:157,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:51.13',p:73,d:'12/10/2025',l:'BOURG'},{t:'00:55.17',p:18,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:54.60',p:24,d:'18/05/2025',l:'OYONNAX'},{t:'01:06.10',p:1,d:'18/01/2025',l:'AMBÉRIEU'},{t:'01:06.10',p:1,d:'08/12/2024',l:'BOURG'}],[{t:'01:43.32',p:115,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:49.55',p:56,d:'31/01/2026',l:'FERNEY'}],[{t:'03:40.61',p:163,d:'20/06/2026',l:'OYONNAX'},{t:'04:03.98',p:54,d:'07/03/2026',l:'AMBÉRIEU'},{t:'04:18.50',p:16,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:55.36',p:186,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:52.81',p:248,d:'20/06/2026',l:'OYONNAX'},{t:'00:56.63',p:159,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:59.28',p:109,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:59.68',p:102,d:'31/01/2026',l:'FERNEY'},{t:'01:09.44',p:4,d:'12/10/2025',l:'BOURG'},{t:'01:14.08',p:1,d:'18/01/2025',l:'AMBÉRIEU'}],n,[{t:'00:56.27',p:265,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:57.84',p:226,d:'20/06/2026',l:'OYONNAX'},{t:'00:59.53',p:187,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:04.67',p:92,d:'12/10/2025',l:'BOURG'},{t:'01:04.80',p:90,d:'21/06/2025',l:'AMBÉRIEU'},{t:'01:09.76',p:31,d:'18/01/2025',l:'AMBÉRIEU'}],[{t:'02:02.29',p:298,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'01:00.56',p:16,d:'31/01/2026',l:'FERNEY'},{t:'00:55.64',p:75,d:'06/12/2025',l:'BELLEGARDE'}],n,[{t:'01:47.85',p:284,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:45.05',p:324,d:'20/06/2026',l:'OYONNAX'},{t:'01:47.24',p:292,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:57.19',p:167,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:57.85',p:160,d:'31/01/2026',l:'FERNEY'},{t:'02:09.30',p:62,d:'18/05/2025',l:'OYONNAX'}],n],
+[[{t:'00:51.06',p:74,d:'20/06/2026',l:'OYONNAX'},{t:'00:55.43',p:16,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:58.80',p:1,d:'31/01/2026',l:'FERNEY'}],[{t:'01:54.87',p:22,d:'03/10/2026',l:'BELLEGARDE'}],n,n,[{t:'01:00.16',p:94,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:57.06',p:150,d:'20/06/2026',l:'OYONNAX'},{t:'01:10.02',p:3,d:'31/01/2026',l:'FERNEY'}],n,[{t:'01:05.80',p:76,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:04.94',p:88,d:'20/06/2026',l:'OYONNAX'},{t:'01:05.26',p:84,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:06.19',p:71,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,n,[{t:'02:03.55',p:105,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:58.89',p:149,d:'20/06/2026',l:'OYONNAX'},{t:'02:01.98',p:119,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:08.41',p:68,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:18.87',p:15,d:'31/01/2026',l:'FERNEY'}],n],
+[[{t:'00:46.75',p:173,d:'20/06/2026',l:'OYONNAX'},{t:'00:52.52',p:50,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:54.06',p:30,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:54.52',p:25,d:'12/10/2025',l:'BOURG'},{t:'00:57.83',p:2,d:'05/04/2025',l:'ANNECY'},{t:'01:00.05',p:1,d:'18/01/2025',l:'AMBÉRIEU'},{t:'01:02.12',p:1,d:'08/12/2024',l:'BOURG'}],[{t:'01:44.97',p:98,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:50.12',p:52,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'03:42.04',p:154,d:'20/06/2026',l:'OYONNAX'},{t:'04:10.65',p:34,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:55.07',p:193,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:57.11',p:149,d:'31/01/2026',l:'FERNEY'},{t:'00:56.25',p:167,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:59.92',p:98,d:'12/10/2025',l:'BOURG'},{t:'00:59.81',p:100,d:'18/05/2025',l:'OYONNAX'}],n,[{t:'00:58.55',p:209,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:59.24',p:194,d:'20/06/2026',l:'OYONNAX'},{t:'00:59.65',p:185,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:02.09',p:136,d:'21/06/2025',l:'AMBÉRIEU'},{t:'01:02.64',p:126,d:'12/10/2025',l:'BOURG'},{t:'01:03.39',p:113,d:'21/06/2025',l:'AMBÉRIEU'},{t:'01:04.32',p:98,d:'18/01/2025',l:'AMBÉRIEU'},{t:'01:05.23',p:84,d:'05/04/2025',l:'ANNECY'},{t:'01:09.64',p:32,d:'08/12/2024',l:'BOURG'},{t:'01:12.87',p:10,d:'04/05/2024',l:'BOURG'}],[{t:'02:03.08',p:288,d:'03/10/2026',l:'BELLEGARDE'},{t:'02:16.54',p:151,d:'31/01/2026',l:'FERNEY'}],[{t:'00:54.90',p:87,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:58.42',p:36,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:59.00',p:30,d:'31/01/2026',l:'FERNEY'},{t:'00:59.95',p:21,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:02.87',p:3,d:'21/06/2025',l:'AMBÉRIEU'},{t:'01:05.96',p:1,d:'21/06/2025',l:'AMBÉRIEU'}],n,[{t:'01:51.59',p:233,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:50.73',p:244,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:53.20',p:213,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:55.82',p:182,d:'31/01/2026',l:'FERNEY'},{t:'02:05.75',p:87,d:'18/05/2025',l:'OYONNAX'},{t:'02:11.29',p:49,d:'05/04/2025',l:'ANNECY'},{t:'02:12.62',p:42,d:'18/01/2025',l:'AMBÉRIEU'}],n],
+[[{t:'00:44.17',p:252,d:'20/06/2026',l:'OYONNAX'},{t:'00:48.85',p:120,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:49.39',p:108,d:'31/01/2026',l:'FERNEY'},{t:'00:51.63',p:64,d:'12/10/2025',l:'BOURG'}],[{t:'01:42.16',p:129,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:53.05',p:32,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,[{t:'00:56.69',p:158,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:53.27',p:236,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:54.94',p:196,d:'31/01/2026',l:'FERNEY'}],[{t:'01:50.09',p:256,d:'20/06/2026',l:'OYONNAX'}],[{t:'00:55.81',p:277,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:58.75',p:205,d:'20/06/2026',l:'OYONNAX'},{t:'00:59.66',p:185,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:00.24',p:172,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:00.63',p:164,d:'31/01/2026',l:'FERNEY'}],n,[{t:'01:11.99',p:1,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:51.09',p:240,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:48.84',p:270,d:'20/06/2026',l:'OYONNAX'},{t:'01:52.94',p:216,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:57.50',p:164,d:'07/03/2026',l:'AMBÉRIEU'}],n],
 [[{t:'00:49.11',p:114,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:52.16',p:55,d:'31/01/2026',l:'FERNEY'},{t:'00:54.00',p:30,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:52.83',p:45,d:'12/10/2025',l:'BOURG'},{t:'00:58.41',p:1,d:'18/05/2025',l:'OYONNAX'},{t:'00:59.27',p:1,d:'18/01/2025',l:'AMBÉRIEU'},{t:'00:57.21',p:4,d:'08/12/2024',l:'BOURG'}],n,[{t:'04:05.29',p:50,d:'07/03/2026',l:'AMBÉRIEU'},{t:'04:14.55',p:24,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:56.41',p:164,d:'31/01/2026',l:'FERNEY'},{t:'00:56.32',p:166,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:01.59',p:73,d:'12/10/2025',l:'BOURG'},{t:'01:04.50',p:38,d:'18/01/2025',l:'AMBÉRIEU'}],n,[{t:'01:07.25',p:57,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:09.58',p:33,d:'31/01/2026',l:'FERNEY'},{t:'01:11.18',p:20,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:11.32',p:19,d:'12/10/2025',l:'BOURG'}],n,[{t:'01:00.68',p:15,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:50.45',p:248,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:00.55',p:133,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:58.30',p:155,d:'31/01/2026',l:'FERNEY'},{t:'02:01.06',p:128,d:'06/12/2025',l:'BELLEGARDE'},{t:'02:13.49',p:37,d:'18/05/2025',l:'OYONNAX'}],n],
-[[{t:'00:45.88',p:198,d:'20/06/2026',l:'OYONNAX'},{t:'00:53.46',p:37,d:'12/10/2025',l:'BOURG'}],n,n,n,[{t:'00:56.16',p:169,d:'25/04/2026',l:'BELLEGARDE'}],n,[{t:'01:03.85',p:105,d:'12/10/2025',l:'BOURG'},{t:'01:05.75',p:77,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:01.27',p:11,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:59.83',p:140,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:02.25',p:117,d:'20/06/2026',l:'OYONNAX'}],n],
-[[{t:'00:43.70',p:268,d:'20/06/2026',l:'OYONNAX'},{t:'00:43.78',p:266,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:45.52',p:209,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:46.08',p:192,d:'31/01/2026',l:'FERNEY'},{t:'00:46.76',p:173,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:47.12',p:163,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:47.98',p:141,d:'12/10/2025',l:'BOURG'},{t:'00:55.68',p:14,d:'08/12/2024',l:'BOURG'},{t:'00:56.07',p:11,d:'18/01/2025',l:'AMBÉRIEU'}],n,[{t:'03:35.09',p:197,d:'20/06/2026',l:'OYONNAX'},{t:'03:46.70',p:129,d:'06/12/2025',l:'BELLEGARDE'},{t:'03:57.83',p:77,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:52.49',p:256,d:'20/06/2026',l:'OYONNAX'},{t:'00:56.70',p:158,d:'12/10/2025',l:'BOURG'},{t:'00:58.99',p:114,d:'18/05/2025',l:'OYONNAX'}],[{t:'01:54.60',p:201,d:'31/01/2026',l:'FERNEY'}],[{t:'00:56.10',p:269,d:'20/06/2026',l:'OYONNAX'},{t:'00:56.89',p:249,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:00.81',p:161,d:'12/10/2025',l:'BOURG'},{t:'01:11.65',p:17,d:'18/01/2025',l:'AMBÉRIEU'}],n,[{t:'00:50.38',p:185,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:53.32',p:117,d:'31/01/2026',l:'FERNEY'},{t:'00:54.24',p:99,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:57.70',p:45,d:'21/06/2025',l:'AMBÉRIEU'}],[{t:'01:59.55',p:122,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'01:45.81',p:313,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:50.35',p:249,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:48.43',p:275,d:'31/01/2026',l:'FERNEY'},{t:'01:50.43',p:248,d:'06/12/2025',l:'BELLEGARDE'},{t:'02:03.47',p:106,d:'18/05/2025',l:'OYONNAX'},{t:'02:18.12',p:17,d:'18/01/2025',l:'AMBÉRIEU'}],n],
-[[{t:'00:48.96',p:117,d:'31/01/2026',l:'FERNEY'},{t:'00:54.67',p:23,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:55.59',p:15,d:'12/10/2025',l:'BOURG'},{t:'00:54.52',p:25,d:'21/06/2025',l:'AMBÉRIEU'}],[{t:'01:46.61',p:82,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'04:37.18',p:1,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:57.63',p:139,d:'31/01/2026',l:'FERNEY'},{t:'01:00.13',p:95,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:09.66',p:4,d:'12/10/2025',l:'BOURG'},{t:'01:08.37',p:9,d:'21/06/2025',l:'AMBÉRIEU'}],n,[{t:'00:55.13',p:295,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:56.47',p:260,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:59.23',p:194,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:00.40',p:169,d:'12/10/2025',l:'BOURG'},{t:'01:03.91',p:104,d:'21/06/2025',l:'AMBÉRIEU'},{t:'01:05.17',p:85,d:'21/06/2025',l:'AMBÉRIEU'},{t:'01:07.67',p:52,d:'18/05/2025',l:'OYONNAX'}],[{t:'02:18.79',p:133,d:'31/01/2026',l:'FERNEY'}],[{t:'00:58.71',p:33,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:05.85',p:1,d:'06/12/2025',l:'BELLEGARDE'}],n,[{t:'01:55.54',p:185,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:56.95',p:170,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:06.18',p:84,d:'31/01/2026',l:'FERNEY'},{t:'02:16.44',p:24,d:'18/05/2025',l:'OYONNAX'}],n],
-[[{t:'00:47.19',p:161,d:'20/06/2026',l:'OYONNAX'},{t:'00:50.56',p:83,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:51.49',p:66,d:'31/01/2026',l:'FERNEY'},{t:'00:51.89',p:60,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:55.56',p:15,d:'12/10/2025',l:'BOURG'}],n,[{t:'03:47.24',p:126,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'00:53.67',p:226,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:53.68',p:226,d:'20/06/2026',l:'OYONNAX'},{t:'00:58.20',p:128,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:58.27',p:127,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:58.93',p:115,d:'31/01/2026',l:'FERNEY'}],n,[{t:'01:09.81',p:31,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:10.08',p:28,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:13.39',p:7,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:58.35',p:37,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:57.45',p:164,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:06.50',p:81,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:07.17',p:76,d:'31/01/2026',l:'FERNEY'}],n],
+[[{t:'00:45.88',p:198,d:'20/06/2026',l:'OYONNAX'},{t:'00:53.46',p:37,d:'12/10/2025',l:'BOURG'}],[{t:'01:48.96',p:61,d:'03/10/2026',l:'BELLEGARDE'}],n,n,[{t:'00:56.16',p:169,d:'25/04/2026',l:'BELLEGARDE'}],n,[{t:'01:04.44',p:96,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:03.85',p:105,d:'12/10/2025',l:'BOURG'},{t:'01:05.75',p:77,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:01.27',p:11,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'02:01.54',p:123,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:59.83',p:140,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:02.25',p:117,d:'20/06/2026',l:'OYONNAX'}],n],
+[[{t:'00:43.70',p:268,d:'20/06/2026',l:'OYONNAX'},{t:'00:43.78',p:266,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:45.52',p:209,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:46.08',p:192,d:'31/01/2026',l:'FERNEY'},{t:'00:46.76',p:173,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:47.12',p:163,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:47.98',p:141,d:'12/10/2025',l:'BOURG'},{t:'00:55.68',p:14,d:'08/12/2024',l:'BOURG'},{t:'00:56.07',p:11,d:'18/01/2025',l:'AMBÉRIEU'}],[{t:'01:40.63',p:148,d:'03/10/2026',l:'BELLEGARDE'}],[{t:'03:35.09',p:197,d:'20/06/2026',l:'OYONNAX'},{t:'03:46.70',p:129,d:'06/12/2025',l:'BELLEGARDE'},{t:'03:57.83',p:77,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:52.63',p:253,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:52.49',p:256,d:'20/06/2026',l:'OYONNAX'},{t:'00:56.70',p:158,d:'12/10/2025',l:'BOURG'},{t:'00:58.99',p:114,d:'18/05/2025',l:'OYONNAX'}],[{t:'01:54.60',p:201,d:'31/01/2026',l:'FERNEY'}],[{t:'00:56.10',p:269,d:'20/06/2026',l:'OYONNAX'},{t:'00:56.89',p:249,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:00.81',p:161,d:'12/10/2025',l:'BOURG'},{t:'01:11.65',p:17,d:'18/01/2025',l:'AMBÉRIEU'}],[{t:'02:01.08',p:312,d:'03/10/2026',l:'BELLEGARDE'}],[{t:'00:50.38',p:185,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:53.32',p:117,d:'31/01/2026',l:'FERNEY'},{t:'00:54.24',p:99,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:57.70',p:45,d:'21/06/2025',l:'AMBÉRIEU'}],[{t:'01:59.55',p:122,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'01:48.01',p:281,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:45.81',p:313,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:50.35',p:249,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:48.43',p:275,d:'31/01/2026',l:'FERNEY'},{t:'01:50.43',p:248,d:'06/12/2025',l:'BELLEGARDE'},{t:'02:03.47',p:106,d:'18/05/2025',l:'OYONNAX'},{t:'02:18.12',p:17,d:'18/01/2025',l:'AMBÉRIEU'}],n],
+[[{t:'00:47.19',p:161,d:'20/06/2026',l:'OYONNAX'},{t:'00:50.56',p:83,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:51.49',p:66,d:'31/01/2026',l:'FERNEY'},{t:'00:51.89',p:60,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:55.56',p:15,d:'12/10/2025',l:'BOURG'}],[{t:'01:51.52',p:42,d:'03/10/2026',l:'BELLEGARDE'}],[{t:'03:47.24',p:126,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'00:57.79',p:136,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:53.67',p:226,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:53.68',p:226,d:'20/06/2026',l:'OYONNAX'},{t:'00:58.20',p:128,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:58.27',p:127,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:58.93',p:115,d:'31/01/2026',l:'FERNEY'}],n,[{t:'01:03.96',p:104,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:09.81',p:31,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:10.08',p:28,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:13.39',p:7,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:58.35',p:37,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:59.18',p:146,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:57.45',p:164,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:06.50',p:81,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:07.17',p:76,d:'31/01/2026',l:'FERNEY'}],n],
 [n,n,n,n,n,n,n,n,n,n,n,n],
-[[{t:'00:59.26',p:1,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:59.61',p:1,d:'31/01/2026',l:'FERNEY'}],[{t:'02:09.82',p:1,d:'20/06/2026',l:'OYONNAX'}],n,n,[{t:'01:03.08',p:54,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:10.71',p:1,d:'31/01/2026',l:'FERNEY'}],n,[{t:'01:01.73',p:143,d:'20/06/2026',l:'OYONNAX'},{t:'01:02.73',p:124,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:03.30',p:114,d:'25/04/2026',l:'BELLEGARDE'}],n,[{t:'01:08.01',p:1,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'02:08.55',p:67,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:11.36',p:49,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:15.06',p:29,d:'20/06/2026',l:'OYONNAX'},{t:'02:22.34',p:6,d:'31/01/2026',l:'FERNEY'}],n],
-[[{t:'00:53.00',p:43,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:53.58',p:35,d:'31/01/2026',l:'FERNEY'},{t:'00:53.57',p:35,d:'20/06/2026',l:'OYONNAX'},{t:'00:55.63',p:14,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,n,[{t:'01:01.15',p:79,d:'31/01/2026',l:'FERNEY'},{t:'01:03.32',p:51,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:05.99',p:73,d:'20/06/2026',l:'OYONNAX'},{t:'01:07.48',p:55,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:09.58',p:1,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'02:03.84',p:103,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:04.88',p:94,d:'20/06/2026',l:'OYONNAX'},{t:'02:10.30',p:55,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:10.75',p:52,d:'31/01/2026',l:'FERNEY'}],n],
-[[{t:'00:48.11',p:137,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:50.74',p:80,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:51.87',p:60,d:'31/01/2026',l:'FERNEY'}],[{t:'01:52.24',p:37,d:'20/06/2026',l:'OYONNAX'}],n,n,[{t:'00:53.15',p:239,d:'20/06/2026',l:'OYONNAX'},{t:'00:58.35',p:125,d:'31/01/2026',l:'FERNEY'}],n,[{t:'01:03.25',p:115,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:00.17',p:19,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:59.74',p:141,d:'20/06/2026',l:'OYONNAX'},{t:'01:59.98',p:138,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:04.11',p:100,d:'31/01/2026',l:'FERNEY'},{t:'02:06.10',p:84,d:'07/03/2026',l:'AMBÉRIEU'}],n],
-[[{t:'00:46.43',p:182,d:'20/06/2026',l:'OYONNAX'},{t:'00:47.04',p:165,d:'31/01/2026',l:'FERNEY'},{t:'00:48.73',p:122,d:'12/10/2025',l:'BOURG'},{t:'00:49.64',p:102,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:51.56',p:65,d:'21/06/2025',l:'AMBÉRIEU'}],[{t:'01:47.18',p:76,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'04:00.91',p:65,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:49.25',p:348,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:49.65',p:336,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:54.02',p:218,d:'12/10/2025',l:'BOURG'},{t:'00:54.32',p:210,d:'12/10/2025',l:'BOURG'},{t:'00:52.61',p:253,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:54.24',p:212,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:57.81',p:136,d:'18/05/2025',l:'OYONNAX'},{t:'01:00.56',p:88,d:'08/12/2024',l:'BOURG'}],[{t:'01:51.63',p:236,d:'31/01/2026',l:'FERNEY'},{t:'01:56.57',p:180,d:'20/06/2026',l:'OYONNAX'}],[{t:'01:06.23',p:70,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:08.13',p:47,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:08.32',p:45,d:'20/06/2026',l:'OYONNAX'},{t:'01:10.44',p:25,d:'12/10/2025',l:'BOURG'},{t:'01:11.36',p:19,d:'21/06/2025',l:'AMBÉRIEU'}],n,[{t:'01:00.00',p:20,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:55.53',p:76,d:'31/01/2026',l:'FERNEY'},{t:'00:55.35',p:79,d:'06/12/2025',l:'BELLEGARDE'}],n,[{t:'01:55.72',p:183,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:57.59',p:163,d:'20/06/2026',l:'OYONNAX'},{t:'01:58.05',p:158,d:'31/01/2026',l:'FERNEY'},{t:'02:03.48',p:106,d:'18/05/2025',l:'OYONNAX'}],n],
-[n,n,n,n,n,n,n,n,n,n,n,n],
+[[{t:'00:57.32',p:4,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:59.26',p:1,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:59.61',p:1,d:'31/01/2026',l:'FERNEY'}],[{t:'02:09.82',p:1,d:'20/06/2026',l:'OYONNAX'}],n,n,[{t:'01:03.08',p:54,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:10.71',p:1,d:'31/01/2026',l:'FERNEY'}],n,[{t:'01:04.36',p:97,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:01.73',p:143,d:'20/06/2026',l:'OYONNAX'},{t:'01:02.73',p:124,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:03.30',p:114,d:'25/04/2026',l:'BELLEGARDE'}],n,[{t:'01:00.81',p:14,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:08.01',p:1,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'02:07.60',p:73,d:'03/10/2026',l:'BELLEGARDE'},{t:'02:08.55',p:67,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:11.36',p:49,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:15.06',p:29,d:'20/06/2026',l:'OYONNAX'},{t:'02:22.34',p:6,d:'31/01/2026',l:'FERNEY'}],n],
+[[{t:'00:53.00',p:43,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:53.58',p:35,d:'31/01/2026',l:'FERNEY'},{t:'00:53.57',p:35,d:'20/06/2026',l:'OYONNAX'},{t:'00:55.63',p:14,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'02:02.69',p:1,d:'03/10/2026',l:'BELLEGARDE'}],n,n,[{t:'01:01.74',p:71,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:01.15',p:79,d:'31/01/2026',l:'FERNEY'},{t:'01:03.32',p:51,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:06.30',p:69,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:05.99',p:73,d:'20/06/2026',l:'OYONNAX'},{t:'01:07.48',p:55,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:09.58',p:1,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'02:07.34',p:75,d:'03/10/2026',l:'BELLEGARDE'},{t:'02:03.84',p:103,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:04.88',p:94,d:'20/06/2026',l:'OYONNAX'},{t:'02:10.30',p:55,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:10.75',p:52,d:'31/01/2026',l:'FERNEY'}],n],
+[[{t:'00:48.30',p:133,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:48.11',p:137,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:50.74',p:80,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:51.87',p:60,d:'31/01/2026',l:'FERNEY'}],[{t:'01:52.24',p:37,d:'20/06/2026',l:'OYONNAX'}],n,n,[{t:'00:53.15',p:239,d:'20/06/2026',l:'OYONNAX'},{t:'00:58.35',p:125,d:'31/01/2026',l:'FERNEY'}],n,[{t:'01:04.12',p:101,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:03.25',p:115,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'00:59.46',p:25,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:00.17',p:19,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:56.41',p:176,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:59.74',p:141,d:'20/06/2026',l:'OYONNAX'},{t:'01:59.98',p:138,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:04.11',p:100,d:'31/01/2026',l:'FERNEY'},{t:'02:06.10',p:84,d:'07/03/2026',l:'AMBÉRIEU'}],n],
+[[{t:'00:48.08',p:138,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:46.43',p:182,d:'20/06/2026',l:'OYONNAX'},{t:'00:47.04',p:165,d:'31/01/2026',l:'FERNEY'},{t:'00:48.73',p:122,d:'12/10/2025',l:'BOURG'},{t:'00:49.64',p:102,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:51.56',p:65,d:'21/06/2025',l:'AMBÉRIEU'}],[{t:'01:47.18',p:76,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'04:00.91',p:65,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:49.60',p:338,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:49.25',p:348,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:49.65',p:336,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:54.02',p:218,d:'12/10/2025',l:'BOURG'},{t:'00:54.32',p:210,d:'12/10/2025',l:'BOURG'},{t:'00:52.61',p:253,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:54.24',p:212,d:'21/06/2025',l:'AMBÉRIEU'},{t:'00:57.81',p:136,d:'18/05/2025',l:'OYONNAX'},{t:'01:00.56',p:88,d:'08/12/2024',l:'BOURG'}],[{t:'01:51.63',p:236,d:'31/01/2026',l:'FERNEY'},{t:'01:56.57',p:180,d:'20/06/2026',l:'OYONNAX'}],[{t:'01:06.23',p:70,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:08.13',p:47,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:08.32',p:45,d:'20/06/2026',l:'OYONNAX'},{t:'01:10.44',p:25,d:'12/10/2025',l:'BOURG'},{t:'01:11.36',p:19,d:'21/06/2025',l:'AMBÉRIEU'}],[{t:'02:19.13',p:130,d:'03/10/2026',l:'BELLEGARDE'}],[{t:'01:00.00',p:20,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:55.53',p:76,d:'31/01/2026',l:'FERNEY'},{t:'00:55.35',p:79,d:'06/12/2025',l:'BELLEGARDE'}],n,[{t:'01:56.89',p:170,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:55.72',p:183,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:57.59',p:163,d:'20/06/2026',l:'OYONNAX'},{t:'01:58.05',p:158,d:'31/01/2026',l:'FERNEY'},{t:'02:03.48',p:106,d:'18/05/2025',l:'OYONNAX'}],n],
 [n,n,n,n,n,n,n,n,n,n,n,n],
 [n,n,n,n,n,n,n,n,n,n,n,n],
 [n,n,n,n,n,n,n,n,n,n,n,n],
@@ -1571,17 +1677,19 @@ const history=[
 [n,n,n,n,n,n,n,n,n,n,n,n],
 [n,n,n,n,n,n,n,n,n,n,n,n],
 [n,n,n,n,n,n,n,n,n,n,n,n],
-[[{t:'00:43.70',p:191,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:45.64',p:139,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:44.69',p:163,d:'12/10/2025',l:'BOURG'}],[{t:'01:42.61',p:85,d:'31/01/2026',l:'FERNEY'}],[{t:'03:27.39',p:124,d:'20/06/2026',l:'OYONNAX'},{t:'03:30.54',p:107,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'00:49.04',p:221,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:50.36',p:188,d:'20/06/2026',l:'OYONNAX'},{t:'00:51.36',p:165,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:52.05',p:150,d:'31/01/2026',l:'FERNEY'},{t:'00:52.34',p:144,d:'06/12/2025',l:'BELLEGARDE'}],n,[{t:'01:01.81',p:78,d:'20/06/2026',l:'OYONNAX'},{t:'01:05.98',p:31,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:06.80',p:24,d:'31/01/2026',l:'FERNEY'},{t:'01:13.27',p:1,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:53.79',p:40,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:47.40',p:162,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:48.59',p:149,d:'20/06/2026',l:'OYONNAX'},{t:'01:49.80',p:136,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:57.11',p:71,d:'31/01/2026',l:'FERNEY'},{t:'01:57.90',p:65,d:'06/12/2025',l:'BELLEGARDE'}],n],
-[[{t:'00:44.22',p:176,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:45.50',p:143,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:50.51',p:45,d:'12/10/2025',l:'BOURG'}],[{t:'01:42.89',p:82,d:'31/01/2026',l:'FERNEY'}],[{t:'03:30.14',p:109,d:'20/06/2026',l:'OYONNAX'},{t:'03:43.43',p:51,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'00:50.53',p:184,d:'20/06/2026',l:'OYONNAX'},{t:'01:00.46',p:24,d:'06/12/2025',l:'BELLEGARDE'}],n,[{t:'01:03.00',p:62,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:03.72',p:53,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:03.78',p:53,d:'20/06/2026',l:'OYONNAX'},{t:'01:06.90',p:23,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:07.18',p:21,d:'31/01/2026',l:'FERNEY'},{t:'01:09.57',p:7,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:54.18',p:35,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:51.24',p:121,d:'20/06/2026',l:'OYONNAX'},{t:'01:55.83',p:80,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:56.79',p:73,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:03.33',p:32,d:'06/12/2025',l:'BELLEGARDE'},{t:'02:04.30',p:27,d:'31/01/2026',l:'FERNEY'}],n],
-[[{t:'00:44.51',p:168,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:43.71',p:190,d:'06/12/2025',l:'BELLEGARDE'}],[{t:'01:50.73',p:26,d:'31/01/2026',l:'FERNEY'}],n,n,[{t:'00:50.65',p:181,d:'31/01/2026',l:'FERNEY'},{t:'00:48.68',p:231,d:'06/12/2025',l:'BELLEGARDE'}],n,[{t:'00:58.62',p:128,d:'31/01/2026',l:'FERNEY'},{t:'00:59.01',p:121,d:'06/12/2025',l:'BELLEGARDE'}],[{t:'02:12.45',p:65,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'00:56.83',p:11,d:'25/04/2026',l:'BELLEGARDE'}],n,[{t:'01:49.67',p:137,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:52.54',p:109,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:53.70',p:98,d:'31/01/2026',l:'FERNEY'}],n],
-[[{t:'00:48.68',p:75,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:51.52',p:32,d:'31/01/2026',l:'FERNEY'},{t:'00:52.56',p:21,d:'20/06/2026',l:'OYONNAX'},{t:'00:53.34',p:15,d:'31/01/2026',l:'FERNEY'},{t:'00:53.75',p:11,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:53.88',p:11,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:55.30',p:3,d:'31/01/2026',l:'FERNEY'},{t:'00:59.08',p:1,d:'12/10/2025',l:'BOURG'}],[{t:'01:57.05',p:4,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'03:57.75',p:13,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'00:53.49',p:120,d:'20/06/2026',l:'OYONNAX'},{t:'00:54.66',p:99,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:54.78',p:97,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:55.07',p:92,d:'31/01/2026',l:'FERNEY'},{t:'00:55.28',p:88,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:59.36',p:34,d:'31/01/2026',l:'FERNEY'},{t:'00:59.59',p:32,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:00.34',p:25,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:01.08',p:19,d:'31/01/2026',l:'FERNEY'},{t:'01:03.29',p:6,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:12.22',p:1,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:17.63',p:1,d:'12/10/2025',l:'BOURG'},{t:'01:10.28',p:5,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:12.11',p:1,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:03.56',p:1,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:02.55',p:1,d:'25/04/2026',l:'BELLEGARDE'}],n,[{t:'01:55.70',p:82,d:'20/06/2026',l:'OYONNAX'},{t:'01:57.85',p:65,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:03.15',p:33,d:'',l:'AMBÉRIEU'},{t:'02:04.94',p:24,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:07.07',p:16,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:08.68',p:11,d:'31/01/2026',l:'FERNEY'},{t:'02:09.50',p:8,d:'31/01/2026',l:'FERNEY'},{t:'02:11.10',p:5,d:'07/03/2026',l:'AMBÉRIEU'}],n],
-[[{t:'00:48.51',p:78,d:'20/06/2026',l:'OYONNAX'}],n,n,n,[{t:'00:55.73',p:81,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:01.69',p:79,d:'20/06/2026',l:'OYONNAX'},{t:'01:06.96',p:23,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:06.96',p:23,d:'25/04/2026',l:'BELLEGARDE'}],n,n,n,[{t:'01:52.81',p:106,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:52.81',p:106,d:'25/04/2026',l:'BELLEGARDE'}],n],
+[[{t:'00:45.99',p:131,d:'20/06/2026',l:'OYONNAX'}],[{t:'01:37.69',p:136,d:'03/10/2026',l:'BELLEGARDE'}],n,n,[{t:'00:54.91',p:95,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:57.38',p:57,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'00:58.92',p:123,d:'03/10/2026',l:'BELLEGARDE'}],n,n,n,[{t:'01:48.81',p:146,d:'03/10/2026',l:'BELLEGARDE'}],n],
+[[{t:'00:44.43',p:170,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:43.70',p:191,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:45.64',p:139,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:44.69',p:163,d:'12/10/2025',l:'BOURG'}],[{t:'01:31.75',p:214,d:'06/06/2026',l:'BOURG'},{t:'01:42.61',p:85,d:'31/01/2026',l:'FERNEY'}],[{t:'03:27.39',p:124,d:'20/06/2026',l:'OYONNAX'},{t:'03:30.54',p:107,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'00:49.04',p:221,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:50.36',p:188,d:'20/06/2026',l:'OYONNAX'},{t:'00:51.36',p:165,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:52.05',p:150,d:'31/01/2026',l:'FERNEY'},{t:'00:52.34',p:144,d:'06/12/2025',l:'BELLEGARDE'}],[{t:'01:49.65',p:153,d:'03/10/2026',l:'BELLEGARDE'}],[{t:'01:02.43',p:69,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:01.81',p:78,d:'20/06/2026',l:'OYONNAX'},{t:'01:05.98',p:31,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:06.80',p:24,d:'31/01/2026',l:'FERNEY'},{t:'01:13.27',p:1,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:53.79',p:40,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:53.45',p:101,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:47.15',p:165,d:'07/06/2026',l:'BOURG'},{t:'01:47.40',p:162,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:48.59',p:149,d:'20/06/2026',l:'OYONNAX'},{t:'01:49.80',p:136,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:57.11',p:71,d:'31/01/2026',l:'FERNEY'},{t:'01:57.90',p:65,d:'06/12/2025',l:'BELLEGARDE'}],n],
+[[{t:'00:44.22',p:176,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:45.50',p:143,d:'06/12/2025',l:'BELLEGARDE'},{t:'00:50.51',p:45,d:'12/10/2025',l:'BOURG'}],[{t:'01:40.84',p:102,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:42.89',p:82,d:'31/01/2026',l:'FERNEY'}],[{t:'03:30.14',p:109,d:'20/06/2026',l:'OYONNAX'},{t:'03:43.43',p:51,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'00:54.73',p:98,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:50.53',p:184,d:'20/06/2026',l:'OYONNAX'},{t:'01:00.46',p:24,d:'06/12/2025',l:'BELLEGARDE'}],n,[{t:'01:06.63',p:25,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:03.00',p:62,d:'06/12/2025',l:'BELLEGARDE'},{t:'01:03.72',p:53,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:03.78',p:53,d:'20/06/2026',l:'OYONNAX'},{t:'01:06.90',p:23,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:07.18',p:21,d:'31/01/2026',l:'FERNEY'},{t:'01:09.57',p:7,d:'12/10/2025',l:'BOURG'}],n,[{t:'00:54.18',p:35,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:53.30',p:102,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:51.24',p:121,d:'20/06/2026',l:'OYONNAX'},{t:'01:55.83',p:80,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:56.79',p:73,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:03.33',p:32,d:'06/12/2025',l:'BELLEGARDE'},{t:'02:04.30',p:27,d:'31/01/2026',l:'FERNEY'}],n],
+[[{t:'00:44.51',p:168,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:43.71',p:190,d:'06/12/2025',l:'BELLEGARDE'}],[{t:'01:50.73',p:26,d:'31/01/2026',l:'FERNEY'}],n,n,[{t:'00:50.65',p:181,d:'31/01/2026',l:'FERNEY'},{t:'00:48.68',p:231,d:'06/12/2025',l:'BELLEGARDE'}],n,[{t:'00:58.62',p:128,d:'31/01/2026',l:'FERNEY'},{t:'00:59.01',p:121,d:'06/12/2025',l:'BELLEGARDE'}],[{t:'02:05.51',p:116,d:'06/06/2026',l:'BOURG'},{t:'02:12.45',p:65,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'00:56.83',p:11,d:'25/04/2026',l:'BELLEGARDE'}],n,[{t:'01:49.67',p:137,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:51.13',p:122,d:'07/06/2026',l:'BOURG'},{t:'01:52.54',p:109,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:53.70',p:98,d:'31/01/2026',l:'FERNEY'}],n],
+[[{t:'00:48.83',p:72,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:48.68',p:75,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:51.52',p:32,d:'31/01/2026',l:'FERNEY'},{t:'00:52.56',p:21,d:'20/06/2026',l:'OYONNAX'},{t:'00:53.34',p:15,d:'31/01/2026',l:'FERNEY'},{t:'00:53.75',p:11,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:53.88',p:11,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:55.30',p:3,d:'31/01/2026',l:'FERNEY'},{t:'00:59.08',p:1,d:'12/10/2025',l:'BOURG'}],[{t:'01:57.05',p:4,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'03:57.75',p:13,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'00:53.49',p:120,d:'20/06/2026',l:'OYONNAX'},{t:'00:54.66',p:99,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:54.78',p:97,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:55.07',p:92,d:'31/01/2026',l:'FERNEY'},{t:'00:55.28',p:88,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:59.36',p:34,d:'31/01/2026',l:'FERNEY'},{t:'00:59.59',p:32,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:00.34',p:25,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:01.08',p:19,d:'31/01/2026',l:'FERNEY'},{t:'01:03.29',p:6,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'02:00.27',p:62,d:'03/10/2026',l:'BELLEGARDE'}],[{t:'01:05.08',p:39,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:12.22',p:1,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:17.63',p:1,d:'12/10/2025',l:'BOURG'},{t:'01:10.28',p:5,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:12.11',p:1,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:03.56',p:1,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:02.55',p:1,d:'25/04/2026',l:'BELLEGARDE'}],n,[{t:'01:59.78',p:52,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:55.70',p:82,d:'20/06/2026',l:'OYONNAX'},{t:'01:57.85',p:65,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:03.15',p:33,d:'',l:'AMBÉRIEU'},{t:'02:04.94',p:24,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:07.07',p:16,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:08.68',p:11,d:'31/01/2026',l:'FERNEY'},{t:'02:09.50',p:8,d:'31/01/2026',l:'FERNEY'},{t:'02:11.10',p:5,d:'07/03/2026',l:'AMBÉRIEU'}],n],
+[[{t:'00:48.51',p:78,d:'20/06/2026',l:'OYONNAX'}],[{t:'01:43.43',p:77,d:'03/10/2026',l:'BELLEGARDE'}],n,n,[{t:'00:55.09',p:92,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:55.73',p:81,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:01.69',p:79,d:'20/06/2026',l:'OYONNAX'},{t:'01:06.96',p:23,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:06.96',p:23,d:'25/04/2026',l:'BELLEGARDE'}],n,n,n,[{t:'01:45.56',p:183,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:52.81',p:106,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:52.81',p:106,d:'25/04/2026',l:'BELLEGARDE'}],n],
 [n,n,n,n,n,n,n,n,n,n,n,n],
 [n,n,n,n,n,n,n,n,n,n,n,n],
 [[{t:'00:47.00',p:108,d:'25/04/2026',l:'BELLEGARDE'}],n,[{t:'03:57.18',p:14,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'00:54.12',p:109,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'00:58.44',p:131,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'00:58.25',p:3,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:56.50',p:75,d:'25/04/2026',l:'BELLEGARDE'}],n],
-[[{t:'00:48.68',p:75,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:49.32',p:64,d:'20/06/2026',l:'OYONNAX'},{t:'00:51.52',p:32,d:'31/01/2026',l:'FERNEY'},{t:'00:53.34',p:15,d:'31/01/2026',l:'FERNEY'},{t:'00:53.75',p:11,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:53.88',p:11,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:55.30',p:3,d:'31/01/2026',l:'FERNEY'},{t:'00:59.08',p:1,d:'12/10/2025',l:'BOURG'}],[{t:'01:57.05',p:4,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,[{t:'00:54.66',p:99,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:54.78',p:97,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:55.07',p:92,d:'31/01/2026',l:'FERNEY'},{t:'00:55.28',p:88,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:57.72',p:53,d:'20/06/2026',l:'OYONNAX'},{t:'00:59.36',p:34,d:'31/01/2026',l:'FERNEY'},{t:'00:59.59',p:32,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:00.34',p:25,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:01.08',p:19,d:'31/01/2026',l:'FERNEY'},{t:'01:03.29',p:6,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:04.87',p:41,d:'20/06/2026',l:'OYONNAX'},{t:'01:10.28',p:5,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:12.22',p:1,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:17.63',p:1,d:'12/10/2025',l:'BOURG'},{t:'01:12.11',p:1,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:03.56',p:1,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:02.55',p:1,d:'25/04/2026',l:'BELLEGARDE'}],n,[{t:'01:57.85',p:65,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:03.15',p:33,d:'',l:'AMBÉRIEU'},{t:'02:03.26',p:32,d:'20/06/2026',l:'OYONNAX'},{t:'02:04.94',p:24,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:07.07',p:16,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:08.68',p:11,d:'31/01/2026',l:'FERNEY'},{t:'02:09.50',p:8,d:'31/01/2026',l:'FERNEY'},{t:'02:11.10',p:5,d:'07/03/2026',l:'AMBÉRIEU'}],n],
-[[{t:'00:53.34',p:15,d:'31/01/2026',l:'FERNEY'},{t:'00:59.08',p:1,d:'12/10/2025',l:'BOURG'},{t:'00:53.75',p:11,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:51.52',p:32,d:'31/01/2026',l:'FERNEY'},{t:'00:48.68',p:75,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:53.88',p:11,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:55.30',p:3,d:'31/01/2026',l:'FERNEY'}],[{t:'01:47.77',p:44,d:'20/06/2026',l:'OYONNAX'},{t:'01:57.05',p:4,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,[{t:'00:54.66',p:99,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:54.78',p:97,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:55.07',p:92,d:'31/01/2026',l:'FERNEY'},{t:'00:55.28',p:88,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:59.36',p:34,d:'31/01/2026',l:'FERNEY'},{t:'00:59.59',p:32,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:00.34',p:25,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:01.08',p:19,d:'31/01/2026',l:'FERNEY'},{t:'01:03.29',p:6,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:05.72',p:1,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:10.28',p:5,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:12.22',p:1,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:17.63',p:1,d:'12/10/2025',l:'BOURG'},{t:'01:12.11',p:1,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:27.50',p:1,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:03.56',p:1,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:02.55',p:1,d:'25/04/2026',l:'BELLEGARDE'}],n,[{t:'01:55.82',p:81,d:'20/06/2026',l:'OYONNAX'},{t:'01:57.85',p:65,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:03.15',p:33,d:'',l:'AMBÉRIEU'},{t:'02:04.94',p:24,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:07.07',p:16,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:08.68',p:11,d:'31/01/2026',l:'FERNEY'},{t:'02:09.50',p:8,d:'31/01/2026',l:'FERNEY'},{t:'02:11.10',p:5,d:'07/03/2026',l:'AMBÉRIEU'}],n],
-[[{t:'00:50.56',p:45,d:'20/06/2026',l:'OYONNAX'},{t:'00:50.72',p:43,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:55.91',p:1,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,n,[{t:'00:59.44',p:33,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:03.93',p:51,d:'20/06/2026',l:'OYONNAX'},{t:'01:04.68',p:43,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:06.00',p:30,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,n,[{t:'02:08.06',p:12,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:10.10',p:7,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:12.13',p:3,d:'20/06/2026',l:'OYONNAX'}],n],
+[[{t:'00:45.86',p:134,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:48.68',p:75,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:49.32',p:64,d:'20/06/2026',l:'OYONNAX'},{t:'00:51.52',p:32,d:'31/01/2026',l:'FERNEY'},{t:'00:53.34',p:15,d:'31/01/2026',l:'FERNEY'},{t:'00:53.75',p:11,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:53.88',p:11,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:55.30',p:3,d:'31/01/2026',l:'FERNEY'},{t:'00:59.08',p:1,d:'12/10/2025',l:'BOURG'}],[{t:'01:57.05',p:4,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,[{t:'00:57.16',p:60,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:54.66',p:99,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:54.78',p:97,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:55.07',p:92,d:'31/01/2026',l:'FERNEY'},{t:'00:55.28',p:88,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:57.72',p:53,d:'20/06/2026',l:'OYONNAX'},{t:'00:59.36',p:34,d:'31/01/2026',l:'FERNEY'},{t:'00:59.59',p:32,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:00.34',p:25,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:01.08',p:19,d:'31/01/2026',l:'FERNEY'},{t:'01:03.29',p:6,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:03.28',p:59,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:04.87',p:41,d:'20/06/2026',l:'OYONNAX'},{t:'01:10.28',p:5,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:12.22',p:1,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:17.63',p:1,d:'12/10/2025',l:'BOURG'},{t:'01:12.11',p:1,d:'07/03/2026',l:'AMBÉRIEU'}],n,[{t:'01:03.56',p:1,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:02.55',p:1,d:'25/04/2026',l:'BELLEGARDE'}],n,[{t:'01:57.85',p:65,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:03.15',p:33,d:'',l:'AMBÉRIEU'},{t:'02:03.26',p:32,d:'20/06/2026',l:'OYONNAX'},{t:'02:04.94',p:24,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:07.07',p:16,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:08.68',p:11,d:'31/01/2026',l:'FERNEY'},{t:'02:09.50',p:8,d:'31/01/2026',l:'FERNEY'},{t:'02:11.10',p:5,d:'07/03/2026',l:'AMBÉRIEU'}],n],
+[[{t:'00:50.73',p:42,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:53.34',p:15,d:'31/01/2026',l:'FERNEY'},{t:'00:59.08',p:1,d:'12/10/2025',l:'BOURG'},{t:'00:53.75',p:11,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:51.52',p:32,d:'31/01/2026',l:'FERNEY'},{t:'00:48.68',p:75,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:53.88',p:11,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:55.30',p:3,d:'31/01/2026',l:'FERNEY'}],[{t:'01:47.77',p:44,d:'20/06/2026',l:'OYONNAX'},{t:'01:57.05',p:4,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,[{t:'00:54.66',p:99,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:54.78',p:97,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:55.07',p:92,d:'31/01/2026',l:'FERNEY'},{t:'00:55.28',p:88,d:'07/03/2026',l:'AMBÉRIEU'},{t:'00:59.36',p:34,d:'31/01/2026',l:'FERNEY'},{t:'00:59.59',p:32,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:00.34',p:25,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:01.08',p:19,d:'31/01/2026',l:'FERNEY'},{t:'01:03.29',p:6,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:05.72',p:1,d:'20/06/2026',l:'OYONNAX'}],[{t:'02:08.44',p:20,d:'03/10/2026',l:'BELLEGARDE'}],[{t:'01:10.28',p:5,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:12.22',p:1,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:17.63',p:1,d:'12/10/2025',l:'BOURG'},{t:'01:12.11',p:1,d:'07/03/2026',l:'AMBÉRIEU'},{t:'01:27.50',p:1,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'00:51.15',p:80,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:03.56',p:1,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:02.55',p:1,d:'25/04/2026',l:'BELLEGARDE'}],n,[{t:'01:55.95',p:80,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:55.82',p:81,d:'20/06/2026',l:'OYONNAX'},{t:'01:57.85',p:65,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:03.15',p:33,d:'',l:'AMBÉRIEU'},{t:'02:04.94',p:24,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:07.07',p:16,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:08.68',p:11,d:'31/01/2026',l:'FERNEY'},{t:'02:09.50',p:8,d:'31/01/2026',l:'FERNEY'},{t:'02:11.10',p:5,d:'07/03/2026',l:'AMBÉRIEU'}],n],
+[[{t:'00:50.56',p:45,d:'20/06/2026',l:'OYONNAX'},{t:'00:50.72',p:43,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:55.91',p:1,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'01:51.80',p:21,d:'03/10/2026',l:'BELLEGARDE'}],n,n,[{t:'01:00.51',p:23,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:59.44',p:33,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:06.27',p:28,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:03.93',p:51,d:'20/06/2026',l:'OYONNAX'},{t:'01:04.68',p:43,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:06.00',p:30,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,n,[{t:'02:01.60',p:41,d:'03/10/2026',l:'BELLEGARDE'},{t:'02:08.06',p:12,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:10.10',p:7,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:12.13',p:3,d:'20/06/2026',l:'OYONNAX'}],n],
+[n,n,n,n,n,n,n,n,n,n,n,n],
 [n,n,n,n,n,n,n,n,n,n,n,n],
 [n,n,n,n,n,n,n,n,n,n,n,n]
 ];
@@ -1762,138 +1870,164 @@ function buildMPPTable(){}
 
 // ── CHRONO COMPÉTITION ──────────────────────────────────────────────────
 const CC_PROGRAM = [
-  {ev:'100 4N',   g:'D'  },{ev:'100 4N',   g:'M'  },
-  {ev:'200 4N',   g:'D'  },{ev:'200 4N',   g:'M'  },
-  {ev:'50 Dos',   g:'D'  },{ev:'50 Dos',   g:'M'  },
-  {ev:'100 Dos',  g:'D'  },{ev:'100 Dos',  g:'M'  },
-  {ev:'50 Bra.',  g:'D'  },{ev:'50 Bra.',  g:'M'  },
-  {ev:'100 Bra.', g:'D'  },{ev:'100 Bra.', g:'M'  },
-  {ev:'400 NL',   g:'D'  },{ev:'400 NL',   g:'M'  },
-  {ev:'200 NL',   g:'D'  },{ev:'200 NL',   g:'M'  },
-  {ev:'50 Pap.',  g:'D'  },{ev:'50 Pap.',  g:'M'  },
-  {ev:'100 Pap.', g:'D'  },{ev:'100 Pap.', g:'M'  },
-  {ev:'50 NL',    g:'D'  },{ev:'50 NL',    g:'M'  },
-  {ev:'100 NL',   g:'D'  },{ev:'100 NL',   g:'M'  },
-  {ev:'4×50 NL',  g:'Mix'},
+  {ev:'100 4N', g:'D'},
+  {ev:'100 4N', g:'M'},
+  {ev:'200 4N', g:'D'},
+  {ev:'200 4N', g:'M'},
+  {ev:'50 Pap.', g:'D'},
+  {ev:'50 Pap.', g:'M'},
+  {ev:'100 Pap.', g:'M'},
+  {ev:'50 NL', g:'D'},
+  {ev:'50 NL', g:'M'},
+  {ev:'100 NL', g:'D'},
+  {ev:'100 NL', g:'M'},
+  {ev:'50 Bra.', g:'D'},
+  {ev:'50 Bra.', g:'M'},
+  {ev:'100 Bra.', g:'D'},
+  {ev:'100 Bra.', g:'M'},
+  {ev:'50 Dos', g:'D'},
+  {ev:'50 Dos', g:'M'},
+  {ev:'100 Dos', g:'D'},
+  {ev:'100 Dos', g:'M'},
+  {ev:'4×50 4N', g:'Mix'},
 ];
-const CC_KEY_DATA = 'cnbb_cc_data_93297';
-const CC_KEY_RES  = 'cnbb_cc_res_93297';
+const CC_KEY_DATA = 'cnbb_cc_data_94487';
+const CC_KEY_RES  = 'cnbb_cc_res_94487';
+const CC_ROSTER = {F:["BILLET Céleste", "CARENE Lya", "CHATELET Lucie", "DELORME Lydiana", "EL HASSOUNI Jenna", "FOREY FAURE Lola", "GASQUET RODRIGUES Ginger", "GUEDES DA SILVA Gabriela", "HALLALI Noor", "JAY Chloé", "KOURTELI Melya", "LAINE Lina", "LEMASLE Claire", "NEVERS Elsa", "PACCARD Mélody", "REYDELLET Camille", "ROBIO Maryam", "SHKOZA Jusra", "TOURNIER Clarisse"],H:["BILLAUDY Gabriel", "BOUVIER Jonathan", "BOZON Paul", "CLOSON Pierre-Elouann", "DARBINIAN David", "EYMARD Pacôme", "FOURMOND Milo", "GIROUD Paul", "HERITIER Leo", "JANICHON Ilyes", "KACEMI Kaïs-Ibrahim", "RAPHAËL LE DOCTE Kanty"]};
 
-// compData[evIdx] = [ [lane0..7], [lane0..7], ... ]  (séries)
+// compData[evIdx] = [ [lane0..7], ... ]  (séries) — Plot N°4 U11, Bellegarde, 3 oct. 2026 (liveffn 94487)
 let ccData    = [];
 /* CC_STARTLIST_BEGIN */
 ccData = [
-  [ // 0: 100 4N Dames
-    ["", "", "HALLALI Noor", "CARENE Lya", "PACCARD Mélody", "", "", ""],
-    ["", "NEVERS Elsa", "", "", "ANIZON Elisabeth", "", "SHKOZA Jusra", "GASQUET RODRIGUES Ginger"],
-    ["", "", "GUEDES DA SILVA Gabriela", "", "CHATELET Lucie", "LAINE Lina", "", "TOURNIER Clarisse"]
+  [ // 0: 100 4 Nages Dames
+    ["","","","","","","",""],
+    ["","","PACCARD Mélody","CARENE Lya","","HALLALI Noor","",""],
+    ["SHKOZA Jusra","","EL HASSOUNI Jenna","TOURNIER Clarisse","","","GASQUET RODRIGUES Ginger","NEVERS Elsa"],
+    ["","","BILLET Céleste","","JAY Chloé","","",""],
+    ["REYDELLET Camille","","","","","","CHATELET Lucie","LAINE Lina"]
   ],
-  [ // 1: 100 4N Messieurs
-    ["", "", "BILLAUDY Gabriel", "", "BOUCHER Ethan", "", "", ""],
-    ["JOUCHOUX Owen", "", "", "", "", "JANICHON Ilyes", "BOUVIER Jonathan", "RAPHAËL LE DOCTE Kanty"],
-    ["KACEMI Kaïs-Ibrahim", "DARBINIAN David", "", "CLOSON Pierre-Elouann", "", "FOURMOND Milo", "EYMARD Pacôme", "HERITIER Leo"]
+  [ // 1: 100 4 Nages Messieurs
+    ["","","","BILLAUDY Gabriel","","","",""],
+    ["","","","","","RAPHAËL LE DOCTE Kanty","",""],
+    ["","BOUVIER Jonathan","KACEMI Kaïs-Ibrahim","","EYMARD Pacôme","DARBINIAN David","JANICHON Ilyes",""],
+    ["FOURMOND Milo","","","","GIROUD Paul","","",""]
   ],
-  [ // 2: 200 4N Dames
-    ["", "", "", "", "FOREY FAURE Lola", "", "", ""],
-    ["BARBANDIERE RACINE Elyn", "", "", "", "", "", "", ""],
-    ["ROBIO Maryam", "", "DELORME Lydiana", "", "LEMASLE Claire", "", "KOURTELI Melya", ""]
+  [ // 2: 200 4 Nages Dames
+    ["","","","","","GUEDES DA SILVA Gabriela","",""],
+    ["","ROBIO Maryam","DELORME Lydiana","LEMASLE Claire","","FOREY FAURE Lola","","KOURTELI Melya"]
   ],
-  [ // 3: 200 4N Messieurs
-    ["", "", "", "", "", "", "", ""]
+  [ // 3: 200 4 Nages Messieurs
+    ["","","","","CLOSON Pierre-Elouann","","",""],
+    ["BOZON Paul","","","","","","",""]
   ],
-  [ // 4: 50 Dos Dames
-    ["", "", "ANIZON Elisabeth", "", "", "", "", ""],
-    ["GASQUET RODRIGUES Ginger", "PACCARD Mélody", "SHKOZA Jusra", "CHOSSAT Maelys", "", "", "", ""],
-    ["CHATELET Lucie", "BARBANDIERE RACINE Elyn", "EL HASSOUNI Jenna", "", "KOURTELI Melya", "", "JAY Chloé", "REYDELLET Camille"],
-    ["GUEDES DA SILVA Gabriela", "ROBIO Maryam", "", "LEMASLE Claire", "", "DELORME Lydiana", "", ""]
+  [ // 4: 50 Papillon Dames
+    ["","","","","","","SHKOZA Jusra","HALLALI Noor"]
   ],
-  [ // 5: 50 Dos Messieurs
-    ["", "", "EYMARD Pacôme", "", "DARBINIAN David", "", "", ""],
-    ["DESCOMBES Andrew", "RAPHAËL LE DOCTE Kanty", "", "", "", "BOUCHER Ethan", "BILLAUDY Gabriel", ""],
-    ["KACEMI Kaïs-Ibrahim", "JANICHON Ilyes", "JOUCHOUX Owen", "BOUVIER Jonathan", "", "HERITIER Leo", "", ""],
-    ["", "", "", "", "BOZON Paul", "FOURMOND Milo", "", ""]
+  [ // 5: 50 Papillon Messieurs
+    ["","","","CLOSON Pierre-Elouann","","JANICHON Ilyes","",""]
   ],
-  [ // 6: 100 Dos Dames
-    ["", "CARENE Lya", "LAINE Lina", "", "", "FOREY FAURE Lola", "", ""],
-    ["", "", "TOURNIER Clarisse", "", "", "", "JAILLET Amélia", ""]
+  [ // 6: 100 Papillon Messieurs
+    ["","","","","","","",""]
   ],
-  [ // 7: 100 Dos Messieurs
-    ["", "", "", "", "", "GIROUD Paul", "", ""]
+  [ // 7: 50 Nage Libre Dames
+    ["","","","","","","",""],
+    ["","","HALLALI Noor","","","","",""],
+    ["","","","","","SHKOZA Jusra","",""],
+    ["TOURNIER Clarisse","","","","","","",""],
+    ["","BILLET Céleste","","","DELORME Lydiana","KOURTELI Melya","",""]
   ],
-  [ // 8: 50 Bra. Dames
-    ["", "", "", "JAILLET Amélia", "PACCARD Mélody", "", "", ""],
-    ["GASQUET RODRIGUES Ginger", "", "HALLALI Noor", "", "ROBIO Maryam", "CARENE Lya", "NEVERS Elsa", "TOURNIER Clarisse"],
-    ["GUEDES DA SILVA Gabriela", "CHATELET Lucie", "", "FOREY FAURE Lola", "", "LEMASLE Claire", "LAINE Lina", ""],
-    ["REYDELLET Camille", "BARBANDIERE RACINE Elyn", "", "", "DELORME Lydiana", "ANIZON Elisabeth", "", "JAY Chloé"]
+  [ // 8: 50 Nage Libre Messieurs
+    ["","","","","","","",""],
+    ["","","","","BOUVIER Jonathan","","",""],
+    ["JANICHON Ilyes","","","","","","","HERITIER Leo"],
+    ["","","","","","FOURMOND Milo","",""]
   ],
-  [ // 9: 50 Bra. Messieurs
-    ["", "", "EYMARD Pacôme", "BILLAUDY Gabriel", "DESCOMBES Andrew", "", "", ""],
-    ["", "", "JOUCHOUX Owen", "JANICHON Ilyes", "", "", "BOUCHER Ethan", ""],
-    ["HERITIER Leo", "FOURMOND Milo", "KACEMI Kaïs-Ibrahim", "", "", "RAPHAËL LE DOCTE Kanty", "DARBINIAN David", ""],
-    ["", "", "", "CLOSON Pierre-Elouann", "BOZON Paul", "GIROUD Paul", "", ""]
+  [ // 9: 100 Nage Libre Dames
+    ["PACCARD Mélody","EL HASSOUNI Jenna","","","","REYDELLET Camille","GASQUET RODRIGUES Ginger","NEVERS Elsa"],
+    ["CARENE Lya","CHATELET Lucie","GUEDES DA SILVA Gabriela","ROBIO Maryam","","","JAY Chloé","LAINE Lina"],
+    ["","","","","","LEMASLE Claire","FOREY FAURE Lola",""]
   ],
-  [ // 10: 100 Bra. Dames
-    ["", "KOURTELI Melya", "", "", "", "", "CHOSSAT Maelys", ""]
+  [ // 10: 100 Nage Libre Messieurs
+    ["","","EYMARD Pacôme","","DARBINIAN David","","",""],
+    ["","RAPHAËL LE DOCTE Kanty","KACEMI Kaïs-Ibrahim","","","","BILLAUDY Gabriel",""],
+    ["BOZON Paul","","GIROUD Paul","","","CLOSON Pierre-Elouann","",""]
   ],
-  [ // 11: 100 Bra. Messieurs
-    ["", "", "", "CLOSON Pierre-Elouann", "", "", "", ""]
+  [ // 11: 50 Brasse Dames
+    ["","","","","","","",""],
+    ["","","","","EL HASSOUNI Jenna","","",""],
+    ["GASQUET RODRIGUES Ginger","CARENE Lya","SHKOZA Jusra","HALLALI Noor","","","NEVERS Elsa","PACCARD Mélody"],
+    ["GUEDES DA SILVA Gabriela","LAINE Lina","CHATELET Lucie","FOREY FAURE Lola","LEMASLE Claire","ROBIO Maryam","","BILLET Céleste"]
   ],
-  [ // 12: 400 NL Dames
-    ["", "", "", "", "", "", "", ""]
+  [ // 12: 50 Brasse Messieurs
+    ["","","","","BILLAUDY Gabriel","","",""],
+    ["","","RAPHAËL LE DOCTE Kanty","","KACEMI Kaïs-Ibrahim","HERITIER Leo","","BOUVIER Jonathan"],
+    ["DARBINIAN David","","EYMARD Pacôme","GIROUD Paul","BOZON Paul","","","FOURMOND Milo"]
   ],
-  [ // 13: 400 NL Messieurs
-    ["", "", "", "BOZON Paul", "", "", "", ""]
+  [ // 13: 100 Brasse Dames
+    ["","","","REYDELLET Camille","TOURNIER Clarisse","","",""],
+    ["","","JAY Chloé","KOURTELI Melya","","","",""],
+    ["","","DELORME Lydiana","","","","",""]
   ],
-  [ // 14: 200 NL Dames
-    ["", "", "EL HASSOUNI Jenna", "CHOSSAT Maelys", "", "", "", ""],
-    ["CHATELET Lucie", "", "", "", "", "REYDELLET Camille", "", "JAY Chloé"]
+  [ // 14: 100 Brasse Messieurs
+    ["","","","","","","",""],
+    ["","","","CLOSON Pierre-Elouann","","","",""]
   ],
-  [ // 15: 200 NL Messieurs
-    ["", "", "", "", "BOUVIER Jonathan", "DESCOMBES Andrew", "EYMARD Pacôme", ""],
-    ["", "", "GIROUD Paul", "", "", "FOURMOND Milo", "KACEMI Kaïs-Ibrahim", ""]
+  [ // 15: 50 Dos Dames
+    ["","","","","","","",""],
+    ["","","CARENE Lya","GASQUET RODRIGUES Ginger","","PACCARD Mélody","",""],
+    ["","LAINE Lina","","REYDELLET Camille","CHATELET Lucie","","EL HASSOUNI Jenna","JAY Chloé"],
+    ["","","TOURNIER Clarisse","","","","",""]
   ],
-  [ // 16: 50 Pap. Dames
-    ["", "", "NEVERS Elsa", "EL HASSOUNI Jenna", "HALLALI Noor", "", "", ""],
-    ["", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "JAILLET Amélia", "SHKOZA Jusra"]
+  [ // 16: 50 Dos Messieurs
+    ["","","","","","","",""],
+    ["","HERITIER Leo","","DARBINIAN David","","BILLAUDY Gabriel","RAPHAËL LE DOCTE Kanty",""],
+    ["","EYMARD Pacôme","","","","KACEMI Kaïs-Ibrahim","",""]
   ],
-  [ // 17: 50 Pap. Messieurs
-    ["", "", "", "DESCOMBES Andrew", "", "", "", ""],
-    ["", "", "", "", "", "", "", ""],
-    ["", "", "", "CLOSON Pierre-Elouann", "", "", "", ""]
+  [ // 17: 100 Dos Dames
+    ["","","","","NEVERS Elsa","","BILLET Céleste",""],
+    ["","","","","","","","KOURTELI Melya"],
+    ["","ROBIO Maryam","DELORME Lydiana","LEMASLE Claire","","FOREY FAURE Lola","","GUEDES DA SILVA Gabriela"]
   ],
-  [ // 18: 100 Pap. Dames
-    ["", "", "", "", "", "", "", ""]
+  [ // 18: 100 Dos Messieurs
+    ["JANICHON Ilyes","BOUVIER Jonathan","","","","","FOURMOND Milo",""],
+    ["","","GIROUD Paul","BOZON Paul","","","",""]
   ],
-  [ // 19: 100 Pap. Messieurs
-    ["", "", "", "", "", "", "", ""]
-  ],
-  [ // 20: 50 NL Dames
-    ["", "", "", "", "", "", "", ""],
-    ["GASQUET RODRIGUES Ginger", "NEVERS Elsa", "PACCARD Mélody", "", "JAY Chloé", "", "ANIZON Elisabeth", ""],
-    ["", "EL HASSOUNI Jenna", "CHOSSAT Maelys", "", "LAINE Lina", "CARENE Lya", "", ""],
-    ["", "", "", "", "KOURTELI Melya", "", "TOURNIER Clarisse", "BARBANDIERE RACINE Elyn"],
-    ["", "", "", "", "", "FOREY FAURE Lola", "", "REYDELLET Camille"]
-  ],
-  [ // 21: 50 NL Messieurs
-    ["", "", "DARBINIAN David", "BOUCHER Ethan", "BILLAUDY Gabriel", "", "", ""],
-    ["", "", "BOUVIER Jonathan", "RAPHAËL LE DOCTE Kanty", "HERITIER Leo", "", "", ""],
-    ["", "", "", "", "", "", "", ""],
-    ["", "", "GIROUD Paul", "", "", "", "BOZON Paul", ""]
-  ],
-  [ // 22: 100 NL Dames
-    ["", "", "HALLALI Noor", "", "SHKOZA Jusra", "", "", ""],
-    ["GUEDES DA SILVA Gabriela", "DELORME Lydiana", "ROBIO Maryam", "", "LEMASLE Claire", "", "", "JAILLET Amélia"]
-  ],
-  [ // 23: 100 NL Messieurs
-    ["", "", "JOUCHOUX Owen", "JANICHON Ilyes", "", "", "", ""]
-  ],
-  [ // 24: 4×50 NL Mixte
-    ["", "CNB", "CNB", "", "", "CNB", "CNB", ""],
-    ["", "CNB", "", "", "", "", "CNB", ""]
+  [ // 19: 4x50 4 Nages Mixtes
+    ["","","","CNB · KOURTELI – BILLAUDY – CHATELET – JANICHON","CNB · BILLET – DARBINIAN – GUEDES DA SILVA – RAPHAËL LE DOCTE","","",""],
+    ["CNB · BOUVIER – EYMARD – JAY – ROBIO","","","","","","",""],
+    ["","","","","","CNB · BOZON – CLOSON – LEMASLE – FOREY FAURE","","CNB · FOURMOND – DELORME – REYDELLET – KACEMI"]
   ]
 ];
 /* CC_STARTLIST_END */
+// Programme complet FFN (PLOT N°4) : CC_FULL[evIdx][serie][couloir] = [nom, club, temps engagement, année] ou null
+// CNB = séries/couloirs importés FFN ; autres clubs reconstitués d'après les temps d'engagement
+const CC_FULL = [[[null,null,null,["PAU Amandine","ANBC","NT","2017"],["VILLON Lutèce","ANBC","NT","2015"],null,null,null],[["VARSALONA Greta","CNBV","2:19.22","2017"],["FEYEUX Marthe","PGN","2:09.17","2016"],["PACCARD Mélody","CNB","2:03.84","2017"],["CARENE Lya","CNB","2:00.12","2015"],["CHAUSSE Mila","SNO","2:03.63","2017"],["HALLALI Noor","CNB","2:08.55","2017"],["JONVAUX Anna","SNO","2:18.03","2017"],["BONIN Lila","ANBC","NT","2016"]],[["SHKOZA Jusra","CNB","1:59.74","2017"],["OUM Victoria","SNO","1:58.05","2016"],["EL HASSOUNI Jenna","CNB","1:57.45","2017"],["TOURNIER Clarisse","CNB","1:55.72","2017"],["CURA-CURA Clelia","CNBV","1:56.27","2018"],["DUNAUD Mélodie","PGN","1:57.65","2016"],["GASQUET RODRIGUES Ginger","CNB","1:58.89","2016"],["NEVERS Elsa","CNB","1:59.83","2016"]],[["SARI Elif","SNO","1:55.12","2015"],["AZEKRI Soundous","CNBV","1:53.60","2017"],["BILLET Céleste","CNB","1:51.78","2016"],["ROBIN NUNES Louise","ANBC","1:48.85","2015"],["JAY Chloé","CNB","1:50.73","2016"],["PROM LAVAYSSIERE Eva","SNO","1:53.19","2016"],["ROBIN NUNES Manon","ANBC","1:54.69","2015"],["BOURGEON Maé","ANBC","1:55.18","2016"]],[["REYDELLET Camille","CNB","1:45.81","2016"],["BREYNAERT Léa","PGN","1:44.45","2015"],["GAJNIK Miley","ANBC","1:35.76","2016"],["REBUCINI Zélie","CNBV","1:26.24","2015"],["SERRE Justine","SNO","1:34.73","2015"],["PACCALLET Capucine","ANBC","1:40.05","2015"],["CHATELET Lucie","CNB","1:45.05","2016"],["LAINE Lina","CNB","1:48.84","2016"]]],[[null,null,["SOLDO Leo","PGN","NT","2016"],["BILLAUDY Gabriel","CNB","NT","2016"],["LOEWERT Elio","PGN","NT","2017"],null,null,null],[["BUTTY William","PGN","2:14.51","2017"],["SAUGUES Aurele","SNO","2:09.85","2018"],["GUILLAUD Enzo","SNO","2:01.92","2017"],["LEMESRE Maël","ANBC","1:57.78","2015"],["BROUILLET DE NEGRI Enzo","CNBV","1:58.12","2015"],["RAPHAËL LE DOCTE Kanty","CNB","2:08.06","2017"],["DINGER Yigit","CNBV","2:11.84","2016"],["SIRANLI Melih","CNBV","NT","2016"]],[["CHOULET Thomas","ANBC","1:56.12","2015"],["BOUVIER Jonathan","CNB","1:55.70","2017"],["KACEMI Kaïs-Ibrahim","CNB","1:51.24","2016"],["GAREL Baptiste","ANBC","1:49.85","2015"],["EYMARD Pacôme","CNB","1:50.38","2015"],["DARBINIAN David","CNB","1:52.81","2017"],["JANICHON Ilyes","CNB","1:55.82","2017"],["OZBASI Berat","SNO","1:57.43","2016"]],[["FOURMOND Milo","CNB","1:47.15","2016"],["CAVALCANTE Noa","ANBC","1:43.86","2015"],["AZEKRI Nizar","CNBV","1:40.59","2016"],["BELLAMMOU Haroun","CNBV","1:29.67","2015"],["GIROUD Paul","CNB","1:35.96","2015"],["GAUBEY Nolan","ANBC","1:41.56","2016"],["CHAMROUK Naym","ANBC","1:44.26","2015"],["FALCAND Sasha","ANBC","1:49.02","2015"]]],[[["PACCIANI Nadia","PGN","NT","2015"],["MARCHAND Margaux","PGN","NT","2018"],["GUIRRIEC CORRADO Léa","PGN","NT","2015"],["SÉNAC Jana","PGN","3:55.94","2015"],["BLANC Héloïse","PGN","4:02.91","2016"],["GUEDES DA SILVA Gabriela","CNB","NT","2015"],["SELMI Nora","PGN","NT","2016"],["CIULEI Sofia","PGN","NT","2016"]],[["HALBERT PEREZ Lina","PGN","3:51.65","2015"],["ROBIO Maryam","CNB","3:47.81","2015"],["DELORME Lydiana","CNB","3:41.56","2015"],["LEMASLE Claire","CNB","3:29.49","2015"],["BELY Louane","ANBC","3:33.31","2015"],["FOREY FAURE Lola","CNB","3:42.42","2015"],["VILAREM GONZALEZ PALACIO Ana","ANBC","3:50.60","2015"],["KOURTELI Melya","CNB","3:55.24","2015"]]],[[null,null,null,["PERNOT Robin","PGN","NT","2016"],["CLOSON Pierre-Elouann","CNB","NT","2015"],null,null,null],[["BOZON Paul","CNB","NT","2015"],["KACET Lounès","PGN","3:54.56","2016"],["TAHIR Naïl","PGN","3:43.59","2015"],["NICOLETTI Gabriel","PGN","3:03.28","2015"],["MARCHAND Milan","PGN","3:21.55","2016"],["PROKOPCHUK Stephen","PGN","3:51.49","2016"],["MARCHAND Lucas","PGN","NT","2018"],["SÉNAC Eden","PGN","NT","2015"]]],[[["FEYEUX Marthe","PGN","1:01.36","2016"],["BOURGEON Maé","ANBC","59.45","2016"],["BREYNAERT Léa","PGN","52.26","2015"],["REBUCINI Zélie","CNBV","41.80","2015"],["GAJNIK Miley","ANBC","47.09","2016"],["CURA-CURA Clelia","CNBV","53.97","2018"],["SHKOZA Jusra","CNB","1:00.17","2017"],["HALLALI Noor","CNB","1:08.01","2017"]]],[[null,["BUTTY William","PGN","NT","2017"],["PACTON SORREL Eloen","ANBC","53.68","2015"],["CLOSON Pierre-Elouann","CNB","41.21","2015"],["FALCAND Sasha","ANBC","52.39","2015"],["JANICHON Ilyes","CNB","NT","2017"],null,null]],[[null,null,null,["NICOLETTI Gabriel","PGN","1:33.06","2015"],["MARCHAND Milan","PGN","1:38.87","2016"],null,null,null]],[[["BENBERKANE Ouzna","SNO","NT","2017"],["PAU Amandine","ANBC","NT","2017"],["PACCALLET Leonie","ANBC","NT","2017"],["TOUSTOU Artemis","SNO","NT","2017"],["BONIN Lila","ANBC","NT","2016"],["DURAND Kamilia","ANBC","NT","2016"],["BENBERKANE Thamilla","SNO","NT","2018"],["VILLON Lutèce","ANBC","NT","2015"]],[["BINDI Lalie","CNBV","NT","2018"],["MESTER Dora","PGN","NT","2016"],["HALLALI Noor","CNB","59.26","2017"],["ROBIN NUNES Manon","ANBC","50.63","2015"],["VARSALONA Greta","CNBV","53.05","2017"],["JONVAUX Anna","SNO","59.68","2017"],["DE SOLERE Sybile","ANBC","NT","2016"],["OZBAHAR Ayla","CNBV","NT","2016"]],[["AZEKRI Soundous","CNBV","49.79","2017"],["PROM LAVAYSSIERE Eva","SNO","48.68","2016"],["MARCHAND Margaux","PGN","47.57","2018"],["CURA-CURA Clelia","CNBV","47.47","2018"],["GUIRRIEC CORRADO Léa","PGN","47.52","2015"],["SHKOZA Jusra","CNB","48.11","2017"],["ROBIN NUNES Louise","ANBC","48.87","2015"],["OUM Victoria","SNO","50.61","2016"]],[["TOURNIER Clarisse","CNB","46.43","2017"],["CHAUSSE Mila","SNO","46.10","2017"],["BLANC Héloïse","PGN","44.70","2016"],["SÉNAC Jana","PGN","43.60","2015"],["HALBERT PEREZ Lina","PGN","43.63","2015"],["SELMI Nora","PGN","46.09","2016"],["FORTUNE Olivia","ANBC","46.34","2016"],["FEYEUX Marthe","PGN","47.34","2016"]],[["CIULEI Sofia","PGN","43.33","2016"],["BILLET Céleste","CNB","42.42","2016"],["PACCALLET Capucine","ANBC","41.34","2015"],["SERRE Justine","SNO","34.96","2015"],["DELORME Lydiana","CNB","40.66","2015"],["KOURTELI Melya","CNB","42.13","2015"],["SARI Elif","SNO","42.96","2015"],["DUNAUD Mélodie","PGN","43.52","2016"]]],[[["BREVET Devon","ANBC","NT","2017"],["PACTON SORREL Eloen","ANBC","NT","2015"],["LOEWERT Elio","PGN","NT","2017"],["VALENZA Sacha","SNO","NT","2018"],["ANTOINE William","SNO","NT","2017"],["SOLDO Leo","PGN","NT","2016"],["NICCO Tyago","CNBV","NT","2017"],null],[["HOLAS Simon","ANBC","NT","2016"],["SAUGUES Aurele","SNO","58.03","2018"],["BUTTY William","PGN","55.79","2017"],["DINGER Yigit","CNBV","49.43","2016"],["BOUVIER Jonathan","CNB","52.56","2017"],["LEMESRE Maël","ANBC","55.98","2015"],["SIRANLI Melih","CNBV","1:12.96","2016"],["PERNOT Robin","PGN","NT","2016"]],[["JANICHON Ilyes","CNB","48.68","2017"],["SÉNAC Eden","PGN","47.64","2015"],["GAREL Baptiste","ANBC","46.30","2015"],["CHOULET Thomas","ANBC","45.85","2015"],["OZBASI Berat","SNO","46.06","2016"],["GUILLAUD Enzo","SNO","47.28","2017"],["BROUILLET DE NEGRI Enzo","CNBV","47.83","2015"],["HERITIER Leo","CNB","49.32","2017"]],[["MARCHAND Lucas","PGN","44.38","2018"],["KACET Lounès","PGN","43.74","2016"],["FALCAND Sasha","ANBC","42.27","2015"],["TAHIR Naïl","PGN","41.11","2015"],["CHAMROUK Naym","ANBC","41.27","2015"],["FOURMOND Milo","CNB","43.70","2016"],["PROKOPCHUK Stephen","PGN","43.78","2016"],["GAUBEY Nolan","ANBC","45.49","2016"]]],[[["PACCARD Mélody","CNB","NT","2017"],["EL HASSOUNI Jenna","CNB","NT","2017"],["BREYNAERT Léa","PGN","NT","2015"],["ROBIN NUNES Louise","ANBC","2:00.30","2015"],["ROBIN NUNES Manon","ANBC","2:13.10","2015"],["REYDELLET Camille","CNB","NT","2016"],["GASQUET RODRIGUES Ginger","CNB","NT","2016"],["NEVERS Elsa","CNB","NT","2016"]],[["CARENE Lya","CNB","1:52.85","2015"],["CHATELET Lucie","CNB","1:49.55","2016"],["GUEDES DA SILVA Gabriela","CNB","1:42.15","2015"],["ROBIO Maryam","CNB","1:34.19","2015"],["BOURGEON Maé","ANBC","1:36.06","2016"],["VILAREM GONZALEZ PALACIO Ana","ANBC","1:42.63","2015"],["JAY Chloé","CNB","1:50.12","2016"],["LAINE Lina","CNB","1:53.05","2016"]],[["PACCIANI Nadia","PGN","1:32.61","2015"],["BELY Louane","ANBC","1:28.82","2015"],["REBUCINI Zélie","CNBV","1:24.32","2015"],["SERRE Justine","SNO","1:17.65","2015"],["GAJNIK Miley","ANBC","1:23.60","2016"],["LEMASLE Claire","CNB","1:28.49","2015"],["FOREY FAURE Lola","CNB","1:29.11","2015"],["PACCALLET Capucine","ANBC","1:34.10","2015"]]],[[null,null,["EYMARD Pacôme","CNB","NT","2015"],null,["DARBINIAN David","CNB","NT","2017"],null,null,null],[["LEMESRE Maël","ANBC","NT","2015"],["RAPHAËL LE DOCTE Kanty","CNB","NT","2017"],["KACEMI Kaïs-Ibrahim","CNB","1:42.89","2016"],["GAUBEY Nolan","ANBC","1:38.48","2016"],["GAREL Baptiste","ANBC","1:41.26","2015"],["CAVALCANTE Noa","ANBC","1:45.60","2015"],["BILLAUDY Gabriel","CNB","NT","2016"],null],[["BOZON Paul","CNB","1:34.11","2015"],["MARCHAND Milan","PGN","1:31.93","2016"],["GIROUD Paul","CNB","1:26.39","2015"],["NICOLETTI Gabriel","PGN","1:16.93","2015"],["BELLAMMOU Haroun","CNBV","1:20.70","2015"],["CLOSON Pierre-Elouann","CNB","1:29.32","2015"],["AZEKRI Nizar","CNBV","1:32.60","2016"],["FALCAND Sasha","ANBC","1:38.15","2015"]]],[[null,null,["MESTER Dora","PGN","NT","2016"],["DE SOLERE Sybile","ANBC","NT","2016"],["FEYEUX Marthe","PGN","NT","2016"],null,null,null],[["VILLON Lutèce","ANBC","NT","2015"],["DURAND Kamilia","ANBC","NT","2016"],["VARSALONA Greta","CNBV","1:14.17","2017"],["MARCHAND Margaux","PGN","1:07.34","2018"],["EL HASSOUNI Jenna","CNB","1:09.81","2017"],["BONIN Lila","ANBC","NT","2016"],["PAU Amandine","ANBC","NT","2017"],["PACCALLET Leonie","ANBC","NT","2017"]],[["GASQUET RODRIGUES Ginger","CNB","1:04.94","2016"],["CARENE Lya","CNB","1:03.44","2015"],["SHKOZA Jusra","CNB","1:03.25","2017"],["HALLALI Noor","CNB","1:01.73","2017"],["SARI Elif","SNO","1:02.71","2015"],["DUNAUD Mélodie","PGN","1:03.29","2016"],["NEVERS Elsa","CNB","1:03.85","2016"],["PACCARD Mélody","CNB","1:05.99","2017"]],[["GUEDES DA SILVA Gabriela","CNB","59.58","2015"],["LAINE Lina","CNB","58.75","2016"],["CHATELET Lucie","CNB","57.84","2016"],["FOREY FAURE Lola","CNB","54.56","2015"],["LEMASLE Claire","CNB","54.71","2015"],["ROBIO Maryam","CNB","58.43","2015"],["PACCIANI Nadia","PGN","59.48","2015"],["BILLET Céleste","CNB","1:01.12","2016"]]],[[null,["BREVET Devon","ANBC","NT","2017"],["SOLDO Leo","PGN","NT","2016"],["LOEWERT Elio","PGN","NT","2017"],["BILLAUDY Gabriel","CNB","NT","2016"],["HOLAS Simon","ANBC","NT","2016"],null,null],[["SIRANLI Melih","CNBV","1:12.20","2016"],["CHOULET Thomas","ANBC","1:07.32","2015"],["RAPHAËL LE DOCTE Kanty","CNB","1:03.93","2017"],["BROUILLET DE NEGRI Enzo","CNBV","1:02.62","2015"],["KACEMI Kaïs-Ibrahim","CNB","1:03.00","2016"],["HERITIER Leo","CNB","1:04.87","2017"],["BUTTY William","PGN","1:08.50","2017"],["BOUVIER Jonathan","CNB","1:12.22","2017"]],[["DARBINIAN David","CNB","1:01.69","2017"],["CHAMROUK Naym","ANBC","56.83","2015"],["EYMARD Pacôme","CNB","55.17","2015"],["GIROUD Paul","CNB","51.37","2015"],["BOZON Paul","CNB","51.62","2015"],["CAVALCANTE Noa","ANBC","56.67","2015"],["PERNOT Robin","PGN","56.93","2016"],["FOURMOND Milo","CNB","1:01.81","2016"]]],[[null,["CHAUSSE Mila","SNO","NT","2017"],["JONVAUX Anna","SNO","NT","2017"],["REYDELLET Camille","CNB","NT","2016"],["TOURNIER Clarisse","CNB","NT","2017"],["PROM LAVAYSSIERE Eva","SNO","NT","2016"],["AZEKRI Soundous","CNBV","NT","2017"],null],[["BLANC Héloïse","PGN","NT","2016"],["OUM Victoria","SNO","NT","2016"],["JAY Chloé","CNB","2:16.54","2016"],["KOURTELI Melya","CNB","2:05.78","2015"],["GUIRRIEC CORRADO Léa","PGN","2:09.59","2015"],["SELMI Nora","PGN","NT","2016"],["CIULEI Sofia","PGN","NT","2016"],null],[["VILAREM GONZALEZ PALACIO Ana","ANBC","1:58.23","2015"],["PACCALLET Capucine","ANBC","1:53.72","2015"],["DELORME Lydiana","CNB","1:48.42","2015"],["REBUCINI Zélie","CNBV","1:35.20","2015"],["BELY Louane","ANBC","1:43.36","2015"],["SÉNAC Jana","PGN","1:52.03","2015"],["GAJNIK Miley","ANBC","1:54.36","2016"],["HALBERT PEREZ Lina","PGN","2:03.28","2015"]]],[[null,null,null,["PROKOPCHUK Stephen","PGN","NT","2016"],["TAHIR Naïl","PGN","NT","2015"],null,null,null],[["GUILLAUD Enzo","SNO","NT","2017"],["KACET Lounès","PGN","NT","2016"],["OZBASI Berat","SNO","NT","2016"],["CLOSON Pierre-Elouann","CNB","1:41.61","2015"],["GAUBEY Nolan","ANBC","1:58.84","2016"],["SAUGUES Aurele","SNO","NT","2018"],["MARCHAND Lucas","PGN","NT","2018"],["SÉNAC Eden","PGN","NT","2015"]]],[[["VILLON Lutèce","ANBC","NT","2015"],["BENBERKANE Thamilla","SNO","NT","2018"],["DURAND Kamilia","ANBC","NT","2016"],["TOUSTOU Artemis","SNO","NT","2017"],["PACCALLET Leonie","ANBC","NT","2017"],["PAU Amandine","ANBC","NT","2017"],["BENBERKANE Ouzna","SNO","NT","2017"],null],[["MESTER Dora","PGN","NT","2016"],["BINDI Lalie","CNBV","NT","2018"],["CARENE Lya","CNB","59.54","2015"],["GASQUET RODRIGUES Ginger","CNB","57.06","2016"],["VARSALONA Greta","CNBV","59.35","2017"],["PACCARD Mélody","CNB","1:01.15","2017"],["DE SOLERE Sybile","ANBC","NT","2016"],["OZBAHAR Ayla","CNBV","NT","2016"]],[["DUNAUD Mélodie","PGN","55.82","2016"],["LAINE Lina","CNB","53.27","2016"],["FORTUNE Olivia","ANBC","53.07","2016"],["REYDELLET Camille","CNB","52.49","2016"],["CHATELET Lucie","CNB","52.81","2016"],["ROBIN NUNES Manon","ANBC","53.17","2015"],["EL HASSOUNI Jenna","CNB","53.67","2017"],["JAY Chloé","CNB","56.25","2016"]],[["CURA-CURA Clelia","CNBV","51.22","2018"],["PACCIANI Nadia","PGN","50.33","2015"],["TOURNIER Clarisse","CNB","49.25","2017"],["SERRE Justine","SNO","44.36","2015"],["BREYNAERT Léa","PGN","47.13","2015"],["ROBIN NUNES Louise","ANBC","49.26","2015"],["SARI Elif","SNO","50.42","2015"],["BOURGEON Maé","ANBC","51.83","2016"]]],[[null,["VALENZA Sacha","SNO","NT","2018"],["SOLDO Leo","PGN","NT","2016"],["ANTOINE William","SNO","NT","2017"],["LOEWERT Elio","PGN","NT","2017"],["NICCO Tyago","CNBV","NT","2017"],null,null],[["PERNOT Robin","PGN","NT","2016"],["HERITIER Leo","CNB","57.72","2017"],["CHOULET Thomas","ANBC","56.84","2015"],["DARBINIAN David","CNB","55.73","2017"],["DINGER Yigit","CNBV","56.11","2016"],["BILLAUDY Gabriel","CNB","57.38","2016"],["RAPHAËL LE DOCTE Kanty","CNB","59.44","2017"],["NICOLETTI Gabriel","PGN","NT","2015"]],[["CAVALCANTE Noa","ANBC","53.67","2015"],["EYMARD Pacôme","CNB","50.91","2015"],["BROUILLET DE NEGRI Enzo","CNBV","49.92","2015"],["MARCHAND Milan","PGN","41.15","2016"],["CHAMROUK Naym","ANBC","47.20","2015"],["KACEMI Kaïs-Ibrahim","CNB","50.53","2016"],["PACTON SORREL Eloen","ANBC","51.65","2015"],["LEMESRE Maël","ANBC","54.18","2015"]]],[[["CIULEI Sofia","PGN","NT","2016"],["JONVAUX Anna","SNO","NT","2017"],["PROM LAVAYSSIERE Eva","SNO","NT","2016"],["SÉNAC Jana","PGN","NT","2015"],["NEVERS Elsa","CNB","NT","2016"],["GUIRRIEC CORRADO Léa","PGN","NT","2015"],["BILLET Céleste","CNB","NT","2016"],null],[["HALBERT PEREZ Lina","PGN","NT","2015"],["CHAUSSE Mila","SNO","NT","2017"],["AZEKRI Soundous","CNBV","2:01.58","2017"],["MARCHAND Margaux","PGN","1:56.14","2018"],["BLANC Héloïse","PGN","2:00.68","2016"],null,["OUM Victoria","SNO","NT","2016"],["KOURTELI Melya","CNB","NT","2015"]],[["SELMI Nora","PGN","1:54.75","2016"],["ROBIO Maryam","CNB","1:46.73","2015"],["DELORME Lydiana","CNB","1:40.86","2015"],["LEMASLE Claire","CNB","1:33.86","2015"],["BELY Louane","ANBC","1:38.20","2015"],["FOREY FAURE Lola","CNB","1:46.11","2015"],["VILAREM GONZALEZ PALACIO Ana","ANBC","1:47.27","2015"],["GUEDES DA SILVA Gabriela","CNB","1:55.11","2015"]]],[[["JANICHON Ilyes","CNB","NT","2017"],["BOUVIER Jonathan","CNB","NT","2017"],["PROKOPCHUK Stephen","PGN","NT","2016"],["MARCHAND Lucas","PGN","NT","2018"],["GUILLAUD Enzo","SNO","NT","2017"],["GAREL Baptiste","ANBC","NT","2015"],["FOURMOND Milo","CNB","NT","2016"],["TAHIR Naïl","PGN","NT","2015"]],[["OZBASI Berat","SNO","NT","2016"],["SÉNAC Eden","PGN","1:58.45","2015"],["GIROUD Paul","CNB","1:41.31","2015"],["BOZON Paul","CNB","1:27.91","2015"],["BELLAMMOU Haroun","CNBV","1:31.42","2015"],["KACET Lounès","PGN","1:49.84","2016"],["AZEKRI Nizar","CNBV","NT","2016"],["SAUGUES Aurele","SNO","NT","2018"]]]];
+const CC_RELAY_OTHERS = {"PGN":["2:29.29","2:47.47","2:49.49","2:52.52","2:54.54"],"CNB":["2:50.00","3:10.00","3:30.00","3:35.00","3:50.00"],"CNBV":["3:00.00","3:50.00"],"ANBC":["3:20.00","3:20.00","3:20.00","3:20.00","3:20.00","3:20.00"]};
+const CC_CLUBS = {CNB:'CN Bourg-en-Bresse',CNBV:'CN Bellegarde',ANBC:'Ambérieu',PGN:'Pays de Gex',SNO:'SN Oyonnax'};
+
+// Temps d'engagement FFN : CC_ENG[evIdx][nom] = 'mm:ss.cc' ('' = pas de temps)
+const CC_ENG = [
+  {"BILLET Céleste":"01:51.78","CARENE Lya":"02:00.12","CHATELET Lucie":"01:45.05","EL HASSOUNI Jenna":"01:57.45","GASQUET RODRIGUES Ginger":"01:58.89","HALLALI Noor":"02:08.55","JAY Chloé":"01:50.73","LAINE Lina":"01:48.84","NEVERS Elsa":"01:59.83","PACCARD Mélody":"02:03.84","REYDELLET Camille":"01:45.81","SHKOZA Jusra":"01:59.74","TOURNIER Clarisse":"01:55.72"}, // 0
+  {"BILLAUDY Gabriel":"","BOUVIER Jonathan":"01:55.70","DARBINIAN David":"01:52.81","EYMARD Pacôme":"01:50.38","FOURMOND Milo":"01:47.15","GIROUD Paul":"01:35.96","JANICHON Ilyes":"01:55.82","KACEMI Kaïs-Ibrahim":"01:51.24","RAPHAËL LE DOCTE Kanty":"02:08.06"}, // 1
+  {"DELORME Lydiana":"03:41.56","FOREY FAURE Lola":"03:42.42","GUEDES DA SILVA Gabriela":"","KOURTELI Melya":"03:55.24","LEMASLE Claire":"03:29.49","ROBIO Maryam":"03:47.81"}, // 2
+  {"BOZON Paul":"","CLOSON Pierre-Elouann":""}, // 3
+  {"HALLALI Noor":"01:08.01","SHKOZA Jusra":"01:00.17"}, // 4
+  {"CLOSON Pierre-Elouann":"00:41.21","JANICHON Ilyes":""}, // 5
+  {}, // 6
+  {"BILLET Céleste":"00:42.42","DELORME Lydiana":"00:40.66","HALLALI Noor":"00:59.26","KOURTELI Melya":"00:42.13","SHKOZA Jusra":"00:48.11","TOURNIER Clarisse":"00:46.43"}, // 7
+  {"BOUVIER Jonathan":"00:52.56","FOURMOND Milo":"00:43.70","HERITIER Leo":"00:49.32","JANICHON Ilyes":"00:48.68"}, // 8
+  {"CARENE Lya":"01:52.85","CHATELET Lucie":"01:49.55","EL HASSOUNI Jenna":"","FOREY FAURE Lola":"01:29.11","GASQUET RODRIGUES Ginger":"","GUEDES DA SILVA Gabriela":"01:42.15","JAY Chloé":"01:50.12","LAINE Lina":"01:53.05","LEMASLE Claire":"01:28.49","NEVERS Elsa":"","PACCARD Mélody":"","REYDELLET Camille":"","ROBIO Maryam":"01:34.19"}, // 9
+  {"BILLAUDY Gabriel":"","BOZON Paul":"01:34.11","CLOSON Pierre-Elouann":"01:29.32","DARBINIAN David":"","EYMARD Pacôme":"","GIROUD Paul":"01:26.39","KACEMI Kaïs-Ibrahim":"01:42.89","RAPHAËL LE DOCTE Kanty":""}, // 10
+  {"BILLET Céleste":"01:01.12","CARENE Lya":"01:03.44","CHATELET Lucie":"00:57.84","EL HASSOUNI Jenna":"01:09.81","FOREY FAURE Lola":"00:54.56","GASQUET RODRIGUES Ginger":"01:04.94","GUEDES DA SILVA Gabriela":"00:59.58","HALLALI Noor":"01:01.73","LAINE Lina":"00:58.75","LEMASLE Claire":"00:54.71","NEVERS Elsa":"01:03.85","PACCARD Mélody":"01:05.99","ROBIO Maryam":"00:58.43","SHKOZA Jusra":"01:03.25"}, // 11
+  {"BILLAUDY Gabriel":"","BOUVIER Jonathan":"01:12.22","BOZON Paul":"00:51.62","DARBINIAN David":"01:01.69","EYMARD Pacôme":"00:55.17","FOURMOND Milo":"01:01.81","GIROUD Paul":"00:51.37","HERITIER Leo":"01:04.87","KACEMI Kaïs-Ibrahim":"01:03.00","RAPHAËL LE DOCTE Kanty":"01:03.93"}, // 12
+  {"DELORME Lydiana":"01:48.42","JAY Chloé":"02:16.54","KOURTELI Melya":"02:05.78","REYDELLET Camille":"","TOURNIER Clarisse":""}, // 13
+  {"CLOSON Pierre-Elouann":"01:41.61"}, // 14
+  {"CARENE Lya":"00:59.54","CHATELET Lucie":"00:52.81","EL HASSOUNI Jenna":"00:53.67","GASQUET RODRIGUES Ginger":"00:57.06","JAY Chloé":"00:56.25","LAINE Lina":"00:53.27","PACCARD Mélody":"01:01.15","REYDELLET Camille":"00:52.49","TOURNIER Clarisse":"00:49.25"}, // 15
+  {"BILLAUDY Gabriel":"00:57.38","DARBINIAN David":"00:55.73","EYMARD Pacôme":"00:50.91","HERITIER Leo":"00:57.72","KACEMI Kaïs-Ibrahim":"00:50.53","RAPHAËL LE DOCTE Kanty":"00:59.44"}, // 16
+  {"BILLET Céleste":"","DELORME Lydiana":"01:40.86","FOREY FAURE Lola":"01:46.11","GUEDES DA SILVA Gabriela":"01:55.11","KOURTELI Melya":"","LEMASLE Claire":"01:33.86","NEVERS Elsa":"","ROBIO Maryam":"01:46.73"}, // 17
+  {"BOUVIER Jonathan":"","BOZON Paul":"01:27.91","FOURMOND Milo":"","GIROUD Paul":"01:41.31","JANICHON Ilyes":""}, // 18
+  {"CNB · KOURTELI – BILLAUDY – CHATELET – JANICHON":"03:35.00","CNB · BOUVIER – EYMARD – JAY – ROBIO":"03:30.00","CNB · BOZON – CLOSON – LEMASLE – FOREY FAURE":"02:50.00","CNB · BILLET – DARBINIAN – GUEDES DA SILVA – RAPHAËL LE DOCTE":"03:50.00","CNB · FOURMOND – DELORME – REYDELLET – KACEMI":"03:10.00"} // 19
+];
 let ccResults = [];
 let ccCurEv   = 0;
 let ccCurSer  = 0;
@@ -1936,9 +2070,100 @@ function showCCTab(tab, btn) {
   });
   document.querySelectorAll('.cc-tab').forEach(b => b.classList.remove('cc-tab-active'));
   if (btn) btn.classList.add('cc-tab-active');
-  if (tab==='resultats') ccRenderResults();
+  if (tab==='resultats') { ccRenderResults(); ccLiveStart(); } else ccLiveStop();
   if (tab==='chrono')    ccRenderChronoTab();
 }
+
+
+// ── RÉSULTATS EN DIRECT (LiveFFN via /api/liveffn) ──
+const CC_LIVE_COMP = '94487';
+// Codes d'épreuve LiveFFN (non séquentiels), dans l'ordre de CC_PROGRAM
+const CC_LIVE_EPR = [40,90,41,91,31,81,82,1,51,2,52,21,71,22,72,11,61,12,62,37];
+let ccLiveTimer = null, ccLiveBusy = false, ccLiveData = {};
+function ccNorm(s) {
+  return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim();
+}
+const CC_ROSTER_N = [...CC_ROSTER.F, ...CC_ROSTER.H].map(n => ({ name: n, toks: ccNorm(n).split(' ') }));
+function ccMatchRoster(rowText) {
+  const t = ' ' + ccNorm(rowText) + ' ';
+  let best = null;
+  CC_ROSTER_N.forEach(r => {
+    if (r.toks.every(k => t.includes(' ' + k + ' '))) {
+      if (!best || r.toks.length > best.toks.length) best = r;
+    }
+  });
+  return best ? best.name : null;
+}
+function ccParseLiveEvent(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const out = [];
+  doc.querySelectorAll('tr').forEach(tr => {
+    const cells = [...tr.querySelectorAll('td,th')].map(c => c.textContent.replace(/\s+/g, ' ').trim());
+    const text = cells.join(' | ');
+    const name = ccMatchRoster(text);
+    if (!name) return;
+    const tm = text.match(/(?:\d{1,2}:)?\d{1,2}[.,]\d{2}(?!\d)/);
+    const flag = text.match(/\b(DSQ|DNS|DNF|DISQ\w*|FORFAIT|ABS\w*)\b/i);
+    const rk = /^\d{1,3}\.?$/.test(cells[0]) ? cells[0].replace('.', '') : '';
+    out.push({ name, rank: rk, time: tm ? tm[0].replace(',', '.').replace(/^0+:(?=\d)/, '') : '', flag: flag ? flag[1].toUpperCase() : '' });
+  });
+  return out;
+}
+async function ccLiveRefresh() {
+  if (ccLiveBusy) return;
+  ccLiveBusy = true;
+  const st = document.getElementById('cc-live-status');
+  let ok = 0, fail = 0;
+  try {
+    await Promise.all(CC_PROGRAM.map(async (_, i) => {
+      try {
+        const r = await fetch('/api/liveffn?competition=' + CC_LIVE_COMP + '&epr=' + CC_LIVE_EPR[i], { cache: 'no-store' });
+        if (!r.ok) throw new Error(r.status);
+        ccLiveData[i] = ccParseLiveEvent(await r.text());
+        ok++;
+      } catch (e) { fail++; }
+    }));
+    const now = new Date().toLocaleTimeString('fr-FR');
+    if (st) st.textContent = ok ? ('Mis à jour ' + now) : 'FFN injoignable — réessai auto';
+    ccRenderLive();
+  } finally { ccLiveBusy = false; }
+}
+function ccRenderLive() {
+  const box = document.getElementById('cc-live-content');
+  if (!box) return;
+  let html = '', n = 0;
+  CC_PROGRAM.forEach((p, i) => {
+    const rows = ccLiveData[i] || [];
+    if (!rows.length) return;
+    let h = '';
+    rows.forEach(r => {
+      n++;
+      const eg = ccEngLabel(i, r.name);
+      let delta = '';
+      const rc = ccTimeToCs(r.time);
+      if (rc !== null && eg.cs !== null) {
+        const d = rc - eg.cs;
+        delta = `<span class="${d <= 0 ? 'cc-res-fast' : 'cc-res-slow'}">${d <= 0 ? '−' : '+'}${(Math.abs(d)/100).toFixed(2)}</span>`;
+      }
+      h += `<div class="cc-res-row">
+        <div class="cc-res-lane">${r.rank ? r.rank + '.' : ''}</div>
+        <div class="cc-res-name">${r.name}<div class="cc-res-eng">Engagement : <b>${eg.txt}</b></div></div>
+        <div class="cc-res-time">${r.time || r.flag || '—'}</div>
+        <div class="cc-res-delta">${delta}</div><span class="cc-res-del-sp"></span></div>`;
+    });
+    html += `<div class="cc-res-group"><div class="cc-res-group-header">📡 ${i + 1}. ${p.ev} ${p.g==='D'?'Dames':p.g==='M'?'Messieurs':'Mixte'}</div>${h}</div>`;
+  });
+  box.innerHTML = html || '<div class="cc-empty" style="margin-bottom:10px;">Aucun résultat CNB publié par la FFN pour l’instant</div>';
+}
+function ccLiveStop() { if (ccLiveTimer) { clearInterval(ccLiveTimer); ccLiveTimer = null; } }
+function ccLiveStart() {
+  ccLiveStop();
+  const on = document.getElementById('cc-live-on');
+  if (on && !on.checked) return;
+  ccLiveRefresh();
+  ccLiveTimer = setInterval(ccLiveRefresh, 30000);
+}
+function ccLiveToggle() { ccLiveStart(); }
 
 // ── PROGRAMME ──
 function ccRenderProgramme() {
@@ -1969,15 +2194,48 @@ function ccToggleEv(i) {
 
 function ccGetSwimmerOptions(evIdx) {
   const gender = CC_PROGRAM[evIdx].g; // 'D', 'M', 'Mix'
-  return SWIMMERS.filter(sw => {
-    if (sw.y !== '2016' && sw.y !== '2017') return false;
-    if (gender === 'D')   return sw.g === 'F';
-    if (gender === 'M')   return sw.g === 'H';
-    return true; // Mix
-  }).sort((a, b) => a.n.localeCompare(b.n));
+  const list = gender === 'D' ? CC_ROSTER.F : gender === 'M' ? CC_ROSTER.H : CC_ROSTER.F.concat(CC_ROSTER.H);
+  return list.map(n => ({n})).sort((a, b) => a.n.localeCompare(b.n));
+}
+
+function ccLaneOpts(optHtml, name) {
+  if (!name) return optHtml;
+  const tag = 'value="' + name + '"';
+  return optHtml.includes(tag) ? optHtml.replace(tag, tag + ' selected')
+                               : optHtml + '<option ' + tag + ' selected>' + name + '</option>';
+}
+
+function ccFullHtml(i) {
+  const grid = CC_FULL[i];
+  const total = grid.reduce((a,g)=>a+g.filter(Boolean).length,0);
+  const cnb = grid.reduce((a,g)=>a+g.filter(x=>x&&x[1]==='CNB').length,0);
+  const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  return `<div class="cc-full-sum">${total} nageurs · ${grid.length} série${grid.length>1?'s':''} · <b class="cc-full-cnb-t">${cnb} CNB</b></div>` +
+    grid.map((lanes, si) => {
+      const rows = lanes.map((x, li) => x ? `<div class="cc-full-row${x[1]==='CNB'?' is-cnb':''}">
+          <span class="cc-full-lane">C${li+1}</span>
+          <span class="cc-full-name">${esc(x[0])}</span>
+          <span class="cc-full-club">${x[1]}</span>
+          <span class="cc-full-time">${x[2]}</span>
+        </div>` : '').join('');
+      return `<div class="cc-ser-block"><div class="cc-ser-label">Série ${si+1}</div>${rows}</div>`;
+    }).join('');
+}
+
+function ccRelayHtml(i) {
+  const series = ccData[i] || [];
+  const others = Object.entries(CC_RELAY_OTHERS).filter(([c])=>c!=='CNB')
+    .map(([c,t]) => `<span class="cc-full-club">${c}</span> ${t.length} équipe${t.length>1?'s':''} (${t[0]}${t.length>1?' … '+t[t.length-1]:''})`).join(' · ');
+  return `<div class="cc-full-sum">${Object.values(CC_RELAY_OTHERS).reduce((a,t)=>a+t.length,0)} équipes engagées</div>` +
+    series.map((lanes, si) => {
+      const rows = lanes.map((n, li) => n ? `<div class="cc-full-row is-cnb"><span class="cc-full-lane">C${li+1}</span><span class="cc-full-name">${n.replace(/^CNB · /,'')}</span><span class="cc-full-club">CNB</span></div>` : '').join('');
+      return `<div class="cc-ser-block"><div class="cc-ser-label">Série ${si+1}</div>${rows}</div>`;
+    }).join('') + `<div class="cc-full-note">Autres équipes : ${others}</div>`;
 }
 
 function ccEvBodyHtml(i) {
+  if (typeof CC_FULL !== 'undefined' && CC_FULL[i]) return ccFullHtml(i);
+  if (typeof CC_RELAY_OTHERS !== 'undefined' && i === CC_PROGRAM.length - 1) return ccRelayHtml(i);
   const series  = ccData[i];
   const options = ccGetSwimmerOptions(i);
   const optHtml = '<option value="">— Vide —</option>' +
@@ -2001,7 +2259,7 @@ function ccEvBodyHtml(i) {
             <div class="cc-lane-row">
               <div class="cc-lane-num">C${li+1}</div>
               <select class="cc-lane-input" onchange="ccSetLane(${i},${si},${li},this.value);ccRefreshSerBlock(${i},${si})">
-                ${optHtml.replace(`value="${name}"`, `value="${name}" selected`)}
+                ${ccLaneOpts(optHtml, name)}
               </select>
             </div>`).join('')}
         </div>
@@ -2201,31 +2459,68 @@ function ccRaz() {
 }
 
 // ── RÉSULTATS ──
+function ccTimeToCs(t) {
+  const m = (t || '').match(/^(?:(\d+):)?(\d+)\.(\d{2})$/);
+  return m ? (+(m[1] || 0)) * 6000 + (+m[2]) * 100 + (+m[3]) : null;
+}
+function ccFmtCs(cs) {
+  const m = Math.floor(cs / 6000), sec = Math.floor((cs % 6000) / 100), c = cs % 100;
+  return m > 0 ? `${m}:${String(sec).padStart(2,'0')}.${String(c).padStart(2,'0')}` : `${sec}.${String(c).padStart(2,'0')}`;
+}
+function ccEngLabel(evIdx, name) {
+  const e = CC_ENG[evIdx];
+  if (!e || !(name in e)) return { txt: '–', cs: null };
+  const cs = ccTimeToCs(e[name]);
+  return cs === null ? { txt: 'NT', cs: null } : { txt: ccFmtCs(cs), cs };
+}
+
 function ccRenderResults() {
   const content = document.getElementById('cc-res-content');
   const cnt     = document.getElementById('cc-res-count');
   if (!content) return;
-  cnt.textContent = ccResults.length + ' temps enregistrés';
-  if (!ccResults.length) {
-    content.innerHTML = '<div class="cc-empty">Aucun temps enregistré</div>'; return;
-  }
-  // Group by event
-  const groups = {};
-  ccResults.forEach((r, i) => {
-    if (!groups[r.ev]) groups[r.ev] = [];
-    groups[r.ev].push({...r, globalIdx: i});
+  let engaged = 0;
+  ccData.forEach(ev => ev.forEach(l => l.forEach(n => { if (n) engaged++; })));
+  cnt.textContent = ccResults.length + ' temps enregistrés · ' + engaged + ' engagements CNB';
+  const used = new Set();
+  const rowHtml = (evIdx, name, laneTxt, gi) => {
+    const r = gi >= 0 ? ccResults[gi] : null;
+    const eg = ccEngLabel(evIdx, name);
+    let delta = '';
+    if (r && eg.cs !== null) {
+      const rc = ccTimeToCs(r.time);
+      if (rc !== null) {
+        const d = rc - eg.cs;
+        delta = `<span class="${d <= 0 ? 'cc-res-fast' : 'cc-res-slow'}">${d <= 0 ? '−' : '+'}${(Math.abs(d)/100).toFixed(2)}</span>`;
+      }
+    }
+    return `<div class="cc-res-row">
+      <div class="cc-res-lane">${laneTxt}</div>
+      <div class="cc-res-name">${name}<div class="cc-res-eng">Engagement : <b>${eg.txt}</b></div></div>
+      <div class="cc-res-time${r ? '' : ' cc-res-empty'}">${r ? r.time : '—'}</div>
+      <div class="cc-res-delta">${delta}</div>
+      ${r ? `<button class="cc-res-del" onclick="ccDelResult(${gi})">✕</button>` : '<span class="cc-res-del-sp"></span>'}
+    </div>`;
+  };
+  let html = '';
+  CC_PROGRAM.forEach((p, i) => {
+    let rows = '';
+    (ccData[i] || []).forEach((lanes, si) => {
+      const names = lanes.map((n, li) => ({ n, li })).filter(x => x.n);
+      if (!names.length) return;
+      rows += `<div class="cc-res-ser">Série ${si + 1}</div>`;
+      names.forEach(({ n, li }) => {
+        let gi = -1;
+        ccResults.forEach((r, k) => { if (r.evIdx === i && r.serIdx === si && r.lane === li + 1) { gi = k; used.add(k); } });
+        rows += rowHtml(i, n, 'C' + (li + 1), gi);
+      });
+    });
+    ccResults.forEach((r, k) => {
+      if (r.evIdx === i && !used.has(k)) { used.add(k); rows += rowHtml(i, r.name, 'C' + r.lane, k); }
+    });
+    if (!rows) return;
+    html += `<div class="cc-res-group"><div class="cc-res-group-header">${i + 1}. ${p.ev} ${p.g==='D'?'Dames':p.g==='M'?'Messieurs':'Mixte'}</div>${rows}</div>`;
   });
-  content.innerHTML = Object.entries(groups).map(([ev, rows]) => `
-    <div class="cc-res-group">
-      <div class="cc-res-group-header">${ev}</div>
-      ${rows.map(r => `
-        <div class="cc-res-row">
-          <div class="cc-res-lane">C${r.lane}</div>
-          <div class="cc-res-time">${r.time}</div>
-          <div class="cc-res-name">${r.name}</div>
-          <button class="cc-res-del" onclick="ccDelResult(${r.globalIdx})">✕</button>
-        </div>`).join('')}
-    </div>`).join('');
+  content.innerHTML = html || '<div class="cc-empty">Aucun engagement CNB</div>';
 }
 
 function ccDelResult(i) {
@@ -2244,6 +2539,18 @@ function ccClearResults() {
 <!-- ===== CHRONO COMPÉTITION STYLES ===== -->
 <style>
 /* Tabs */
+.cc-full-sum{color:rgba(255,255,255,0.55);font-size:12px;padding:2px 2px 8px;}
+.cc-full-cnb-t{color:#39ff14;}
+.cc-full-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;font-size:13px;color:rgba(255,255,255,0.72);}
+.cc-full-row:nth-child(even){background:rgba(255,255,255,0.03);}
+.cc-full-row.is-cnb{color:#39ff14;font-weight:800;background:rgba(57,255,20,0.10);box-shadow:inset 3px 0 0 #39ff14;text-shadow:0 0 8px rgba(57,255,20,0.35);}
+.cc-full-lane{width:26px;flex:none;font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);}
+.cc-full-row.is-cnb .cc-full-lane{color:#39ff14;}
+.cc-full-name{flex:1;min-width:0;}
+.cc-full-club{flex:none;font-size:10px;font-weight:700;letter-spacing:.3px;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,0.10);color:rgba(255,255,255,0.6);}
+.cc-full-row.is-cnb .cc-full-club{background:#39ff14;color:#0f2447;}
+.cc-full-time{flex:none;width:58px;text-align:right;font-variant-numeric:tabular-nums;font-size:12px;opacity:.85;}
+.cc-full-note{color:rgba(255,255,255,0.55);font-size:12px;padding:8px 4px;line-height:1.7;}
 .cc-tabs{display:flex;gap:0;background:rgba(0,0,0,0.3);border-bottom:1px solid rgba(255,255,255,0.1);}
 .cc-tab{flex:1;background:none;border:none;color:rgba(255,255,255,0.5);padding:13px 8px;font-size:13px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.15s;letter-spacing:0.2px;}
 .cc-tab-active{color:#fff;border-bottom-color:#60d394;}
@@ -2320,6 +2627,14 @@ function ccClearResults() {
 .cc-res-time{font-size:18px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;min-width:76px;}
 .cc-res-name{flex:1;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);}
 .cc-res-del{background:none;border:none;color:rgba(255,255,255,0.2);cursor:pointer;font-size:14px;padding:2px;}
+.cc-res-eng{font-size:11px;font-weight:500;color:rgba(255,255,255,0.45);margin-top:2px;}
+.cc-res-eng b{color:#fbbf24;font-weight:700;font-variant-numeric:tabular-nums;}
+.cc-res-empty{color:rgba(255,255,255,0.25);}
+.cc-res-delta{font-size:12px;font-weight:700;min-width:44px;text-align:right;font-variant-numeric:tabular-nums;}
+.cc-res-fast{color:#60d394;}
+.cc-res-slow{color:#fca5a5;}
+.cc-res-del-sp{display:inline-block;width:18px;}
+.cc-res-ser{padding:6px 14px 2px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.6px;border-top:1px solid rgba(255,255,255,0.06);}
 .cc-empty{padding:32px;text-align:center;color:rgba(255,255,255,0.3);font-size:14px;}
 </style>
 
@@ -2363,4 +2678,8 @@ function ccClearResults() {
   /* ── MPP overlay ── */
   #mpp-overlay { font-size: 13px; }
   #mpp-overlay .subtitle { font-size: 10px; }
-  #mpp-overlay .
+}
+</style>
+
+</body>
+</html>

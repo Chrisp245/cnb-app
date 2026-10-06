@@ -303,7 +303,8 @@ td.col-holiday.checked .cell-inner{
 <div class="stats-bar">
   <div class="stat-item"><strong id="stat-total">0</strong>présences enregistrées</div>
   <div class="stat-item"><strong id="stat-sessions">166</strong>séances au total</div>
-  <div class="stat-item"><strong id="stat-swimmers">25</strong>nageurs</div>
+  <div class="stat-item"><strong id="stat-swimmers">36</strong>nageurs</div>
+  <div class="stat-item" id="sync-status" style="font-weight:600;"></div>
   <button class="reset-btn" onclick="confirmReset()">Réinitialiser</button>
 </div>
 
@@ -327,67 +328,115 @@ td.col-holiday.checked .cell-inner{
 const LOGO_B64 = '';
 
 const SWIMMERS = [
-  {n:'BARBANDIERE Elyn', g:'F', y:'2016'},
-  {n:'BILLET Céleste',           g:'F', y:'2016'},
-  {n:'CHATELET Lucie',           g:'F', y:'2016'},
-  {n:'GASQUET Ginger', g:'F', y:'2016'},
-  {n:'JAY Chloé',                g:'F', y:'2016'},
-  {n:'LAINE Lina',               g:'F', y:'2016'},
-  {n:'LEMASLE Constance',        g:'F', y:'2016'},
-  {n:'NEVERS Elsa',              g:'F', y:'2016'},
-  {n:'REYDELLET Camille',        g:'F', y:'2016'},
-  {n:'CHOSSAT Maélys',           g:'F', y:'2017'},
-  {n:'EL HASSOUNI Jenna',        g:'F', y:'2017'},
-  {n:'HALLALI Noor',             g:'F', y:'2017'},
-  {n:'PACCARD Mélody',           g:'F', y:'2017'},
-  {n:'SHKOZA Jusra',             g:'F', y:'2017'},
-  {n:'TOURNIER Clarisse',        g:'F', y:'2017'},
-  {n:'BILLAUDY Gabriel *',       g:'H', y:'2016'},
-  {n:'FOURMOND Milo',            g:'H', y:'2016'},
-  {n:'KACEMI Kaïs-Ibrahim',      g:'H', y:'2016'},
-  {n:'MORAND Gaspard',           g:'H', y:'2016'},
-  {n:'BOUVIER Jonathan',         g:'H', y:'2017'},
-  {n:'DARBINIAN David',          g:'H', y:'2017'},
-  {n:'DESCOMBES Andrew',         g:'H', y:'2017'},
-  {n:'HERITIER Léo',             g:'H', y:'2017'},
-  {n:'JANICHON Ilyes',           g:'H', y:'2017'},
-  {n:'RAPHAËL Kanty',   g:'H', y:'2017'},
+  {n:'BARBANDIERE Elyn',              g:'F', y:'2016'},
+  {n:'BILLET Céleste',                g:'F', y:'2016'},
+  {n:'CHATELET Lucie',                g:'F', y:'2016'},
+  {n:'GASQUET Ginger',                g:'F', y:'2016'},
+  {n:'JAY Chloé',                     g:'F', y:'2016'},
+  {n:'LAINE Lina',                    g:'F', y:'2016'},
+  {n:'LEMASLE Constance',             g:'F', y:'2016'},
+  {n:'NEVERS Elsa',                   g:'F', y:'2016'},
+  {n:'REYDELLET Camille',             g:'F', y:'2016'},
+  {n:'EL HASSOUNI Jenna',             g:'F', y:'2017'},
+  {n:'GIRARD Alice',                  g:'F', y:'2017'},
+  {n:'HALLALI Noor',                  g:'F', y:'2017'},
+  {n:'PACCARD Mélody',                g:'F', y:'2017'},
+  {n:'SHKOZA Jusra',                  g:'F', y:'2017'},
+  {n:'TOURNIER Clarisse',             g:'F', y:'2017'},
+  {n:'BERTRAND Adèle',                 g:'F', y:'2018'},
+  {n:'DINAR Nesma',                   g:'F', y:'2018'},
+  {n:'GUEDES DA SILVA Vitoria',      g:'F', y:'2018'},
+  {n:'KACEMI Lylia',                  g:'F', y:'2018'},
+  {n:'LALLEMAND-RIBOT Anaïs',         g:'F', y:'2018'},
+  {n:'MORAND Adèle',                  g:'F', y:'2018'},
+  {n:'PIRAT Agathe',                  g:'F', y:'2018'},
+  {n:'BILLAUDY Gabriel',            g:'H', y:'2016'},
+  {n:'FOURMOND Milo',                 g:'H', y:'2016'},
+  {n:'KACEMI Kaïs-Ibrahim',           g:'H', y:'2016'},
+  {n:'MORAND Gaspard',                g:'H', y:'2016'},
+  {n:'BOUVIER Jonathan',              g:'H', y:'2017'},
+  {n:'DARBINIAN David',               g:'H', y:'2017'},
+  {n:'DEMESY Maxime',                 g:'H', y:'2017'},
+  {n:'DEROGNAT Lyam',                 g:'H', y:'2017'},
+  {n:'DESCOMBES Andrew',              g:'H', y:'2017'},
+  {n:'HERITIER Léo',                  g:'H', y:'2017'},
+  {n:'JANICHON Ilyes',                g:'H', y:'2017'},
+  {n:'RAPHAËL Kanty',                 g:'H', y:'2017'},
+  {n:'OMRANI Mohamed',                g:'H', y:'2018'},
+  {n:'ROBERT Hector',                  g:'H', y:'2018'},
+  {n:'BOZON Jules',                   g:'H', y:'2019'},
 ];
 
 const GROUP_COLORS = {
-  'F2016': '#9d174d',
-  'F2017': '#ec4899',
-  'H2016': '#1e3a8a',
-  'H2017': '#3b82f6',
+  'F2016': '#881337',
+  'F2017': '#db2777',
+  'F2018': '#ec4899',
+  'H2016': '#172554',
+  'H2017': '#1d4ed8',
+  'H2018': '#3b82f6',
+  'H2019': '#38bdf8',
 };
-const DAY_NAMES = {0:'L',2:'M',3:'J',4:'V'};
+const DAY_NAMES = {0:'L',1:'Ma',2:'M',3:'J',4:'V'};
 
-const DATES = [{d:"14/09",day:0,full:"2026-09-14"},{d:"16/09",day:2,full:"2026-09-16"},{d:"17/09",day:3,full:"2026-09-17"},{d:"18/09",day:4,full:"2026-09-18"},{d:"21/09",day:0,full:"2026-09-21"},{d:"23/09",day:2,full:"2026-09-23"},{d:"24/09",day:3,full:"2026-09-24"},{d:"25/09",day:4,full:"2026-09-25"},{d:"28/09",day:0,full:"2026-09-28"},{d:"30/09",day:2,full:"2026-09-30"},{d:"01/10",day:3,full:"2026-10-01"},{d:"02/10",day:4,full:"2026-10-02"},{d:"05/10",day:0,full:"2026-10-05"},{d:"07/10",day:2,full:"2026-10-07"},{d:"08/10",day:3,full:"2026-10-08"},{d:"09/10",day:4,full:"2026-10-09"},{d:"12/10",day:0,full:"2026-10-12"},{d:"14/10",day:2,full:"2026-10-14"},{d:"15/10",day:3,full:"2026-10-15"},{d:"16/10",day:4,full:"2026-10-16"},{d:"19/10",day:0,full:"2026-10-19",hol:"Toussaint"},{d:"21/10",day:2,full:"2026-10-21",hol:"Toussaint"},{d:"22/10",day:3,full:"2026-10-22",hol:"Toussaint"},{d:"23/10",day:4,full:"2026-10-23",hol:"Toussaint"},{d:"26/10",day:0,full:"2026-10-26",hol:"Toussaint"},{d:"28/10",day:2,full:"2026-10-28",hol:"Toussaint"},{d:"29/10",day:3,full:"2026-10-29",hol:"Toussaint"},{d:"30/10",day:4,full:"2026-10-30",hol:"Toussaint"},{d:"02/11",day:0,full:"2026-11-02",hol:"Toussaint"},{d:"04/11",day:2,full:"2026-11-04"},{d:"05/11",day:3,full:"2026-11-05"},{d:"06/11",day:4,full:"2026-11-06"},{d:"09/11",day:0,full:"2026-11-09"},{d:"11/11",day:2,full:"2026-11-11"},{d:"12/11",day:3,full:"2026-11-12"},{d:"13/11",day:4,full:"2026-11-13"},{d:"16/11",day:0,full:"2026-11-16"},{d:"18/11",day:2,full:"2026-11-18"},{d:"19/11",day:3,full:"2026-11-19"},{d:"20/11",day:4,full:"2026-11-20"},{d:"23/11",day:0,full:"2026-11-23"},{d:"25/11",day:2,full:"2026-11-25"},{d:"26/11",day:3,full:"2026-11-26"},{d:"27/11",day:4,full:"2026-11-27"},{d:"30/11",day:0,full:"2026-11-30"},{d:"02/12",day:2,full:"2026-12-02"},{d:"03/12",day:3,full:"2026-12-03"},{d:"04/12",day:4,full:"2026-12-04"},{d:"07/12",day:0,full:"2026-12-07"},{d:"09/12",day:2,full:"2026-12-09"},{d:"10/12",day:3,full:"2026-12-10"},{d:"11/12",day:4,full:"2026-12-11"},{d:"14/12",day:0,full:"2026-12-14"},{d:"16/12",day:2,full:"2026-12-16"},{d:"17/12",day:3,full:"2026-12-17"},{d:"18/12",day:4,full:"2026-12-18"},{d:"21/12",day:0,full:"2026-12-21",hol:"Noël"},{d:"23/12",day:2,full:"2026-12-23",hol:"Noël"},{d:"24/12",day:3,full:"2026-12-24",hol:"Noël"},{d:"25/12",day:4,full:"2026-12-25",hol:"Noël"},{d:"28/12",day:0,full:"2026-12-28",hol:"Noël"},{d:"30/12",day:2,full:"2026-12-30",hol:"Noël"},{d:"31/12",day:3,full:"2026-12-31",hol:"Noël"},{d:"01/01",day:4,full:"2027-01-01",hol:"Noël"},{d:"04/01",day:0,full:"2027-01-04"},{d:"06/01",day:2,full:"2027-01-06"},{d:"07/01",day:3,full:"2027-01-07"},{d:"08/01",day:4,full:"2027-01-08"},{d:"11/01",day:0,full:"2027-01-11"},{d:"13/01",day:2,full:"2027-01-13"},{d:"14/01",day:3,full:"2027-01-14"},{d:"15/01",day:4,full:"2027-01-15"},{d:"18/01",day:0,full:"2027-01-18"},{d:"20/01",day:2,full:"2027-01-20"},{d:"21/01",day:3,full:"2027-01-21"},{d:"22/01",day:4,full:"2027-01-22"},{d:"25/01",day:0,full:"2027-01-25"},{d:"27/01",day:2,full:"2027-01-27"},{d:"28/01",day:3,full:"2027-01-28"},{d:"29/01",day:4,full:"2027-01-29"},{d:"01/02",day:0,full:"2027-02-01"},{d:"03/02",day:2,full:"2027-02-03"},{d:"04/02",day:3,full:"2027-02-04"},{d:"05/02",day:4,full:"2027-02-05"},{d:"08/02",day:0,full:"2027-02-08"},{d:"10/02",day:2,full:"2027-02-10"},{d:"11/02",day:3,full:"2027-02-11"},{d:"12/02",day:4,full:"2027-02-12"},{d:"15/02",day:0,full:"2027-02-15",hol:"Hiver"},{d:"17/02",day:2,full:"2027-02-17",hol:"Hiver"},{d:"18/02",day:3,full:"2027-02-18",hol:"Hiver"},{d:"19/02",day:4,full:"2027-02-19",hol:"Hiver"},{d:"22/02",day:0,full:"2027-02-22",hol:"Hiver"},{d:"24/02",day:2,full:"2027-02-24",hol:"Hiver"},{d:"25/02",day:3,full:"2027-02-25",hol:"Hiver"},{d:"26/02",day:4,full:"2027-02-26",hol:"Hiver"},{d:"01/03",day:0,full:"2027-03-01",hol:"Hiver"},{d:"03/03",day:2,full:"2027-03-03"},{d:"04/03",day:3,full:"2027-03-04"},{d:"05/03",day:4,full:"2027-03-05"},{d:"08/03",day:0,full:"2027-03-08"},{d:"10/03",day:2,full:"2027-03-10"},{d:"11/03",day:3,full:"2027-03-11"},{d:"12/03",day:4,full:"2027-03-12"},{d:"15/03",day:0,full:"2027-03-15"},{d:"17/03",day:2,full:"2027-03-17"},{d:"18/03",day:3,full:"2027-03-18"},{d:"19/03",day:4,full:"2027-03-19"},{d:"22/03",day:0,full:"2027-03-22"},{d:"24/03",day:2,full:"2027-03-24"},{d:"25/03",day:3,full:"2027-03-25"},{d:"26/03",day:4,full:"2027-03-26"},{d:"29/03",day:0,full:"2027-03-29"},{d:"31/03",day:2,full:"2027-03-31"},{d:"01/04",day:3,full:"2027-04-01"},{d:"02/04",day:4,full:"2027-04-02"},{d:"05/04",day:0,full:"2027-04-05"},{d:"07/04",day:2,full:"2027-04-07"},{d:"08/04",day:3,full:"2027-04-08"},{d:"09/04",day:4,full:"2027-04-09"},{d:"12/04",day:0,full:"2027-04-12",hol:"Printemps"},{d:"14/04",day:2,full:"2027-04-14",hol:"Printemps"},{d:"15/04",day:3,full:"2027-04-15",hol:"Printemps"},{d:"16/04",day:4,full:"2027-04-16",hol:"Printemps"},{d:"19/04",day:0,full:"2027-04-19",hol:"Printemps"},{d:"21/04",day:2,full:"2027-04-21",hol:"Printemps"},{d:"22/04",day:3,full:"2027-04-22",hol:"Printemps"},{d:"23/04",day:4,full:"2027-04-23",hol:"Printemps"},{d:"26/04",day:0,full:"2027-04-26",hol:"Printemps"},{d:"28/04",day:2,full:"2027-04-28"},{d:"29/04",day:3,full:"2027-04-29"},{d:"30/04",day:4,full:"2027-04-30"},{d:"03/05",day:0,full:"2027-05-03"},{d:"05/05",day:2,full:"2027-05-05"},{d:"06/05",day:3,full:"2027-05-06"},{d:"07/05",day:4,full:"2027-05-07"},{d:"10/05",day:0,full:"2027-05-10"},{d:"12/05",day:2,full:"2027-05-12"},{d:"13/05",day:3,full:"2027-05-13"},{d:"14/05",day:4,full:"2027-05-14"},{d:"17/05",day:0,full:"2027-05-17"},{d:"19/05",day:2,full:"2027-05-19"},{d:"20/05",day:3,full:"2027-05-20"},{d:"21/05",day:4,full:"2027-05-21"},{d:"24/05",day:0,full:"2027-05-24"},{d:"26/05",day:2,full:"2027-05-26"},{d:"27/05",day:3,full:"2027-05-27"},{d:"28/05",day:4,full:"2027-05-28"},{d:"31/05",day:0,full:"2027-05-31"},{d:"02/06",day:2,full:"2027-06-02"},{d:"03/06",day:3,full:"2027-06-03"},{d:"04/06",day:4,full:"2027-06-04"},{d:"07/06",day:0,full:"2027-06-07"},{d:"09/06",day:2,full:"2027-06-09"},{d:"10/06",day:3,full:"2027-06-10"},{d:"11/06",day:4,full:"2027-06-11"},{d:"14/06",day:0,full:"2027-06-14"},{d:"16/06",day:2,full:"2027-06-16"},{d:"17/06",day:3,full:"2027-06-17"},{d:"18/06",day:4,full:"2027-06-18"},{d:"21/06",day:0,full:"2027-06-21"},{d:"23/06",day:2,full:"2027-06-23"},{d:"24/06",day:3,full:"2027-06-24"},{d:"25/06",day:4,full:"2027-06-25"},{d:"28/06",day:0,full:"2027-06-28"},{d:"30/06",day:2,full:"2027-06-30"}];
+const DATES = [{d:"14/09",day:0,full:"2026-09-14"},{d:"16/09",day:2,full:"2026-09-16"},{d:"17/09",day:3,full:"2026-09-17"},{d:"18/09",day:4,full:"2026-09-18"},{d:"21/09",day:0,full:"2026-09-21"},{d:"23/09",day:2,full:"2026-09-23"},{d:"24/09",day:3,full:"2026-09-24"},{d:"25/09",day:4,full:"2026-09-25"},{d:"28/09",day:0,full:"2026-09-28"},{d:"30/09",day:2,full:"2026-09-30"},{d:"01/10",day:3,full:"2026-10-01"},{d:"02/10",day:4,full:"2026-10-02"},{d:"05/10",day:0,full:"2026-10-05"},{d:"07/10",day:2,full:"2026-10-07"},{d:"08/10",day:3,full:"2026-10-08"},{d:"09/10",day:4,full:"2026-10-09"},{d:"12/10",day:0,full:"2026-10-12"},{d:"14/10",day:2,full:"2026-10-14"},{d:"15/10",day:3,full:"2026-10-15"},{d:"16/10",day:4,full:"2026-10-16"},{d:"19/10",day:0,full:"2026-10-19",hol:"Toussaint"},{d:"20/10",day:1,full:"2026-10-20",hol:"Toussaint"},{d:"21/10",day:2,full:"2026-10-21",hol:"Toussaint"},{d:"22/10",day:3,full:"2026-10-22",hol:"Toussaint"},{d:"26/10",day:0,full:"2026-10-26",hol:"Toussaint"},{d:"27/10",day:1,full:"2026-10-27",hol:"Toussaint"},{d:"28/10",day:2,full:"2026-10-28",hol:"Toussaint"},{d:"29/10",day:3,full:"2026-10-29",hol:"Toussaint"},{d:"02/11",day:0,full:"2026-11-02"},{d:"04/11",day:2,full:"2026-11-04"},{d:"05/11",day:3,full:"2026-11-05"},{d:"06/11",day:4,full:"2026-11-06"},{d:"09/11",day:0,full:"2026-11-09"},{d:"11/11",day:2,full:"2026-11-11"},{d:"12/11",day:3,full:"2026-11-12"},{d:"13/11",day:4,full:"2026-11-13"},{d:"16/11",day:0,full:"2026-11-16"},{d:"18/11",day:2,full:"2026-11-18"},{d:"19/11",day:3,full:"2026-11-19"},{d:"20/11",day:4,full:"2026-11-20"},{d:"23/11",day:0,full:"2026-11-23"},{d:"25/11",day:2,full:"2026-11-25"},{d:"26/11",day:3,full:"2026-11-26"},{d:"27/11",day:4,full:"2026-11-27"},{d:"30/11",day:0,full:"2026-11-30"},{d:"02/12",day:2,full:"2026-12-02"},{d:"03/12",day:3,full:"2026-12-03"},{d:"04/12",day:4,full:"2026-12-04"},{d:"07/12",day:0,full:"2026-12-07"},{d:"09/12",day:2,full:"2026-12-09"},{d:"10/12",day:3,full:"2026-12-10"},{d:"11/12",day:4,full:"2026-12-11"},{d:"14/12",day:0,full:"2026-12-14"},{d:"16/12",day:2,full:"2026-12-16"},{d:"17/12",day:3,full:"2026-12-17"},{d:"18/12",day:4,full:"2026-12-18"},{d:"21/12",day:0,full:"2026-12-21",hol:"Noël"},{d:"22/12",day:1,full:"2026-12-22",hol:"Noël"},{d:"23/12",day:2,full:"2026-12-23",hol:"Noël"},{d:"28/12",day:0,full:"2026-12-28",hol:"Noël"},{d:"29/12",day:1,full:"2026-12-29",hol:"Noël"},{d:"30/12",day:2,full:"2026-12-30",hol:"Noël"},{d:"04/01",day:0,full:"2027-01-04"},{d:"06/01",day:2,full:"2027-01-06"},{d:"07/01",day:3,full:"2027-01-07"},{d:"08/01",day:4,full:"2027-01-08"},{d:"11/01",day:0,full:"2027-01-11"},{d:"13/01",day:2,full:"2027-01-13"},{d:"14/01",day:3,full:"2027-01-14"},{d:"15/01",day:4,full:"2027-01-15"},{d:"18/01",day:0,full:"2027-01-18"},{d:"20/01",day:2,full:"2027-01-20"},{d:"21/01",day:3,full:"2027-01-21"},{d:"22/01",day:4,full:"2027-01-22"},{d:"25/01",day:0,full:"2027-01-25"},{d:"27/01",day:2,full:"2027-01-27"},{d:"28/01",day:3,full:"2027-01-28"},{d:"29/01",day:4,full:"2027-01-29"},{d:"01/02",day:0,full:"2027-02-01"},{d:"03/02",day:2,full:"2027-02-03"},{d:"04/02",day:3,full:"2027-02-04"},{d:"05/02",day:4,full:"2027-02-05"},{d:"08/02",day:0,full:"2027-02-08"},{d:"10/02",day:2,full:"2027-02-10"},{d:"11/02",day:3,full:"2027-02-11"},{d:"12/02",day:4,full:"2027-02-12"},{d:"15/02",day:0,full:"2027-02-15",hol:"Hiver"},{d:"16/02",day:1,full:"2027-02-16",hol:"Hiver"},{d:"17/02",day:2,full:"2027-02-17",hol:"Hiver"},{d:"18/02",day:3,full:"2027-02-18",hol:"Hiver"},{d:"22/02",day:0,full:"2027-02-22",hol:"Hiver"},{d:"23/02",day:1,full:"2027-02-23",hol:"Hiver"},{d:"24/02",day:2,full:"2027-02-24",hol:"Hiver"},{d:"25/02",day:3,full:"2027-02-25",hol:"Hiver"},{d:"01/03",day:0,full:"2027-03-01"},{d:"03/03",day:2,full:"2027-03-03"},{d:"04/03",day:3,full:"2027-03-04"},{d:"05/03",day:4,full:"2027-03-05"},{d:"08/03",day:0,full:"2027-03-08"},{d:"10/03",day:2,full:"2027-03-10"},{d:"11/03",day:3,full:"2027-03-11"},{d:"12/03",day:4,full:"2027-03-12"},{d:"15/03",day:0,full:"2027-03-15"},{d:"17/03",day:2,full:"2027-03-17"},{d:"18/03",day:3,full:"2027-03-18"},{d:"19/03",day:4,full:"2027-03-19"},{d:"22/03",day:0,full:"2027-03-22"},{d:"24/03",day:2,full:"2027-03-24"},{d:"25/03",day:3,full:"2027-03-25"},{d:"26/03",day:4,full:"2027-03-26"},{d:"29/03",day:0,full:"2027-03-29"},{d:"31/03",day:2,full:"2027-03-31"},{d:"01/04",day:3,full:"2027-04-01"},{d:"02/04",day:4,full:"2027-04-02"},{d:"05/04",day:0,full:"2027-04-05"},{d:"07/04",day:2,full:"2027-04-07"},{d:"08/04",day:3,full:"2027-04-08"},{d:"09/04",day:4,full:"2027-04-09"},{d:"12/04",day:0,full:"2027-04-12",hol:"Printemps"},{d:"13/04",day:1,full:"2027-04-13",hol:"Printemps"},{d:"14/04",day:2,full:"2027-04-14",hol:"Printemps"},{d:"15/04",day:3,full:"2027-04-15",hol:"Printemps"},{d:"19/04",day:0,full:"2027-04-19",hol:"Printemps"},{d:"20/04",day:1,full:"2027-04-20",hol:"Printemps"},{d:"21/04",day:2,full:"2027-04-21",hol:"Printemps"},{d:"22/04",day:3,full:"2027-04-22",hol:"Printemps"},{d:"26/04",day:0,full:"2027-04-26"},{d:"28/04",day:2,full:"2027-04-28"},{d:"29/04",day:3,full:"2027-04-29"},{d:"30/04",day:4,full:"2027-04-30"},{d:"03/05",day:0,full:"2027-05-03"},{d:"05/05",day:2,full:"2027-05-05"},{d:"10/05",day:0,full:"2027-05-10"},{d:"12/05",day:2,full:"2027-05-12"},{d:"13/05",day:3,full:"2027-05-13"},{d:"14/05",day:4,full:"2027-05-14"},{d:"17/05",day:0,full:"2027-05-17"},{d:"19/05",day:2,full:"2027-05-19"},{d:"20/05",day:3,full:"2027-05-20"},{d:"21/05",day:4,full:"2027-05-21"},{d:"24/05",day:0,full:"2027-05-24"},{d:"26/05",day:2,full:"2027-05-26"},{d:"27/05",day:3,full:"2027-05-27"},{d:"28/05",day:4,full:"2027-05-28"},{d:"31/05",day:0,full:"2027-05-31"},{d:"02/06",day:2,full:"2027-06-02"},{d:"03/06",day:3,full:"2027-06-03"},{d:"04/06",day:4,full:"2027-06-04"},{d:"07/06",day:0,full:"2027-06-07"},{d:"09/06",day:2,full:"2027-06-09"},{d:"10/06",day:3,full:"2027-06-10"},{d:"11/06",day:4,full:"2027-06-11"},{d:"14/06",day:0,full:"2027-06-14"},{d:"16/06",day:2,full:"2027-06-16"},{d:"17/06",day:3,full:"2027-06-17"},{d:"18/06",day:4,full:"2027-06-18"},{d:"21/06",day:0,full:"2027-06-21"},{d:"23/06",day:2,full:"2027-06-23"},{d:"24/06",day:3,full:"2027-06-24"},{d:"25/06",day:4,full:"2027-06-25"},{d:"28/06",day:0,full:"2027-06-28"},{d:"30/06",day:2,full:"2027-06-30"}];
 
 // State: presence[swimmerIdx][dateIdx] = bool
 let presence = [];
+let syncOk = true;
 const STORAGE_KEY = 'cnbb_presence_2026_2027';
+const API_URL = '/api/presence';
 
-function loadState() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      presence = JSON.parse(saved);
-      // Ensure correct dimensions
-      while (presence.length < SWIMMERS.length) presence.push([]);
-      presence.forEach((row, i) => {
-        while (row.length < DATES.length) row.push(false);
-      });
-    } else {
-      presence = SWIMMERS.map(() => new Array(DATES.length).fill(false));
-    }
-  } catch(e) {
-    presence = SWIMMERS.map(() => new Array(DATES.length).fill(false));
+function emptyPresence() {
+  return SWIMMERS.map(() => new Array(DATES.length).fill(false));
+}
+
+function normalizePresence() {
+  while (presence.length < SWIMMERS.length) presence.push([]);
+  for (let idx = 0; idx < presence.length; idx++) {
+    if (!Array.isArray(presence[idx])) presence[idx] = [];
+    const row = presence[idx];
+    while (row.length < DATES.length) row.push(false);
   }
 }
 
-function saveState() {
+function loadLocalFallback() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    presence = saved ? JSON.parse(saved) : emptyPresence();
+  } catch(e) {
+    presence = emptyPresence();
+  }
+  normalizePresence();
+}
+
+function saveLocalCache() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(presence)); } catch(e) {}
+}
+
+function setSyncIndicator() {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.textContent = syncOk ? '✓ Synchronisé' : '⚠ Hors ligne (local)';
+  el.style.color = syncOk ? '#60d394' : '#f59e0b';
+}
+
+// Loads presence from the shared server store (Netlify Blobs via /api/presence).
+// Falls back to the browser's local copy if the server is unreachable.
+async function loadState() {
+  try {
+    const res = await fetch(API_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error('status ' + res.status);
+    const data = await res.json();
+    presence = Array.isArray(data.presence) ? data.presence : emptyPresence();
+    normalizePresence();
+    saveLocalCache();
+    syncOk = true;
+  } catch(e) {
+    console.warn('Sync serveur indisponible, utilisation des données locales.', e);
+    loadLocalFallback();
+    syncOk = false;
+  }
+  setSyncIndicator();
 }
 
 function buildTable() {
@@ -451,11 +500,11 @@ function updateStats() {
   document.getElementById('stat-total').textContent = grand;
 }
 
-function togglePresence(i, j) {
+async function togglePresence(i, j) {
   if (DATES[j].hol) return; // holiday, no toggle
   presence[i][j] = !presence[i][j];
-  saveState();
-  
+  saveLocalCache();
+
   // Update cell
   const cell = document.querySelector(`td[data-i="${i}"][data-j="${j}"]`);
   if (cell) cell.classList.toggle('checked', presence[i][j]);
@@ -477,8 +526,23 @@ function togglePresence(i, j) {
   const grand = presence.reduce((s,row) => s+row.reduce((a,v)=>a+(v?1:0),0), 0);
   const gEl = document.getElementById('grand-total');
   if (gEl) gEl.textContent = grand;
-  
+
   updateStats();
+
+  // Push this single change to the shared server store.
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({i, j, value: presence[i][j]})
+    });
+    if (!res.ok) throw new Error('status ' + res.status);
+    syncOk = true;
+  } catch(e) {
+    console.warn('Échec de synchronisation de la présence.', e);
+    syncOk = false;
+  }
+  setSyncIndicator();
 }
 
 // Event delegation
@@ -490,17 +554,32 @@ document.getElementById('tbody').addEventListener('click', function(e) {
   togglePresence(i, j);
 });
 
-function confirmReset() {
+async function confirmReset() {
   if (confirm('Effacer toutes les présences de la saison ?')) {
-    presence = SWIMMERS.map(() => new Array(DATES.length).fill(false));
-    saveState();
+    presence = emptyPresence();
+    saveLocalCache();
     buildTable();
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({reset: true})
+      });
+      if (!res.ok) throw new Error('status ' + res.status);
+      syncOk = true;
+    } catch(e) {
+      console.warn('Échec de synchronisation de la réinitialisation.', e);
+      syncOk = false;
+    }
+    setSyncIndicator();
   }
 }
 
 // Init
-loadState();
-buildTable();
+(async function init() {
+  await loadState();
+  buildTable();
+})();
 </script>
 </body>
 </html>

@@ -1,0 +1,9 @@
+*_BACKUP_*
+*.bak*
+deploy-*.zip
+*.log
+.netlify/
+node_modules/
+.wrangler/
+import-presence.sql
+.last-deploy.stamp
