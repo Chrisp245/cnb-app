@@ -205,6 +205,60 @@ td.col-holiday.checked .cell-inner{background:linear-gradient(135deg,#00ff6a 0%,
 <meta name="theme-color" content="#1e3a5f">
 <link rel="icon" type="image/png" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+
+<!-- ===== PROGRAMME COMPÉTITION STYLES ===== -->
+<style>
+.cc-tabs{display:flex;gap:0;background:rgba(0,0,0,0.3);border-bottom:1px solid rgba(255,255,255,0.1);}
+.cc-tab{flex:1;background:none;border:none;color:rgba(255,255,255,0.5);padding:13px 8px;font-size:13px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;letter-spacing:0.2px;font-family:inherit;}
+.cc-tab-active{color:#fff;border-bottom-color:#60d394;}
+.cc-panel{padding:16px 14px 60px;max-width:760px;margin:0 auto;}
+.cc-import-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:12px 14px;margin-bottom:12px;}
+.cc-liveffn-btn{background:linear-gradient(135deg,#1e3a5f,#1d4ed8);color:#fff;text-decoration:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;white-space:nowrap;}
+.cc-import-note{font-size:11px;color:rgba(255,255,255,0.55);flex:1;min-width:180px;line-height:1.5;}
+.cc-filter-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.75);padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+.cc-filter-btn.on{background:rgba(57,255,20,0.15);border-color:#39ff14;color:#39ff14;}
+.cc-reunion{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#fde68a;margin:16px 2px 8px;}
+.cc-ev-item{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:12px;margin-bottom:8px;overflow:hidden;}
+.cc-ev-item.has-hl{border-color:rgba(57,255,20,0.35);}
+.cc-ev-header{display:flex;align-items:center;padding:11px 14px;cursor:pointer;gap:10px;}
+.cc-ev-num{font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);width:24px;flex-shrink:0;}
+.cc-ev-name{flex:1;font-size:14px;font-weight:700;color:#fff;}
+.cc-ev-h{font-size:11px;font-weight:600;color:rgba(255,255,255,0.45);margin-left:6px;}
+.cc-ev-hl{flex:none;min-width:22px;height:22px;border-radius:11px;background:#39ff14;color:#0f2447;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 6px;}
+.cc-ev-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;flex-shrink:0;}
+.badge-d{background:rgba(236,72,153,0.25);color:#f9a8d4;}
+.badge-m{background:rgba(59,130,246,0.25);color:#93c5fd;}
+.cc-ev-toggle{font-size:16px;color:rgba(255,255,255,0.3);flex-shrink:0;transition:transform 0.2s;}
+.cc-ev-toggle.open{transform:rotate(180deg);}
+.cc-ev-body{display:none;border-top:1px solid rgba(255,255,255,0.08);padding:12px 14px;}
+.cc-ev-body.open{display:block;}
+.cc-ser-block{margin-bottom:12px;}
+.cc-ser-label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;}
+.cc-full-sum{color:rgba(255,255,255,0.55);font-size:12px;padding:2px 2px 8px;}
+.cc-full-cnb-t{color:#39ff14;}
+.cc-full-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;font-size:13px;color:rgba(255,255,255,0.72);}
+.cc-full-row:nth-child(even){background:rgba(255,255,255,0.03);}
+.cc-full-row.is-cnb{color:#39ff14;font-weight:800;background:rgba(57,255,20,0.10);box-shadow:inset 3px 0 0 #39ff14;text-shadow:0 0 8px rgba(57,255,20,0.35);}
+.cc-full-lane{width:26px;flex:none;font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);}
+.cc-full-row.is-cnb .cc-full-lane{color:#39ff14;}
+.cc-full-name{flex:1;min-width:0;}
+.cc-full-year{flex:none;font-size:11px;opacity:.55;font-variant-numeric:tabular-nums;}
+.cc-full-club{flex:none;font-size:10px;font-weight:700;letter-spacing:.3px;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,0.10);color:rgba(255,255,255,0.6);}
+.cc-full-row.is-cnb .cc-full-club{background:#39ff14;color:#0f2447;}
+.cc-full-time{flex:none;width:58px;text-align:right;font-variant-numeric:tabular-nums;font-size:12px;opacity:.85;}
+.cc-res-group{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;overflow:hidden;margin-bottom:10px;}
+.cc-res-group-header{padding:10px 14px;background:rgba(255,255,255,0.05);font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.6px;}
+.cc-res-row{display:flex;align-items:center;padding:9px 14px;border-top:1px solid rgba(255,255,255,0.06);gap:10px;}
+.cc-res-lane{font-size:11px;color:rgba(255,255,255,0.35);width:32px;flex-shrink:0;}
+.cc-res-time{font-size:18px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;min-width:76px;}
+.cc-res-name{flex:1;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);}
+.cc-res-eng{font-size:11px;font-weight:500;color:rgba(255,255,255,0.45);margin-top:2px;}
+.cc-res-eng b{color:#fbbf24;font-weight:700;font-variant-numeric:tabular-nums;}
+.cc-res-delta{font-size:12px;font-weight:700;min-width:44px;text-align:right;font-variant-numeric:tabular-nums;}
+.cc-res-fast{color:#60d394;}
+.cc-res-slow{color:#fca5a5;}
+.cc-empty{padding:32px;text-align:center;color:rgba(255,255,255,0.3);font-size:14px;}
+</style>
 </head>
 <body>
 
@@ -392,8 +446,66 @@ td.col-holiday.checked .cell-inner{background:linear-gradient(135deg,#00ff6a 0%,
     <button class="perf-close" onclick="closeComp()" style="position:absolute;right:16px;">✕</button>
   </div>
   <div style="max-width:640px;margin:8px auto 40px;padding:0 16px;">
+        <!-- Prochaine compétition (programme) -->
+    <div style="background:#fff;border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,0.13),0 2px 8px rgba(30,58,95,0.08);padding:30px 24px;text-align:center;margin:12px 0 28px;">
+      <div style="display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f59e0b,#d97706);width:64px;height:64px;border-radius:16px;box-shadow:0 4px 16px rgba(245,158,11,0.4);margin-bottom:18px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4"/><path d="M7 4H5a2 2 0 0 0-2 2v1a4 4 0 0 0 4 4h.5"/><path d="M17 4h2a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4h-.5"/><path d="M7 4a5 5 0 0 0 10 0V2H7v2z"/></svg>
+      </div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:#16a34a;text-transform:uppercase;margin-bottom:8px;">📅 Prochaine compétition</div>
+      <h2 style="font-size:23px;font-weight:900;color:#1e3a5f;margin:0 0 18px;line-height:1.2;">MEETING DÉPARTEMENTAL<br>U12 ET +</h2>
+      <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <span style="background:#f1f5f9;padding:8px 14px;border-radius:20px;font-size:14px;font-weight:700;color:#1e3a5f;">📅 Dimanche 11 Octobre 2026</span>
+        <span style="background:#f1f5f9;padding:8px 14px;border-radius:20px;font-size:14px;font-weight:700;color:#1e3a5f;">📍 OYONNAX</span>
+        <span style="background:#f1f5f9;padding:8px 14px;border-radius:20px;font-size:14px;font-weight:700;color:#1e3a5f;">🏊 Bassin 25 m</span>
+      </div>
+      <div style="background:#f8fafc;border-radius:12px;padding:12px 16px;margin-bottom:22px;text-align:left;">
+        <div style="font-size:12px;color:#334155;line-height:1.7;"><b>Réunion N°1</b> · portes 8h30 · 1ère épreuve 9h45<br><b>Réunion N°2</b> · portes 14h00 · 1ère épreuve 15h00</div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:6px;">38 épreuves · horaires indicatifs (source LiveFFN)</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;">
+        <a href="#" onclick="openChrono(); return false;" style="display:inline-block;background:linear-gradient(135deg,#059669,#10b981);color:#fff;text-decoration:none;padding:13px 32px;border-radius:14px;font-size:15px;font-weight:800;box-shadow:0 4px 14px rgba(5,150,105,0.4);letter-spacing:0.3px;width:100%;box-sizing:border-box;text-align:center;">📋 Programme</a>
+        <a href="https://www.liveffn.com/cgi-bin/resultats.php?competition=94488&langue=fra" target="_blank" rel="noopener" style="display:inline-block;background:linear-gradient(135deg,#1e3a5f,#1d4ed8);color:#fff;text-decoration:none;padding:14px 32px;border-radius:14px;font-size:16px;font-weight:800;box-shadow:0 4px 16px rgba(29,78,216,0.35);letter-spacing:0.3px;width:100%;box-sizing:border-box;text-align:center;">Voir les résultats FFN ↗</a>
+      </div>
+    </div>
     <div id="comp-count" style="text-align:center;color:#6b7280;font-size:13px;font-weight:700;margin:4px 0 18px;letter-spacing:0.3px;"></div>
     <div id="comp-list"></div>
+  </div>
+</div>
+
+<!-- ===== PROGRAMME OVERLAY (Meeting Oyonnax 11/10/2026) ===== -->
+<div id="chrono-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#0f2447 0%,#1a3a6b 100%);overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:'Nunito',sans-serif;">
+  <div class="header" style="position:relative;">
+    <a href="#" onclick="closeChrono(); return false;" class="back-btn" style="flex:none;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Retour
+    </a>
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex:1;min-width:0;">
+      <div class="logo-circle"><img id="chrono-logo" alt="CNB"></div>
+      <div class="header-text" style="text-align:left;flex:none;">
+        <div class="header-title">BENJAMINS · CN Bourg-en-Bresse</div>
+        <div class="header-subtitle">Programme – Oyonnax – 11 oct. 2026</div>
+      </div>
+    </div>
+  </div>
+  <div class="cc-tabs">
+    <button class="cc-tab cc-tab-active" onclick="showCCTab('programme',this)">📋 Programme</button>
+    <button class="cc-tab" onclick="showCCTab('resultats',this)">🏆 Résultats</button>
+  </div>
+  <div id="cc-programme" class="cc-panel">
+    <div class="cc-import-bar">
+      <a href="https://www.liveffn.com/cgi-bin/startlist.php?competition=94488&langue=fra" target="_blank" rel="noopener" class="cc-liveffn-btn">📡 Liste de départ FFN ↗</a>
+      <span class="cc-import-note">Programme complet · nageurs CNB nés en 2013 et 2014 en vert fluo · séries et couloirs provisoires (reconstitués d’après les engagements, la liste officielle sort après la réunion technique)</span>
+      <button class="cc-filter-btn" id="cc-filter-btn" onclick="ccToggleFilter()">Filtrer : mes nageurs 2013-2014</button>
+    </div>
+    <div id="cc-events-list"></div>
+  </div>
+  <div id="cc-resultats" class="cc-panel" style="display:none">
+    <div id="cc-live-bar" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px 14px;margin-bottom:10px;">
+      <label style="color:#fff;font-size:13px;font-weight:700;cursor:pointer;"><input type="checkbox" id="cc-live-on" checked onchange="ccLiveToggle()"> 📡 Résultats FFN en direct</label>
+      <span id="cc-live-status" style="color:rgba(255,255,255,0.55);font-size:11px;"></span>
+      <a href="https://www.liveffn.com/cgi-bin/resultats.php?competition=94488&langue=fra" target="_blank" rel="noopener" style="color:#93c5fd;font-size:12px;font-weight:700;text-decoration:none;">LiveFFN ↗</a>
+    </div>
+    <div id="cc-live-content"></div>
   </div>
 </div>
 
@@ -1244,6 +1356,211 @@ document.getElementById('tbody').addEventListener('click', function(e) {
   if (!cell) return;
   togglePresence(parseInt(cell.dataset.i), parseInt(cell.dataset.j));
 });
+</script>
+
+<script>
+// ══ PROGRAMME – MEETING DÉPARTEMENTAL U12 ET + · OYONNAX · 11/10/2026 (LiveFFN 94488) ══
+// Nageurs CNB nés en 2013 et 2014 = surbrillance verte. Séries/couloirs reconstitués d'après les temps d'engagement
+// (la liste de départ officielle FFN n'est publiée qu'après la réunion technique).
+const CC_COMP = '94488';
+const CC_HL_YEARS = ["2013", "2014"];
+const CC_PROGRAM = [{"ev": "U15 4×50 NL", "g": "D", "h": "09h45", "r": 1, "epr": 47, "relay": true}, {"ev": "U15 4×50 NL", "g": "M", "h": "09h48", "r": 1, "epr": 97, "relay": true}, {"ev": "800 NL", "g": "D", "h": "09h51", "r": 1, "epr": 5, "relay": false}, {"ev": "800 NL", "g": "M", "h": "10h03", "r": 1, "epr": 55, "relay": false}, {"ev": "100 Dos", "g": "D", "h": "10h15", "r": 1, "epr": 12, "relay": false}, {"ev": "100 Dos", "g": "M", "h": "10h22", "r": 1, "epr": 62, "relay": false}, {"ev": "U15 50 Bra.", "g": "D", "h": "10h43", "r": 1, "epr": 21, "relay": false}, {"ev": "U15 50 Bra.", "g": "M", "h": "10h47", "r": 1, "epr": 71, "relay": false}, {"ev": "200 Pap.", "g": "D", "h": "10h52", "r": 1, "epr": 33, "relay": false}, {"ev": "200 Pap.", "g": "M", "h": "10h55", "r": 1, "epr": 83, "relay": false}, {"ev": "400 4N", "g": "M", "h": "10h59", "r": 1, "epr": 92, "relay": false}, {"ev": "U15 50 Pap.", "g": "D", "h": "11h14", "r": 1, "epr": 31, "relay": false}, {"ev": "U15 50 Pap.", "g": "M", "h": "11h19", "r": 1, "epr": 81, "relay": false}, {"ev": "100 NL", "g": "D", "h": "11h23", "r": 1, "epr": 2, "relay": false}, {"ev": "100 NL", "g": "M", "h": "11h32", "r": 1, "epr": 52, "relay": false}, {"ev": "200 Bra.", "g": "D", "h": "11h38", "r": 1, "epr": 23, "relay": false}, {"ev": "200 Bra.", "g": "M", "h": "11h43", "r": 1, "epr": 73, "relay": false}, {"ev": "200 NL", "g": "D", "h": "11h47", "r": 1, "epr": 3, "relay": false}, {"ev": "200 NL", "g": "M", "h": "12h01", "r": 1, "epr": 53, "relay": false}, {"ev": "1500 NL", "g": "M", "h": "15h00", "r": 2, "epr": 56, "relay": false}, {"ev": "100 4N", "g": "D", "h": "15h16", "r": 2, "epr": 40, "relay": false}, {"ev": "100 4N", "g": "M", "h": "15h19", "r": 2, "epr": 90, "relay": false}, {"ev": "U15 50 NL", "g": "D", "h": "15h37", "r": 2, "epr": 1, "relay": false}, {"ev": "U15 50 NL", "g": "M", "h": "15h42", "r": 2, "epr": 51, "relay": false}, {"ev": "100 Bra.", "g": "D", "h": "15h48", "r": 2, "epr": 22, "relay": false}, {"ev": "100 Bra.", "g": "M", "h": "15h50", "r": 2, "epr": 72, "relay": false}, {"ev": "200 4N", "g": "D", "h": "15h55", "r": 2, "epr": 41, "relay": false}, {"ev": "50 Dos", "g": "D", "h": "16h03", "r": 2, "epr": 11, "relay": false}, {"ev": "200 4N", "g": "M", "h": "16h08", "r": 2, "epr": 91, "relay": false}, {"ev": "U15 50 Dos", "g": "M", "h": "16h35", "r": 2, "epr": 61, "relay": false}, {"ev": "400 NL", "g": "D", "h": "16h38", "r": 2, "epr": 4, "relay": false}, {"ev": "400 NL", "g": "M", "h": "16h52", "r": 2, "epr": 54, "relay": false}, {"ev": "100 Pap.", "g": "D", "h": "17h08", "r": 2, "epr": 32, "relay": false}, {"ev": "100 Pap.", "g": "M", "h": "17h12", "r": 2, "epr": 82, "relay": false}, {"ev": "200 Dos", "g": "D", "h": "17h17", "r": 2, "epr": 13, "relay": false}, {"ev": "200 Dos", "g": "M", "h": "17h35", "r": 2, "epr": 63, "relay": false}, {"ev": "U15 4×100 4N", "g": "D", "h": "17h39", "r": 2, "epr": 46, "relay": true}, {"ev": "U15 4×100 4N", "g": "M", "h": "17h46", "r": 2, "epr": 96, "relay": true}];
+const CC_FULL = [null, null, [[["LE CORVOISIER AUBRY Emma", "PGN", "NT", "2014"], ["TAHIR Lina", "PGN", "NT", "2013"], ["MONY Alexandra", "OYO", "NT", "2003"], ["TABUREL Romane", "CNB", "10:44.63", "2010"], ["TALBOT Apolline", "PGN", "11:36.54", "2014"], ["GERFAUD-VALENTIN Abigaëlle", "CNB", "NT", "2007"], ["BOR Iris", "PGN", "NT", "2014"], ["ARAYER Thea", "PGN", "NT", "2013"]]], [[null, null, ["SOLOVYANOV Alexander", "BEL", "10:43.29", "2012"], ["MONTET Arthur", "CNB", "8:32.55", "2006"], ["FOURÉ DELORME Thomas", "CNB", "9:56.55", "2012"], ["BOUSSIF Youssef", "CNB", "NT", "2010"], null, null]], [[null, null, ["VICTOR PIN Océane", "AMB", "NT", "2014"], ["PHALIPPON Elisa", "AMB", "NT", "2014"], ["MULLER Olivia", "AMB", "NT", "2014"], null, null, null], [["ESSADKI Maïssane", "CNB", "1:46.00", "2014"], ["ARCHENY Emma", "OYO", "1:35.29", "2014"], ["LE CORVOISIER AUBRY Emma", "PGN", "1:30.42", "2014"], ["BERTONI Chiara", "OYO", "1:22.12", "2011"], ["RIBEYRON Agathe", "CNB", "1:22.53", "2013"], ["BEKAR Julide", "OYO", "1:31.46", "2013"], ["AZZAZ Lylia", "CNB", "1:38.55", "2014"], null], [["BOUTELDJA Ayem", "BEL", "1:21.75", "2014"], ["DUBOISSET Emmy", "AMB", "1:21.23", "2013"], ["BOUTHORS GROBOZ Pénélope", "CNB", "1:17.56", "2008"], ["LESUEUR MANCEAU Adele", "AMB", "1:10.91", "2013"], ["FEIN Clarisse", "CNB", "1:12.42", "2010"], ["PETRUCCI Eva", "PGN", "1:19.79", "2013"], ["PENIN Penelope", "BEL", "1:21.68", "2013"], ["SERRE Chloe", "OYO", "1:22.05", "2009"]]], [[null, ["BOURGEON Gabin", "AMB", "1:50.11", "2013"], ["OMRANI Nassim", "CNB", "1:29.18", "2014"], ["SANCHEZ Leo", "OYO", "1:20.36", "2013"], ["MAESTRIPIERI Loris", "AMB", "1:28.23", "2012"], ["DUPRAT PAKULA Robin", "CNB", "1:34.22", "2014"], null, null], [["ORQUIN Evan", "AMB", "1:18.66", "2011"], ["GAJNIK Scott", "AMB", "1:14.59", "2013"], ["DELEBASSEE Florian", "AMB", "1:10.20", "2004"], ["TALBOT Louis", "PGN", "1:09.50", "2009"], ["POBEL Timaël", "CNB", "1:09.58", "2012"], ["BOUSSIF Ayoub", "CNB", "1:12.26", "2012"], ["MARCHAND Mathéo", "PGN", "1:17.08", "2013"], ["JOUCHOUX Lenny", "CNB", "1:20.04", "2013"]], [["DUBOISSET Théo", "AMB", "1:08.66", "2010"], ["WAGNER ROBINEAU Elias", "PGN", "1:08.54", "2009"], ["GAJNIK Matt", "AMB", "1:05.91", "2006"], ["DELEBASSEE Julien", "AMB", "58.51", "2007"], ["BERNARD Tao", "CNB", "1:02.57", "2010"], ["WAGNER ROBINEAU Simon", "PGN", "1:06.97", "2012"], ["LUSY-DEGRANGE Jules", "CNB", "1:08.65", "2009"], ["BOSCH Raphaël", "CNB", "1:09.23", "2012"]]], [[["ARAYER Thea", "PGN", "1:00.36", "2013"], ["VIRGINIE Paloma", "BEL", "55.63", "2013"], ["BOR Iris", "PGN", "53.11", "2014"], ["POMERET Lucile", "BEL", "48.48", "2014"], ["AZZAZ Lylia", "CNB", "51.57", "2014"], ["GARBE Sophie", "BEL", "53.95", "2014"], ["BENNIS Hajar", "OYO", "57.34", "2014"], ["BASCEYHAN Seda", "BEL", "1:11.05", "2012"]], [["JAY Maëlys", "CNB", "44.59", "2013"], ["TALBOT Apolline", "PGN", "41.70", "2014"], ["DONNIER VALENTIN Zélie", "CNB", "40.00", "2013"], ["PIERREHUMBERT Nina", "PGN", "38.66", "2010"], ["DONNIER VALENTIN Joy", "CNB", "39.63", "2013"], ["PIQUET Alice", "OYO", "40.13", "2003"], ["TARTAGLIONE Jade", "CNB", "43.06", "2014"], ["BIZAUD Sonia", "CNB", "45.70", "2014"]]], [[null, null, ["NOVO Adam", "PGN", "57.20", "2014"], ["CALVO David", "PGN", "51.86", "2014"], ["DAMBRI Kehynn", "PGN", "52.38", "2014"], ["FROMENTIN Recky", "BEL", "1:03.86", "2014"], null, null], [["RAPHAËL LE DOCTE Tianao", "CNB", "44.86", "2014"], ["LELARDOUX Jonas", "AMB", "40.88", "2014"], ["FOURÉ DELORME Thomas", "CNB", "37.84", "2012"], ["CHOUDIN GARCIA Timothe", "PGN", "37.28", "2009"], ["BOUSSIF Ayoub", "CNB", "37.35", "2012"], ["DUSSURGET Bastien", "CNB", "37.93", "2013"], ["CHENE Jonah", "AMB", "43.86", "2014"], ["DUHAMEL Léo", "BEL", "48.29", "2014"]], [["MICHALET--NGUYEN Ambroise", "PGN", "33.93", "2009"], ["RIBEYRON Gautier", "CNB", "33.40", "2009"], ["LUSY-DEGRANGE Jules", "CNB", "32.82", "2009"], ["KERLING Hugo", "PGN", "31.69", "2009"], ["BOUSSIF Youssef", "CNB", "32.31", "2010"], ["MULET Thibault", "PGN", "33.01", "2009"], ["AZEKRI Haroun", "BEL", "33.82", "2010"], ["VILLAR BOSVEIL Axel", "PGN", "35.45", "2009"]]], [[null, null, null, ["GERFAUD-VALENTIN Abigaëlle", "CNB", "2:29.78", "2007"], null, null, null, null]], [[null, null, null, ["DELRUE Raphael", "AMB", "2:23.09", "2011"], ["SOLOVYANOV Alexander", "BEL", "3:29.18", "2012"], null, null, null]], [[null, null, null, ["LELARDOUX Jonas", "AMB", "NT", "2014"], ["CHENE Jonah", "AMB", "NT", "2014"], null, null, null]], [[null, null, ["BENNIS Hajar", "OYO", "55.24", "2014"], ["LE CORVOISIER AUBRY Emma", "PGN", "52.09", "2014"], ["GARBE Sophie", "BEL", "54.81", "2014"], ["BASCEYHAN Seda", "BEL", "1:14.64", "2012"], null, null], [["BOR Iris", "PGN", "50.37", "2014"], ["ESSADKI Maïssane", "CNB", "45.63", "2014"], ["ARCHENY Emma", "OYO", "42.28", "2014"], ["DREVET Océane", "AMB", "38.70", "2009"], ["BEKAR Julide", "OYO", "38.75", "2013"], ["GHOULI Ines", "AMB", "45.47", "2012"], ["TAHIR Lina", "PGN", "45.65", "2013"], ["ARAYER Thea", "PGN", "51.30", "2013"]], [["PENIN Penelope", "BEL", "37.52", "2013"], ["NOVAKOSKI Clara", "OYO", "35.88", "2012"], ["RATIGNER Clara", "AMB", "32.83", "2011"], ["LEGRIS Emma", "AMB", "30.47", "2012"], ["LESUEUR MANCEAU Adele", "AMB", "31.11", "2013"], ["BOUTELDJA Ayem", "BEL", "34.90", "2014"], ["BIZAUD Sonia", "CNB", "36.82", "2014"], ["TARTAGLIONE Jade", "CNB", "38.19", "2014"]]], [[null, null, ["NOVO Adam", "PGN", "51.90", "2014"], ["DUPRAT PAKULA Robin", "CNB", "44.13", "2014"], ["CALVO David", "PGN", "50.97", "2014"], ["FROMENTIN Recky", "BEL", "57.96", "2014"], null, null], [["DUHAMEL Léo", "BEL", "38.32", "2014"], ["RATIGNER Nolan", "AMB", "35.43", "2013"], ["FOURÉ DELORME Thomas", "CNB", "31.21", "2012"], ["AZEKRI Haroun", "BEL", "30.31", "2010"], ["BOSCH Raphaël", "CNB", "30.45", "2012"], ["SANCHEZ Leo", "OYO", "35.25", "2013"], ["OMRANI Nassim", "CNB", "37.05", "2014"], ["RAPHAËL LE DOCTE Tianao", "CNB", "43.90", "2014"]], [["BOUSSIF Ayoub", "CNB", "29.88", "2012"], ["POBEL Timaël", "CNB", "28.19", "2012"], ["WAGNER ROBINEAU Elias", "PGN", "27.73", "2009"], ["DELEBASSEE Julien", "AMB", "26.26", "2007"], ["MONTET Arthur", "CNB", "27.45", "2006"], ["BOUSSIF Youssef", "CNB", "27.83", "2010"], ["MARCHAND Mathéo", "PGN", "29.78", "2013"], ["BERNARD Tao", "CNB", "30.03", "2010"]]], [[null, null, ["VICTOR PIN Océane", "AMB", "NT", "2014"], ["BENNIS Hajar", "OYO", "1:41.49", "2014"], ["PHALIPPON Elisa", "AMB", "NT", "2014"], null, null, null], [null, ["VIRGINIE Paloma", "BEL", "1:32.13", "2013"], ["TAHIR Lina", "PGN", "1:25.35", "2013"], ["AZZAZ Lylia", "CNB", "1:20.63", "2014"], ["VILAREM GONZALEZ PALACIO Eva", "AMB", "1:21.93", "2013"], ["POMERET Lucile", "BEL", "1:31.42", "2014"], ["GHOULI Ines", "AMB", "1:34.78", "2012"], null], [["SERRE Chloe", "OYO", "1:17.05", "2009"], ["NOVAKOSKI Clara", "OYO", "1:13.19", "2012"], ["PENIN Penelope", "BEL", "1:11.87", "2013"], ["PIERREHUMBERT Nina", "PGN", "1:08.75", "2010"], ["DONNIER VALENTIN Zélie", "CNB", "1:09.87", "2013"], ["DONNIER VALENTIN Joy", "CNB", "1:11.90", "2013"], ["BERTONI Chiara", "OYO", "1:14.05", "2011"], ["MULLER Olivia", "AMB", "1:18.55", "2014"]], [["PETRUCCI Eva", "PGN", "1:07.33", "2013"], ["CIESLAK Albane", "AMB", "1:04.63", "2010"], ["TABUREL Romane", "CNB", "1:03.42", "2010"], ["GERFAUD-VALENTIN Abigaëlle", "CNB", "1:02.46", "2007"], ["MOHAMED Laina", "AMB", "1:03.41", "2008"], ["FEIN Clarisse", "CNB", "1:03.48", "2010"], ["BOUTHORS GROBOZ Pénélope", "CNB", "1:06.19", "2008"], ["RIBEYRON Agathe", "CNB", "1:08.42", "2013"]]], [[null, ["DAMBRI Kehynn", "PGN", "1:40.30", "2014"], ["CHENE Jonah", "AMB", "1:15.76", "2014"], ["DUSSURGET Bastien", "CNB", "1:11.14", "2013"], ["LELARDOUX Jonas", "AMB", "1:15.01", "2014"], ["BOURGEON Gabin", "AMB", "1:27.01", "2013"], null, null], [["SOLOVYANOV Alexander", "BEL", "1:06.93", "2012"], ["NOVAKOSKI Jules", "OYO", "1:04.47", "2010"], ["DELEBASSEE Florian", "AMB", "1:03.19", "2004"], ["MULET Thibault", "PGN", "1:01.51", "2009"], ["TALBOT Louis", "PGN", "1:02.94", "2009"], ["MONNET Mathéo", "PGN", "1:04.20", "2011"], ["VILLAR BOSVEIL Axel", "PGN", "1:04.96", "2009"], ["JOUCHOUX Lenny", "CNB", "1:10.80", "2013"]], [["BERNARD Tao", "CNB", "1:01.30", "2010"], ["KERLING Hugo", "PGN", "57.94", "2009"], ["LUSY-DEGRANGE Jules", "CNB", "56.48", "2009"], ["GAJNIK Matt", "AMB", "54.77", "2006"], ["MICHALET--NGUYEN Ambroise", "PGN", "55.85", "2009"], ["RIBEYRON Gautier", "CNB", "56.85", "2009"], ["WAGNER ROBINEAU Elias", "PGN", "58.95", "2009"], ["CHOUDIN GARCIA Timothe", "PGN", "1:01.44", "2009"]]], [[["JAY Maëlys", "CNB", "3:31.94", "2013"], ["DUBOISSET Emmy", "AMB", "3:10.61", "2013"], ["LEGRIS Emma", "AMB", "3:05.71", "2012"], ["RATIGNER Clara", "AMB", "2:49.31", "2011"], ["PIQUET Alice", "OYO", "3:05.45", "2003"], ["CHEVALIER Charlotte", "AMB", "3:10.48", "2011"], ["TALBOT Apolline", "PGN", "3:14.13", "2014"], null]], [[null, ["LELARDOUX Jonas", "AMB", "3:30.76", "2014"], ["BOSCH Raphaël", "CNB", "3:00.57", "2012"], ["DELRUE Raphael", "AMB", "2:39.53", "2011"], ["AZEKRI Haroun", "BEL", "2:45.15", "2010"], ["BOUSSIF Ayoub", "CNB", "3:15.74", "2012"], null, null]], [[null, null, ["POMERET Lucile", "BEL", "3:21.62", "2014"], ["ARCHENY Emma", "OYO", "3:11.82", "2014"], ["VIRGINIE Paloma", "BEL", "3:15.13", "2013"], null, null, null], [["GARBE Sophie", "BEL", "3:05.76", "2014"], ["MULLER Olivia", "AMB", "2:51.98", "2014"], ["TARTAGLIONE Jade", "CNB", "2:46.06", "2014"], ["BIZAUD Sonia", "CNB", "2:45.30", "2014"], ["DREVET Océane", "AMB", "2:45.59", "2009"], ["BEKAR Julide", "OYO", "2:49.72", "2013"], ["VILAREM GONZALEZ PALACIO Eva", "AMB", "2:58.82", "2013"], ["ESSADKI Maïssane", "CNB", "3:08.16", "2014"]], [["SERRE Chloe", "OYO", "2:37.04", "2009"], ["TALBOT Leonore", "PGN", "2:35.89", "2011"], ["DONNIER VALENTIN Zélie", "CNB", "2:31.32", "2013"], ["RIBEYRON Agathe", "CNB", "2:28.94", "2013"], ["PETRUCCI Eva", "PGN", "2:30.02", "2013"], ["DONNIER VALENTIN Joy", "CNB", "2:34.65", "2013"], ["VUARIER Amélie", "PGN", "2:36.90", "2012"], ["MULET Axelle", "PGN", "2:39.50", "2012"]], [["BOUTHORS GROBOZ Pénélope", "CNB", "2:25.30", "2008"], ["LESUEUR MANCEAU Adele", "AMB", "2:23.57", "2013"], ["FEIN Clarisse", "CNB", "2:21.93", "2010"], ["CIESLAK Albane", "AMB", "2:14.44", "2010"], ["MOHAMED Laina", "AMB", "2:21.82", "2008"], ["CHEVALIER Charlotte", "AMB", "2:22.60", "2011"], ["PIERREHUMBERT Nina", "PGN", "2:24.51", "2010"], ["AGUADO MUNOZ ARROYO Clara", "PGN", "2:28.90", "2012"]]], [[null, ["NOVO Adam", "PGN", "NT", "2014"], ["DAMBRI Kehynn", "PGN", "3:25.83", "2014"], ["CALVO David", "PGN", "3:14.57", "2014"], ["OMRANI Nassim", "CNB", "3:17.05", "2014"], ["FROMENTIN Recky", "BEL", "3:46.77", "2014"], null, null], [["DUPRAT PAKULA Robin", "CNB", "2:54.50", "2014"], ["CHENE Jonah", "AMB", "2:39.75", "2014"], ["SANCHEZ Leo", "OYO", "2:38.31", "2013"], ["MAIRE Celian", "PGN", "2:30.35", "2011"], ["DUSSURGET Bastien", "CNB", "2:38.12", "2013"], ["ORQUIN Evan", "AMB", "2:38.68", "2011"], ["RAPHAËL LE DOCTE Tianao", "CNB", "2:44.60", "2014"], ["DUHAMEL Léo", "BEL", "2:56.00", "2014"]], [["JOUCHOUX Lenny", "CNB", "2:29.66", "2013"], ["NOVAKOSKI Jules", "OYO", "2:27.15", "2010"], ["GAJNIK Scott", "AMB", "2:24.87", "2013"], ["MULET Thibault", "PGN", "2:17.68", "2009"], ["VILLAR BOSVEIL Axel", "PGN", "2:24.35", "2009"], ["MARCHAND Mathéo", "PGN", "2:26.21", "2013"], ["RATIGNER Nolan", "AMB", "2:28.77", "2013"], ["MAESTRIPIERI Loris", "AMB", "2:29.91", "2012"]], [["POBEL Timaël", "CNB", "2:14.89", "2012"], ["FOURÉ DELORME Thomas", "CNB", "2:10.99", "2012"], ["MICHALET--NGUYEN Ambroise", "PGN", "2:05.00", "2009"], ["MONTET Arthur", "CNB", "1:54.01", "2006"], ["DELEBASSEE Julien", "AMB", "1:58.83", "2007"], ["RIBEYRON Gautier", "CNB", "2:06.37", "2009"], ["TORRE RONCOLI Lorenzo", "PGN", "2:14.25", "2012"], ["DUBOISSET Théo", "AMB", "2:14.94", "2010"]]], [[null, null, null, ["MONTET Arthur", "CNB", "16:06.52", "2006"], null, null, null, null]], [[["MONY Alexandra", "OYO", "NT", "2003"], ["GHOULI Ines", "AMB", "1:55.09", "2012"], ["MULLER Olivia", "AMB", "1:35.96", "2014"], ["DREVET Océane", "AMB", "1:23.05", "2009"], ["ARCHENY Emma", "OYO", "1:33.25", "2014"], ["ARAYER Thea", "PGN", "1:47.66", "2013"], ["PIQUET Alice", "OYO", "NT", "2003"], ["CIESLAK Albane", "AMB", "NT", "2010"]]], [[["HAAB Quentin", "AMB", "NT", "2003"], ["LELARDOUX Jonas", "AMB", "1:32.15", "2014"], ["MULET Thibault", "PGN", "1:17.28", "2009"], ["GAJNIK Matt", "AMB", "1:05.56", "2006"], ["CHOUDIN GARCIA Timothe", "PGN", "1:13.38", "2009"], ["CHENE Jonah", "AMB", "1:22.06", "2014"], ["BOURGEON Gabin", "AMB", "1:52.46", "2013"], ["BAIANO Alessandro", "PGN", "NT", "2014"]]], [[null, ["VICTOR PIN Océane", "AMB", "NT", "2014"], ["BASCEYHAN Seda", "BEL", "52.51", "2012"], ["GARBE Sophie", "BEL", "40.02", "2014"], ["GHOULI Ines", "AMB", "41.52", "2012"], ["PHALIPPON Elisa", "AMB", "NT", "2014"], null, null], [["BOR Iris", "PGN", "39.01", "2014"], ["ESSADKI Maïssane", "CNB", "37.60", "2014"], ["JAY Maëlys", "CNB", "36.33", "2013"], ["AZZAZ Lylia", "CNB", "35.04", "2014"], ["LE CORVOISIER AUBRY Emma", "PGN", "35.88", "2014"], ["TAHIR Lina", "PGN", "36.91", "2013"], ["VIRGINIE Paloma", "BEL", "38.98", "2013"], ["POMERET Lucile", "BEL", "39.81", "2014"]], [["BOUTELDJA Ayem", "BEL", "33.68", "2014"], ["NOVAKOSKI Clara", "OYO", "33.15", "2012"], ["PENIN Penelope", "BEL", "32.53", "2013"], ["RIBEYRON Agathe", "CNB", "31.95", "2013"], ["BIZAUD Sonia", "CNB", "32.17", "2014"], ["BEKAR Julide", "OYO", "33.00", "2013"], ["TARTAGLIONE Jade", "CNB", "33.35", "2014"], ["BERTONI Chiara", "OYO", "33.98", "2011"]], [["PIQUET Alice", "OYO", "30.90", "2003"], ["BOUTHORS GROBOZ Pénélope", "CNB", "30.27", "2008"], ["MOHAMED Laina", "AMB", "29.42", "2008"], ["GERFAUD-VALENTIN Abigaëlle", "CNB", "28.66", "2007"], ["FEIN Clarisse", "CNB", "29.19", "2010"], ["TABUREL Romane", "CNB", "29.95", "2010"], ["PETRUCCI Eva", "PGN", "30.30", "2013"], ["PIERREHUMBERT Nina", "PGN", "31.30", "2010"]]], [[["FROMENTIN Recky", "BEL", "48.11", "2014"], ["BOURGEON Gabin", "AMB", "39.28", "2013"], ["NOVO Adam", "PGN", "38.67", "2014"], ["DUPRAT PAKULA Robin", "CNB", "34.89", "2014"], ["DUHAMEL Léo", "BEL", "36.12", "2014"], ["CALVO David", "PGN", "39.14", "2014"], ["DAMBRI Kehynn", "PGN", "39.94", "2014"], ["BAIANO Alessandro", "PGN", "NT", "2014"]], [["JOUCHOUX Lenny", "CNB", "31.95", "2013"], ["ORQUIN Evan", "AMB", "30.95", "2011"], ["MAESTRIPIERI Loris", "AMB", "29.17", "2012"], ["BERNARD Tao", "CNB", "28.91", "2010"], ["MARCHAND Mathéo", "PGN", "29.05", "2013"], ["SANCHEZ Leo", "OYO", "29.72", "2013"], ["SOLOVYANOV Alexander", "BEL", "31.77", "2012"], ["OMRANI Nassim", "CNB", "32.72", "2014"]], [["NOVAKOSKI Jules", "OYO", "27.97", "2010"], ["HAAB Quentin", "AMB", "27.76", "2003"], ["BOUSSIF Ayoub", "CNB", "27.41", "2012"], ["POBEL Timaël", "CNB", "26.83", "2012"], ["TALBOT Louis", "PGN", "27.41", "2009"], ["AZEKRI Haroun", "BEL", "27.60", "2010"], ["VILLAR BOSVEIL Axel", "PGN", "27.91", "2009"], ["CHOUDIN GARCIA Timothe", "PGN", "28.10", "2009"]], [["WAGNER ROBINEAU Elias", "PGN", "26.60", "2009"], ["KERLING Hugo", "PGN", "26.14", "2009"], ["BOUSSIF Youssef", "CNB", "25.95", "2010"], ["DELEBASSEE Julien", "AMB", "23.97", "2007"], ["MICHALET--NGUYEN Ambroise", "PGN", "25.43", "2009"], ["RIBEYRON Gautier", "CNB", "25.99", "2009"], ["LUSY-DEGRANGE Jules", "CNB", "26.16", "2009"], ["DELRUE Raphael", "AMB", "26.67", "2011"]]], [[["ARCHENY Emma", "OYO", "1:44.61", "2014"], ["TALBOT Apolline", "PGN", "1:32.61", "2014"], ["DONNIER VALENTIN Joy", "CNB", "1:27.52", "2013"], ["RATIGNER Clara", "AMB", "1:19.69", "2011"], ["DONNIER VALENTIN Zélie", "CNB", "1:27.45", "2013"], ["PIQUET Alice", "OYO", "1:27.73", "2003"], ["JAY Maëlys", "CNB", "1:39.03", "2013"], ["ARAYER Thea", "PGN", "NT", "2013"]]], [[null, null, ["RATIGNER Nolan", "AMB", "1:36.63", "2013"], ["DUSSURGET Bastien", "CNB", "1:29.23", "2013"], ["LELARDOUX Jonas", "AMB", "1:34.79", "2014"], null, null, null], [["ORQUIN Evan", "AMB", "1:26.85", "2011"], ["AZEKRI Haroun", "BEL", "1:14.49", "2010"], ["RIBEYRON Gautier", "CNB", "1:12.23", "2009"], ["KERLING Hugo", "PGN", "1:11.17", "2009"], ["LUSY-DEGRANGE Jules", "CNB", "1:11.66", "2009"], ["MULET Thibault", "PGN", "1:14.21", "2009"], ["BOSCH Raphaël", "CNB", "1:19.11", "2012"], null]], [[null, null, ["BOR Iris", "PGN", "NT", "2014"], ["VILAREM GONZALEZ PALACIO Eva", "AMB", "3:23.34", "2013"], ["GARBE Sophie", "BEL", "3:43.24", "2014"], ["LE CORVOISIER AUBRY Emma", "PGN", "NT", "2014"], null, null], [["MULLER Olivia", "AMB", "3:21.04", "2014"], ["DUBOISSET Emmy", "AMB", "2:57.20", "2013"], ["FEIN Clarisse", "CNB", "2:40.76", "2010"], ["LEGRIS Emma", "AMB", "2:35.45", "2012"], ["CHEVALIER Charlotte", "AMB", "2:38.77", "2011"], ["LESUEUR MANCEAU Adele", "AMB", "2:43.38", "2013"], ["NOVAKOSKI Clara", "OYO", "3:11.86", "2012"], ["AZZAZ Lylia", "CNB", "3:23.14", "2014"]]], [[["VICTOR PIN Océane", "AMB", "NT", "2014"], ["ARAYER Thea", "PGN", "50.24", "2013"], ["TALBOT Apolline", "PGN", "49.22", "2014"], ["VIRGINIE Paloma", "BEL", "45.98", "2013"], ["ESSADKI Maïssane", "CNB", "46.10", "2014"], ["BASCEYHAN Seda", "BEL", "49.48", "2012"], ["PHALIPPON Elisa", "AMB", "NT", "2014"], null], [["TAHIR Lina", "PGN", "44.46", "2013"], ["BIZAUD Sonia", "CNB", "40.37", "2014"], ["SERRE Chloe", "OYO", "39.53", "2009"], ["DONNIER VALENTIN Joy", "CNB", "38.81", "2013"], ["RIBEYRON Agathe", "CNB", "39.28", "2013"], ["TARTAGLIONE Jade", "CNB", "40.24", "2014"], ["ARCHENY Emma", "OYO", "41.96", "2014"], ["POMERET Lucile", "BEL", "45.82", "2014"]], [["PENIN Penelope", "BEL", "37.74", "2013"], ["BERTONI Chiara", "OYO", "36.45", "2011"], ["PETRUCCI Eva", "PGN", "35.39", "2013"], ["TABUREL Romane", "CNB", "33.44", "2010"], ["MOHAMED Laina", "AMB", "34.35", "2008"], ["BOUTHORS GROBOZ Pénélope", "CNB", "35.87", "2008"], ["BOUTELDJA Ayem", "BEL", "37.59", "2014"], ["DONNIER VALENTIN Zélie", "CNB", "37.80", "2013"]]], [[null, null, ["DAMBRI Kehynn", "PGN", "NT", "2014"], ["CALVO David", "PGN", "3:38.38", "2014"], ["VILLAR BOSVEIL Axel", "PGN", "NT", "2009"], null, null, null], [["DUHAMEL Léo", "BEL", "3:20.98", "2014"], ["CHENE Jonah", "AMB", "3:01.28", "2014"], ["RATIGNER Nolan", "AMB", "2:57.35", "2013"], ["MARCHAND Mathéo", "PGN", "2:45.50", "2013"], ["SOLOVYANOV Alexander", "BEL", "2:50.86", "2012"], ["WAGNER ROBINEAU Simon", "PGN", "2:57.38", "2012"], ["OMRANI Nassim", "CNB", "3:09.64", "2014"], null], [["DELEBASSEE Florian", "AMB", "2:38.21", "2004"], ["POBEL Timaël", "CNB", "2:29.65", "2012"], ["MICHALET--NGUYEN Ambroise", "PGN", "2:26.87", "2009"], ["DELEBASSEE Julien", "AMB", "2:09.60", "2007"], ["MONTET Arthur", "CNB", "2:16.05", "2006"], ["BOUSSIF Ayoub", "CNB", "2:26.88", "2012"], ["DUBOISSET Théo", "AMB", "2:32.52", "2010"], ["GAJNIK Scott", "AMB", "2:42.29", "2013"]]], [[null, ["FROMENTIN Recky", "BEL", "48.63", "2014"], ["JOUCHOUX Lenny", "CNB", "34.40", "2013"], ["CHOUDIN GARCIA Timothe", "PGN", "33.99", "2009"], ["KERLING Hugo", "PGN", "34.08", "2009"], ["DUPRAT PAKULA Robin", "CNB", "42.11", "2014"], ["BAIANO Alessandro", "PGN", "NT", "2014"], null], [["BOSCH Raphaël", "CNB", "32.37", "2012"], ["BOUSSIF Youssef", "CNB", "31.93", "2010"], ["WAGNER ROBINEAU Elias", "PGN", "31.12", "2009"], ["LUSY-DEGRANGE Jules", "CNB", "29.90", "2009"], ["BERNARD Tao", "CNB", "29.98", "2010"], ["TALBOT Louis", "PGN", "31.14", "2009"], ["AZEKRI Haroun", "BEL", "32.01", "2010"], ["NOVAKOSKI Jules", "OYO", "33.00", "2010"]]], [[null, null, ["GARBE Sophie", "BEL", "7:03.85", "2014"], ["JAY Maëlys", "CNB", "6:21.80", "2013"], ["MULLER Olivia", "AMB", "6:57.18", "2014"], null, null, null], [["DUBOISSET Emmy", "AMB", "5:26.52", "2013"], ["PIERREHUMBERT Nina", "PGN", "5:10.16", "2010"], ["GERFAUD-VALENTIN Abigaëlle", "CNB", "4:57.64", "2007"], ["CIESLAK Albane", "AMB", "4:38.61", "2010"], ["TABUREL Romane", "CNB", "4:48.78", "2010"], ["LEGRIS Emma", "AMB", "5:01.18", "2012"], ["MONY Alexandra", "OYO", "5:19.40", "2003"], ["RATIGNER Clara", "AMB", "5:29.73", "2011"]]], [[null, null, ["DAMBRI Kehynn", "PGN", "7:38.92", "2014"], ["CALVO David", "PGN", "7:01.48", "2014"], ["NOVO Adam", "PGN", "7:28.31", "2014"], null, null, null], [["DUSSURGET Bastien", "CNB", "5:52.30", "2013"], ["POBEL Timaël", "CNB", "4:48.25", "2012"], ["MICHALET--NGUYEN Ambroise", "PGN", "4:38.30", "2009"], ["DELRUE Raphael", "AMB", "4:30.63", "2011"], ["HAAB Quentin", "AMB", "4:37.71", "2003"], ["DUBOISSET Théo", "AMB", "4:42.92", "2010"], ["MULET Thibault", "PGN", "5:04.17", "2009"], ["BOURGEON Gabin", "AMB", "6:55.35", "2013"]]], [[null, null, ["VIRGINIE Paloma", "BEL", "NT", "2013"], ["AZZAZ Lylia", "CNB", "1:41.85", "2014"], ["ESSADKI Maïssane", "CNB", "NT", "2014"], null, null, null], [["BEKAR Julide", "OYO", "1:31.57", "2013"], ["BIZAUD Sonia", "CNB", "1:27.34", "2014"], ["DONNIER VALENTIN Zélie", "CNB", "1:25.45", "2013"], ["CHEVALIER Charlotte", "AMB", "1:11.62", "2011"], ["RIBEYRON Agathe", "CNB", "1:24.25", "2013"], ["DONNIER VALENTIN Joy", "CNB", "1:27.33", "2013"], ["BOUTHORS GROBOZ Pénélope", "CNB", "1:29.54", "2008"], ["VILAREM GONZALEZ PALACIO Eva", "AMB", "1:36.75", "2013"]]], [[["DUHAMEL Léo", "BEL", "1:34.98", "2014"], ["SOLOVYANOV Alexander", "BEL", "1:30.49", "2012"], ["SANCHEZ Leo", "OYO", "1:18.86", "2013"], ["GAJNIK Scott", "AMB", "1:15.71", "2013"], ["BERNARD Tao", "CNB", "1:16.92", "2010"], ["CHENE Jonah", "AMB", "1:22.76", "2014"], ["OMRANI Nassim", "CNB", "1:31.71", "2014"], null], [["MARCHAND Mathéo", "PGN", "1:10.69", "2013"], ["RIBEYRON Gautier", "CNB", "1:08.61", "2009"], ["MONTET Arthur", "CNB", "1:01.83", "2006"], ["GAJNIK Matt", "AMB", "1:00.45", "2006"], ["BOUSSIF Youssef", "CNB", "1:01.47", "2010"], ["WAGNER ROBINEAU Elias", "PGN", "1:04.80", "2009"], ["BOSCH Raphaël", "CNB", "1:08.85", "2012"], ["MAESTRIPIERI Loris", "AMB", "1:13.11", "2012"]]], [[["TALBOT Apolline", "PGN", "NT", "2014"], ["DREVET Océane", "AMB", "2:56.27", "2009"], ["PENIN Penelope", "BEL", "2:50.85", "2013"], ["LESUEUR MANCEAU Adele", "AMB", "2:36.75", "2013"], ["FEIN Clarisse", "CNB", "2:39.54", "2010"], ["SERRE Chloe", "OYO", "2:53.15", "2009"], ["BOUTELDJA Ayem", "BEL", "2:57.11", "2014"], ["TARTAGLIONE Jade", "CNB", "NT", "2014"]]], [[["DUPRAT PAKULA Robin", "CNB", "NT", "2014"], ["BOUSSIF Ayoub", "CNB", "2:48.80", "2012"], ["NOVAKOSKI Jules", "OYO", "2:42.51", "2010"], ["BERNARD Tao", "CNB", "2:17.19", "2010"], ["DELEBASSEE Florian", "AMB", "2:32.31", "2004"], ["JOUCHOUX Lenny", "CNB", "2:46.48", "2013"], ["BOUSSIF Youssef", "CNB", "NT", "2010"], null]], null, null];
+const CC_RELAYS = {"0": [["BEL", "2:25.00"]], "1": [["BEL", "2:23.00"]], "36": [["BEL", "6:15.00"], ["PGN", "6:30.30"]], "37": [["BEL", "5:50.00"]]};
+const CC_ENG = [{}, {}, {}, {}, {"RIBEYRON Agathe": "01:22.53", "AZZAZ Lylia": "01:38.55", "ESSADKI Maïssane": "01:46.00"}, {"JOUCHOUX Lenny": "01:20.04", "OMRANI Nassim": "01:29.18", "DUPRAT PAKULA Robin": "01:34.22"}, {"DONNIER VALENTIN Joy": "00:39.63", "DONNIER VALENTIN Zélie": "00:40.00", "TARTAGLIONE Jade": "00:43.06", "JAY Maëlys": "00:44.59", "BIZAUD Sonia": "00:45.70", "AZZAZ Lylia": "00:51.57"}, {"DUSSURGET Bastien": "00:37.93", "RAPHAËL LE DOCTE Tianao": "00:44.86"}, {}, {}, {}, {"BIZAUD Sonia": "00:36.82", "TARTAGLIONE Jade": "00:38.19", "ESSADKI Maïssane": "00:45.63"}, {"OMRANI Nassim": "00:37.05", "RAPHAËL LE DOCTE Tianao": "00:43.90", "DUPRAT PAKULA Robin": "00:44.13"}, {"RIBEYRON Agathe": "01:08.42", "DONNIER VALENTIN Zélie": "01:09.87", "DONNIER VALENTIN Joy": "01:11.90", "AZZAZ Lylia": "01:20.63"}, {"JOUCHOUX Lenny": "01:10.80", "DUSSURGET Bastien": "01:11.14"}, {"JAY Maëlys": "03:31.94"}, {}, {"RIBEYRON Agathe": "02:28.94", "DONNIER VALENTIN Zélie": "02:31.32", "DONNIER VALENTIN Joy": "02:34.65", "BIZAUD Sonia": "02:45.30", "TARTAGLIONE Jade": "02:46.06", "ESSADKI Maïssane": "03:08.16"}, {"JOUCHOUX Lenny": "02:29.66", "DUSSURGET Bastien": "02:38.12", "RAPHAËL LE DOCTE Tianao": "02:44.60", "DUPRAT PAKULA Robin": "02:54.50", "OMRANI Nassim": "03:17.05"}, {}, {}, {}, {"RIBEYRON Agathe": "00:31.95", "BIZAUD Sonia": "00:32.17", "TARTAGLIONE Jade": "00:33.35", "AZZAZ Lylia": "00:35.04", "JAY Maëlys": "00:36.33", "ESSADKI Maïssane": "00:37.60"}, {"JOUCHOUX Lenny": "00:31.95", "OMRANI Nassim": "00:32.72", "DUPRAT PAKULA Robin": "00:34.89"}, {"DONNIER VALENTIN Zélie": "01:27.45", "DONNIER VALENTIN Joy": "01:27.52", "JAY Maëlys": "01:39.03"}, {"DUSSURGET Bastien": "01:29.23"}, {"AZZAZ Lylia": "03:23.14"}, {"DONNIER VALENTIN Zélie": "00:37.80", "DONNIER VALENTIN Joy": "00:38.81", "RIBEYRON Agathe": "00:39.28", "TARTAGLIONE Jade": "00:40.24", "BIZAUD Sonia": "00:40.37", "ESSADKI Maïssane": "00:46.10"}, {"OMRANI Nassim": "03:09.64"}, {"JOUCHOUX Lenny": "00:34.40", "DUPRAT PAKULA Robin": "00:42.11"}, {"JAY Maëlys": "06:21.80"}, {"DUSSURGET Bastien": "05:52.30"}, {"RIBEYRON Agathe": "01:24.25", "DONNIER VALENTIN Zélie": "01:25.45", "DONNIER VALENTIN Joy": "01:27.33", "BIZAUD Sonia": "01:27.34", "AZZAZ Lylia": "01:41.85", "ESSADKI Maïssane": ""}, {"OMRANI Nassim": "01:31.71"}, {"TARTAGLIONE Jade": ""}, {"JOUCHOUX Lenny": "02:46.48", "DUPRAT PAKULA Robin": ""}, {}, {}];
+const CC_ROSTER_NAMES = ["AZZAZ Lylia", "BIZAUD Sonia", "DONNIER VALENTIN Joy", "DONNIER VALENTIN Zélie", "DUPRAT PAKULA Robin", "DUSSURGET Bastien", "ESSADKI Maïssane", "JAY Maëlys", "JOUCHOUX Lenny", "OMRANI Nassim", "RAPHAËL LE DOCTE Tianao", "RIBEYRON Agathe", "TARTAGLIONE Jade"];
+const CC_CLUBS = {CNB:'CN Bourg-en-Bresse',BEL:'CN Bellegarde',AMB:'Ambérieu',PGN:'Pays de Gex',OYO:'SN Oyonnax'};
+const CC_REUNIONS = {1:'Réunion N°1 · ouverture des portes 8h30',2:'Réunion N°2 · ouverture des portes 14h00'};
+let ccOnlyHl = false, ccInited = false;
+let ccLiveTimer = null, ccLiveBusy = false, ccLiveData = {};
+
+function ccIsHl(x) { return !!x && x[1] === 'CNB' && CC_HL_YEARS.indexOf(String(x[3])) >= 0; }
+function ccHlCount(i) {
+  const g = CC_FULL[i];
+  if (!g) return 0;
+  return g.reduce((a, s) => a + s.filter(ccIsHl).length, 0);
+}
+function ccEsc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+
+function openChrono() {
+  document.getElementById('chrono-logo').src = document.querySelector('#pov .logo-circle img').src;
+  document.getElementById('chrono-overlay').style.display = 'block';
+  if (!ccInited) { ccInited = true; ccRenderProgramme(); }
+}
+function closeChrono() {
+  ccLiveStop();
+  document.getElementById('chrono-overlay').style.display = 'none';
+}
+function showCCTab(tab, btn) {
+  ['programme', 'resultats'].forEach(t => {
+    document.getElementById('cc-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.cc-tab').forEach(b => b.classList.remove('cc-tab-active'));
+  if (btn) btn.classList.add('cc-tab-active');
+  if (tab === 'resultats') ccLiveStart(); else ccLiveStop();
+}
+function ccToggleFilter() {
+  ccOnlyHl = !ccOnlyHl;
+  const b = document.getElementById('cc-filter-btn');
+  if (b) { b.classList.toggle('on', ccOnlyHl); b.textContent = ccOnlyHl ? '✔ Mes nageurs 2013-2014 seulement' : 'Filtrer : mes nageurs 2013-2014'; }
+  ccRenderProgramme();
+}
+
+function ccFullHtml(i) {
+  const grid = CC_FULL[i];
+  const total = grid.reduce((a, g) => a + g.filter(Boolean).length, 0);
+  const hl = ccHlCount(i);
+  const cnb = grid.reduce((a, g) => a + g.filter(x => x && x[1] === 'CNB').length, 0);
+  return `<div class="cc-full-sum">${total} nageurs · ${grid.length} série${grid.length > 1 ? 's' : ''} · <b class="cc-full-cnb-t">${hl} CNB 2013-2014</b>${cnb > hl ? ' · ' + (cnb - hl) + ' autre' + (cnb - hl > 1 ? 's' : '') + ' CNB' : ''}</div>` +
+    grid.map((lanes, si) => {
+      const rows = lanes.map((x, li) => x ? `<div class="cc-full-row${ccIsHl(x) ? ' is-cnb' : ''}">
+          <span class="cc-full-lane">C${li + 1}</span>
+          <span class="cc-full-name">${ccEsc(x[0])}</span>
+          <span class="cc-full-year">${x[3]}</span>
+          <span class="cc-full-club">${x[1]}</span>
+          <span class="cc-full-time">${x[2]}</span>
+        </div>` : '').join('');
+      return `<div class="cc-ser-block"><div class="cc-ser-label">Série ${si + 1}</div>${rows}</div>`;
+    }).join('');
+}
+function ccRelayHtml(i) {
+  const teams = CC_RELAYS[i] || [];
+  return `<div class="cc-full-sum">${teams.length} équipe${teams.length > 1 ? 's' : ''} engagée${teams.length > 1 ? 's' : ''} · aucun relais CNB</div>` +
+    `<div class="cc-ser-block"><div class="cc-ser-label">Série 1</div>` +
+    teams.map((t, k) => `<div class="cc-full-row"><span class="cc-full-lane">C${k + 1}</span><span class="cc-full-name">${CC_CLUBS[t[0]] || t[0]}</span><span class="cc-full-club">${t[0]}</span><span class="cc-full-time">${t[1]}</span></div>`).join('') +
+    `</div>`;
+}
+function ccEvBodyHtml(i) { return CC_PROGRAM[i].relay ? ccRelayHtml(i) : ccFullHtml(i); }
+
+function ccRenderProgramme() {
+  const el = document.getElementById('cc-events-list');
+  if (!el) return;
+  let lastR = 0, html = '';
+  CC_PROGRAM.forEach((p, i) => {
+    const hl = p.relay ? 0 : ccHlCount(i);
+    if (ccOnlyHl && !hl) return;
+    if (p.r !== lastR) { lastR = p.r; html += `<div class="cc-reunion">${CC_REUNIONS[p.r]}</div>`; }
+    const badge = p.g === 'D' ? 'badge-d' : 'badge-m';
+    const label = p.g === 'D' ? 'Dames' : 'Messieurs';
+    html += `<div class="cc-ev-item${hl ? ' has-hl' : ''}">
+      <div class="cc-ev-header" onclick="ccToggleEv(${i})">
+        <div class="cc-ev-num">${i + 1}</div>
+        <div class="cc-ev-name">${p.ev} <span class="cc-ev-h">${p.h}</span></div>
+        ${hl ? `<div class="cc-ev-hl">${hl}</div>` : ''}
+        <div class="cc-ev-badge ${badge}">${label}</div>
+        <div class="cc-ev-toggle" id="cc-tog-${i}">▾</div>
+      </div>
+      <div class="cc-ev-body" id="cc-body-${i}"></div>
+    </div>`;
+  });
+  el.innerHTML = html || '<div class="cc-empty">Aucune épreuve</div>';
+}
+function ccToggleEv(i) {
+  const body = document.getElementById('cc-body-' + i);
+  const tog = document.getElementById('cc-tog-' + i);
+  const open = body.classList.toggle('open');
+  tog.classList.toggle('open', open);
+  if (open) body.innerHTML = ccEvBodyHtml(i);
+}
+
+// ── RÉSULTATS EN DIRECT (LiveFFN via /api/liveffn) ──
+const CC_LIVE_IDX = CC_PROGRAM.map((p, i) => i).filter(i => !CC_PROGRAM[i].relay && ccHlCount(i) > 0);
+function ccNorm(s) {
+  return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim();
+}
+const CC_ROSTER_N = CC_ROSTER_NAMES.map(n => ({ name: n, toks: ccNorm(n).split(' ') }));
+function ccMatchRoster(rowText) {
+  const t = ' ' + ccNorm(rowText) + ' ';
+  let best = null;
+  CC_ROSTER_N.forEach(r => {
+    if (r.toks.every(k => t.includes(' ' + k + ' '))) {
+      if (!best || r.toks.length > best.toks.length) best = r;
+    }
+  });
+  return best ? best.name : null;
+}
+function ccTimeToCs(t) {
+  const m = (t || '').match(/^(?:(\d+):)?(\d+)\.(\d{2})$/);
+  return m ? (+(m[1] || 0)) * 6000 + (+m[2]) * 100 + (+m[3]) : null;
+}
+function ccFmtCs(cs) {
+  const m = Math.floor(cs / 6000), sec = Math.floor((cs % 6000) / 100), c = cs % 100;
+  return m > 0 ? `${m}:${String(sec).padStart(2, '0')}.${String(c).padStart(2, '0')}` : `${sec}.${String(c).padStart(2, '0')}`;
+}
+function ccEngLabel(evIdx, name) {
+  const e = CC_ENG[evIdx];
+  if (!e || !(name in e)) return { txt: '–', cs: null };
+  const cs = ccTimeToCs(e[name]);
+  return cs === null ? { txt: 'NT', cs: null } : { txt: ccFmtCs(cs), cs };
+}
+function ccParseLiveEvent(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const out = [];
+  doc.querySelectorAll('tr').forEach(tr => {
+    const cells = [...tr.querySelectorAll('td,th')].map(c => c.textContent.replace(/\s+/g, ' ').trim());
+    const text = cells.join(' | ');
+    const name = ccMatchRoster(text);
+    if (!name) return;
+    const tm = text.match(/(?:\d{1,2}:)?\d{1,2}[.,]\d{2}(?!\d)/);
+    const flag = text.match(/\b(DSQ|DNS|DNF|DISQ\w*|FORFAIT|ABS\w*)\b/i);
+    const rk = /^\d{1,3}\.?$/.test(cells[0]) ? cells[0].replace('.', '') : '';
+    out.push({ name, rank: rk, time: tm ? tm[0].replace(',', '.').replace(/^0+:(?=\d)/, '') : '', flag: flag ? flag[1].toUpperCase() : '' });
+  });
+  return out;
+}
+async function ccLiveRefresh() {
+  if (ccLiveBusy) return;
+  ccLiveBusy = true;
+  const st = document.getElementById('cc-live-status');
+  let ok = 0;
+  try {
+    await Promise.all(CC_LIVE_IDX.map(async i => {
+      try {
+        const r = await fetch('/api/liveffn?competition=' + CC_COMP + '&epr=' + CC_PROGRAM[i].epr, { cache: 'no-store' });
+        if (!r.ok) throw new Error(r.status);
+        ccLiveData[i] = ccParseLiveEvent(await r.text());
+        ok++;
+      } catch (e) {}
+    }));
+    if (st) st.textContent = ok ? ('Mis à jour ' + new Date().toLocaleTimeString('fr-FR')) : 'FFN injoignable — réessai auto';
+    ccRenderLive();
+  } finally { ccLiveBusy = false; }
+}
+function ccRenderLive() {
+  const box = document.getElementById('cc-live-content');
+  if (!box) return;
+  let html = '';
+  CC_PROGRAM.forEach((p, i) => {
+    const rows = ccLiveData[i] || [];
+    if (!rows.length) return;
+    let h = '';
+    rows.forEach(r => {
+      const eg = ccEngLabel(i, r.name);
+      let delta = '';
+      const rc = ccTimeToCs(r.time);
+      if (rc !== null && eg.cs !== null) {
+        const d = rc - eg.cs;
+        delta = `<span class="${d <= 0 ? 'cc-res-fast' : 'cc-res-slow'}">${d <= 0 ? '−' : '+'}${(Math.abs(d) / 100).toFixed(2)}</span>`;
+      }
+      h += `<div class="cc-res-row">
+        <div class="cc-res-lane">${r.rank ? r.rank + '.' : ''}</div>
+        <div class="cc-res-name">${r.name}<div class="cc-res-eng">Engagement : <b>${eg.txt}</b></div></div>
+        <div class="cc-res-time">${r.time || r.flag || '—'}</div>
+        <div class="cc-res-delta">${delta}</div></div>`;
+    });
+    html += `<div class="cc-res-group"><div class="cc-res-group-header">📡 ${i + 1}. ${p.ev} ${p.g === 'D' ? 'Dames' : 'Messieurs'}</div>${h}</div>`;
+  });
+  box.innerHTML = html || '<div class="cc-empty" style="margin-bottom:10px;">Aucun résultat CNB publié par la FFN pour l’instant</div>';
+}
+function ccLiveStop() { if (ccLiveTimer) { clearInterval(ccLiveTimer); ccLiveTimer = null; } }
+function ccLiveStart() {
+  ccLiveStop();
+  const on = document.getElementById('cc-live-on');
+  if (on && !on.checked) return;
+  ccLiveRefresh();
+  ccLiveTimer = setInterval(ccLiveRefresh, 30000);
+}
+function ccLiveToggle() { ccLiveStart(); }
 </script>
 </body>
 </html>
