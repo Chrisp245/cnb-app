@@ -75,6 +75,7 @@ label{font-size:13px;color:var(--mute);display:block;margin:8px 0 3px}
     <input type="text" id="outro" style="width:100%">
     <label for="sign">Signature</label>
     <input type="text" id="sign" style="width:100%">
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="imgWa"> <b>WhatsApp : envoyer l'image</b> (temps en vert / rouge) au lieu du texte <span class="hint" style="margin:0">(l'image est copiée, WhatsApp s'ouvre sur la bonne conversation : Ctrl+V puis Envoyer)</span></label>
     <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="emojiSms"> Emojis (🟢🔴) aussi dans les SMS <span class="hint" style="margin:0">(un SMS avec emojis est découpé en messages plus courts)</span></label>
     <div class="hint">Chaque course est suivie de l'écart par rapport au temps d'engagement : 🟢 + = temps gagné, 🔴 − = temps perdu. WhatsApp ne permet pas de colorer du texte : le bouton <b>🖼 Image</b> de chaque nageur copie un récap avec les temps écrits en vert / rouge, à coller (Ctrl+V) dans la conversation.</div>
   </div>
@@ -111,7 +112,7 @@ let sent = store.get(K_SENT, {});                  // { "cle#i": "2026-10-12T15:
 let S = Object.assign({
   intro: 'Salut ! 👋 Le récap de {prenom} {nom} est là 🔥',
   outro: '',
-  signature: RECAP.competition.signature || '', emojiSms: true
+  signature: RECAP.competition.signature || '', emojiSms: true, imgWa: true
 }, store.get(K_SET, {}));
 let filter = 'all';
 
@@ -204,15 +205,17 @@ function drawRecap(n){
   if (RECAP.competition.signature) { x.textAlign = 'left'; x.fillStyle = MUTE; x.font = F(600, 16); x.fillText(S.signature || RECAP.competition.signature, P, y + 36); }
   return c;
 }
-async function copyImage(k){
-  const n = RECAP.nageurs.find(z => z.cle === k); if (!n) return;
+async function copyImage(k, quiet){
+  const n = RECAP.nageurs.find(z => z.cle === k); if (!n) return false;
   const blob = await new Promise(r => drawRecap(n).toBlob(r, 'image/png'));
   try {
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-    toast('Image copiée : ouvrez la conversation WhatsApp puis collez-la (Ctrl+V)');
+    toast(quiet ? 'Image copiée → dans WhatsApp : Ctrl+V puis Envoyer' : 'Image copiée : ouvrez la conversation WhatsApp puis collez-la (Ctrl+V)');
+    return true;
   } catch (e) {
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'recap_' + n.nom + '_' + n.prenom + '.png'; a.click();
-    toast('Copie impossible : image téléchargée à la place');
+    toast('Copie impossible : image téléchargée, à glisser dans WhatsApp');
+    return false;
   }
 }
 
@@ -267,13 +270,15 @@ function exportCSV(){
 // ---------- envoi ----------
 function urlFor(n, c){
   const phone = normPhone(c.tel); if (!phone) return null;
+  if (c.canal !== 'sms' && S.imgWa) return `https://wa.me/${phone.slice(1)}`;
   const msg = buildMessage(n, c.canal, c.parent);
   return c.canal === 'sms' ? `sms:${phone}?&body=${encodeURIComponent(msg)}` : `https://wa.me/${phone.slice(1)}?text=${encodeURIComponent(msg)}`;
 }
-function sendTo(k, i){
+async function sendTo(k, i){
   const n = RECAP.nageurs.find(x => x.cle === k), c = contacts[i]; if (!n || !c) return;
   const url = urlFor(n, c); if (!url) return toast('Numéro invalide pour ' + n.nomComplet);
   sent[k + '#' + i] = new Date().toISOString(); store.set(K_SENT, sent);
+  if (c.canal !== 'sms' && S.imgWa) await copyImage(k, true);
   if (c.canal === 'sms') location.href = url; else window.open(url, '_blank', 'noopener');
   render();
 }
@@ -297,7 +302,7 @@ function swHTML(n){
       <input type="text" data-f="parent" placeholder="Parent (facultatif)" value="${esc(c.parent)}">
       <input type="tel" data-f="tel" placeholder="06 12 34 56 78" value="${esc(c.tel)}">
       <select data-f="canal"><option value="whatsapp"${c.canal==='whatsapp'?' selected':''}>WhatsApp</option><option value="sms"${c.canal==='sms'?' selected':''}>SMS</option></select>
-      ${ph ? `<button class="${c.canal==='sms'?'sms':'wa'}" data-act="send">${c.canal==='sms'?'Envoyer le SMS':'Envoyer sur WhatsApp'}</button>` : `<span class="bad">${c.tel ? 'numéro invalide' : 'numéro manquant'}</span>`}
+      ${ph ? `<button class="${c.canal==='sms'?'sms':'wa'}" data-act="send">${c.canal==='sms'?'Envoyer le SMS':(S.imgWa?'Envoyer l\'image sur WhatsApp':'Envoyer sur WhatsApp')}</button>` : `<span class="bad">${c.tel ? 'numéro invalide' : 'numéro manquant'}</span>`}
       ${done ? `<span class="ok">✓ fait</span> <button class="ghost" data-act="undo">annuler</button>` : ''}
       <button class="ghost" data-act="del" title="Supprimer ce contact">✕</button></div>`;
   }).join('');
@@ -352,9 +357,9 @@ $('#btnNext').addEventListener('click', () => { const p = pending()[0]; if (p) s
 $('#btnImport').addEventListener('click', () => $('#file').click());
 $('#file').addEventListener('change', e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => importCSV(String(r.result)); r.readAsText(f, 'utf-8'); e.target.value = ''; });
 $('#btnExport').addEventListener('click', exportCSV);
-$('#intro').value = S.intro; $('#outro').value = S.outro; $('#sign').value = S.signature; $('#emojiSms').checked = !!S.emojiSms;
-const saveSet = () => { S = { intro: $('#intro').value, outro: $('#outro').value, signature: $('#sign').value, emojiSms: $('#emojiSms').checked }; store.set(K_SET, S); render(); };
-['#intro', '#outro', '#sign'].forEach(s => $(s).addEventListener('input', saveSet)); $('#emojiSms').addEventListener('change', saveSet);
+$('#intro').value = S.intro; $('#outro').value = S.outro; $('#sign').value = S.signature; $('#emojiSms').checked = !!S.emojiSms; $('#imgWa').checked = !!S.imgWa;
+const saveSet = () => { S = { intro: $('#intro').value, outro: $('#outro').value, signature: $('#sign').value, emojiSms: $('#emojiSms').checked, imgWa: $('#imgWa').checked }; store.set(K_SET, S); render(); };
+['#intro', '#outro', '#sign'].forEach(s => $(s).addEventListener('input', saveSet)); $('#emojiSms').addEventListener('change', saveSet); $('#imgWa').addEventListener('change', saveSet);
 document.title = 'Envoi récaps ' + RECAP.competition.date + ' – CN Bourg-en-Bresse';
 render();
 </script>
