@@ -692,7 +692,7 @@ td.col-holiday.checked .cell-inner{
 <div class="stats-bar" style="position:relative;top:auto;">
   <div class="stat-item"><strong id="stat-total">0</strong>présences enregistrées</div>
   <div class="stat-item"><strong id="stat-sessions">166</strong>séances au total</div>
-  <div class="stat-item"><strong id="stat-swimmers">37</strong>nageurs</div>
+  <div class="stat-item"><strong id="stat-swimmers">38</strong>nageurs</div>
   <div class="stat-item" id="sync-status" style="font-weight:600;"></div>
   <button type="button" onclick="resortPresence()" style="border:1px solid #c4b5fd;background:#f5f3ff;color:#4c1d95;font-weight:700;font-size:12px;border-radius:8px;padding:5px 10px;cursor:pointer;">&#8635; Trier par %</button>
 </div>
@@ -771,6 +771,7 @@ const SWIMMERS = [
   {n:'OMRANI Mohamed',                g:'H', y:'2018'},
   {n:'ROBERT Hector',                  g:'H', y:'2018'},
   {n:'BOZON Jules',                   g:'H', y:'2019'},
+  {n:'BORGIS Noélie',                  g:'F', y:'2019'},
 ];
 (function(){ var el=document.getElementById('stat-swimmers'); if(el) el.textContent=SWIMMERS.length; })();
 const GROUP_COLORS = {
@@ -781,6 +782,7 @@ const GROUP_COLORS = {
   'H2017': '#1d4ed8',
   'H2018': '#3b82f6',
   'H2019': '#38bdf8',
+  'F2019': '#f472b6',
 };
 const DAY_NAMES = {0:'L',1:'Ma',2:'M',3:'J',4:'V'};
 // Jeudi en période scolaire non comptabilisé pour les 2017/2018/2019
@@ -788,18 +790,22 @@ function isExcluded(j, year) {
   return (year === '2017' || year === '2018' || year === '2019') && DATES[j].day === 3 && !DATES[j].hol && !DATES[j].stage;
 }
 const TODAY = new Date().toISOString().slice(0, 10);
-function swimmerActiveSessions(year) {
-  return DATES.filter((dt, j) => !isExcluded(j, year) && dt.full <= TODAY).length;
+// Date de debut du calcul du % pour les nageurs arrives en cours de saison
+const PCT_START = {'BORGIS Noélie':'2026-10-12'};
+function swimmerActiveSessions(year, name) {
+  const st = PCT_START[name] || '';
+  return DATES.filter((dt, j) => !isExcluded(j, year) && dt.full <= TODAY && dt.full >= st).length;
 }
 function swimmerTotal(idx, year) {
-  return presence[idx].reduce((s, v, j) => s + (v && !isExcluded(j, year) && DATES[j].full <= TODAY ? 1 : 0), 0);
+  const st = PCT_START[SWIMMERS[idx].n] || '';
+  return presence[idx].reduce((s, v, j) => s + (v && !isExcluded(j, year) && DATES[j].full <= TODAY && DATES[j].full >= st ? 1 : 0), 0);
 }
 // Ordre d'affichage du tableau de presence : meilleur % de presence en premier.
 // Egalite : plus de seances suivies d'abord, puis ordre de la liste SWIMMERS.
 // Seul l'affichage est trie : les presences restent enregistrees par numero de nageur.
 function presenceOrder() {
   const base = SWIMMERS.map((sw, i) => {
-    const active = swimmerActiveSessions(sw.y);
+    const active = swimmerActiveSessions(sw.y, sw.n);
     const tot = swimmerTotal(i, sw.y);
     return { i, pct: active > 0 ? Math.round(tot / active * 100) : -1, tot };
   });
@@ -809,7 +815,7 @@ function presenceOrder() {
 function resortPresence() { buildTable(); }
 function avgPct() {
   const pcts = SWIMMERS.map((sw, idx) => {
-    const active = swimmerActiveSessions(sw.y);
+    const active = swimmerActiveSessions(sw.y, sw.n);
     if (active === 0) return null;
     return Math.round(swimmerTotal(idx, sw.y) / active * 100);
   }).filter(p => p !== null);
@@ -909,7 +915,7 @@ function buildTable() {
     });
     const tot = swimmerTotal(i, sw.y);
     rows += `<td class="col-total" id="row-total-${i}">${tot}</td>`;
-    const activeSessions = swimmerActiveSessions(sw.y);
+    const activeSessions = swimmerActiveSessions(sw.y, sw.n);
     const pct = activeSessions > 0 ? Math.round(tot / activeSessions * 100) : 0;
     const pctColor = pct >= 80 ? '#16a34a' : pct >= 60 ? '#d97706' : (pct > 0 ? '#dc2626' : '#9ca3af');
     rows += `<td class="col-pct" id="row-pct-${i}" style="color:${pctColor}">${activeSessions > 0 ? pct+'%' : '–'}</td>`;
@@ -972,7 +978,7 @@ async function togglePresence(i, j) {
     const pctEl = document.getElementById(`row-pct-${idx}`);
     if (!pctEl) return;
     const t = swimmerTotal(idx, sw.y);
-    const active = swimmerActiveSessions(sw.y);
+    const active = swimmerActiveSessions(sw.y, sw.n);
     const p = active > 0 ? Math.round(t / active * 100) : 0;
     pctEl.textContent = active > 0 ? p+'%' : '–';
     pctEl.style.color = p >= 80 ? '#16a34a' : p >= 60 ? '#d97706' : (p > 0 ? '#dc2626' : '#9ca3af');
@@ -1171,6 +1177,7 @@ td.clickable:active .perf-badge {
   <div><span class="dot" style="background:#db2777;"></span><span style="color:#db2777;">Filles 2017</span></div>
   <div><span class="dot" style="background:#ec4899;"></span><span style="color:#ec4899;">Filles 2018</span></div>
   <div><span class="dot" style="background:#38bdf8;"></span><span style="color:#38bdf8;">Garçons 2019</span></div>
+  <div><span class="dot" style="background:#f472b6;"></span><span style="color:#f472b6;">Filles 2019</span></div>
 </div>
 
 <div class="table-wrap">
@@ -1633,7 +1640,7 @@ const PERF_C=[
   {mn:800,mx:899,bg:'#e9d5ff',tx:'#581c87',label:'800–899'},
   {mn:900,mx:999,bg:'#a855f7',tx:'#faf5ff',label:'900–999'},
 ];
-const NAME_C={'H2016':'#172554','H2017':'#1d4ed8','H2018':'#3b82f6','H2019':'#38bdf8','F2016':'#881337','F2017':'#db2777','F2018':'#ec4899'};
+const NAME_C={'H2016':'#172554','H2017':'#1d4ed8','H2018':'#3b82f6','H2019':'#38bdf8','F2019':'#f472b6','F2016':'#881337','F2017':'#db2777','F2018':'#ec4899'};
 function pc(p){if(p===null)return null;return PERF_C.find(x=>p>=x.mn&&p<=x.mx)||PERF_C[PERF_C.length-1];}
 function t2cs(t){const a=t.split(':'),b=a[1].split('.');return +a[0]*6000+ +b[0]*100+ +b[1];}
 const E=['50 NL','100 NL','200 NL','400 NL','50 Dos','100 Dos','50 Bra.','100 Bra.','50 Pap.','100 Pap.','100 4N','200 4N'];
@@ -1677,6 +1684,7 @@ const swimmers=[
 {n:'OMRANI Mohamed',           g:'H',y:'2018',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
 {n:'ROBERT Hector',            g:'H',y:'2018',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
 {n:'BOZON Jules',              g:'H',y:'2019',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
+{n:'BORGIS Noélie',             g:'F',y:'2019',p:[n,n,n,n,n,n,n,n,n,n,n,n]},
 ];
 
 // History: history[swimmer_idx][event_idx] = [{t,p,d,l},...] sorted best first, or null
@@ -1717,7 +1725,8 @@ const history=[
 [[{t:'00:50.56',p:45,d:'20/06/2026',l:'OYONNAX'},{t:'00:50.72',p:43,d:'25/04/2026',l:'BELLEGARDE'},{t:'00:55.91',p:1,d:'07/03/2026',l:'AMBÉRIEU'}],[{t:'01:51.80',p:21,d:'03/10/2026',l:'BELLEGARDE'}],n,n,[{t:'01:00.51',p:23,d:'03/10/2026',l:'BELLEGARDE'},{t:'00:59.44',p:33,d:'20/06/2026',l:'OYONNAX'}],n,[{t:'01:06.27',p:28,d:'03/10/2026',l:'BELLEGARDE'},{t:'01:03.93',p:51,d:'20/06/2026',l:'OYONNAX'},{t:'01:04.68',p:43,d:'25/04/2026',l:'BELLEGARDE'},{t:'01:06.00',p:30,d:'07/03/2026',l:'AMBÉRIEU'}],n,n,n,[{t:'02:01.60',p:41,d:'03/10/2026',l:'BELLEGARDE'},{t:'02:08.06',p:12,d:'25/04/2026',l:'BELLEGARDE'},{t:'02:10.10',p:7,d:'07/03/2026',l:'AMBÉRIEU'},{t:'02:12.13',p:3,d:'20/06/2026',l:'OYONNAX'}],n],
 [n,n,n,n,n,n,n,n,n,n,n,n],
 [n,n,n,n,n,n,n,n,n,n,n,n],
-[n,n,n,n,n,n,n,n,n,n,n,n]
+[n,n,n,n,n,n,n,n,n,n,n,n],
+[n,n,n,n,n,n,n,n,n,n,n,n],
 ];
 
 // Build legend
