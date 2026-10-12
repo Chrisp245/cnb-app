@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Envoi des récaps aux parents – CN Bourg-en-Bresse</title>
+<style>
+:root{--navy:#1e3a5f;--bg:#eef2f7;--card:#fff;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--green:#16a34a;--green-bg:#dcfce7;--red:#dc2626;--red-bg:#fee2e2;--wa:#25d366;--sms:#2563eb;--amber:#f59e0b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.bar{position:sticky;top:0;z-index:5;background:var(--navy);color:#fff;padding:12px 16px}
+.bar h1{font-size:16px;margin:0;font-weight:700}
+.bar .sub{font-size:12.5px;opacity:.85;margin-top:2px}
+.bar .stats{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;font-size:12.5px}
+.bar .stats span{background:rgba(255,255,255,.14);padding:3px 10px;border-radius:999px}
+.wrap{max-width:980px;margin:14px auto 60px;padding:0 16px}
+.panel{background:var(--card);border-radius:14px;box-shadow:0 2px 10px rgba(15,23,42,.07);padding:14px 16px;margin-bottom:14px}
+.panel h2{font-size:14px;margin:0 0 8px;text-transform:uppercase;letter-spacing:.5px;color:var(--mute)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button,.btn{font:inherit;font-weight:700;font-size:14px;border:0;border-radius:10px;padding:8px 14px;cursor:pointer;background:#e2e8f0;color:var(--ink)}
+button.primary{background:var(--amber);color:#1c1100}
+button.wa{background:var(--wa);color:#04210f} button.sms{background:var(--sms);color:#fff}
+button.ghost{background:transparent;border:1px solid var(--line);font-weight:600}
+button:disabled{opacity:.45;cursor:not-allowed}
+input[type=text],input[type=tel],select,textarea{font:inherit;border:1px solid #cbd5e1;border-radius:9px;padding:7px 10px;background:#fff;color:var(--ink);min-width:0}
+textarea{width:100%;resize:vertical}
+label{font-size:13px;color:var(--mute);display:block;margin:8px 0 3px}
+.hint{font-size:12.5px;color:var(--mute);margin-top:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.chip{padding:6px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:600;cursor:pointer}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.sw{background:var(--card);border-radius:14px;box-shadow:0 2px 10px rgba(15,23,42,.07);margin-bottom:10px;overflow:hidden}
+.sw .hd{display:flex;gap:10px;align-items:center;padding:11px 14px;flex-wrap:wrap}
+.sw .nm{font-weight:800;flex:1 1 200px}
+.sw .nm small{font-weight:500;color:var(--mute);margin-left:6px}
+.badge{font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:#f1f5f9;color:var(--mute)}
+.badge.g{background:var(--green-bg);color:var(--green)} .badge.r{background:var(--red-bg);color:var(--red)}
+.ct{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 14px;border-top:1px solid var(--line);background:#fafcff}
+.ct input[type=text]{width:160px} .ct input[type=tel]{width:160px}
+.ct .ok{color:var(--green);font-weight:700;font-size:13px}
+.ct .bad{color:var(--red);font-size:12.5px}
+.pre{padding:0 14px 12px;display:none}
+.pre.open{display:block}
+.pre pre{white-space:pre-wrap;background:#0f172a;color:#e2e8f0;padding:12px 14px;border-radius:10px;font:13px/1.5 ui-monospace,Consolas,monospace;margin:10px 0 6px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;max-width:90vw}
+#toast.on{opacity:1}
+@media(max-width:560px){.ct input[type=text],.ct input[type=tel]{width:100%}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <a href="cnbb_accueil.html" style="color:#fff;opacity:.85;text-decoration:none;font-size:13px;display:inline-block;margin-bottom:6px">← Accueil</a>
+  <h1>Envoi des récaps aux parents</h1>
+  <div class="sub" id="sub"></div>
+  <div class="stats" id="stats"></div>
+</div>
+<div class="wrap">
+
+  <div class="panel">
+    <h2>1. Contacts des parents</h2>
+    <div class="row">
+      <button class="primary" id="btnImport">Importer un fichier CSV…</button>
+      <button id="btnExport">Télécharger le modèle / exporter</button>
+      <input type="file" id="file" accept=".csv,.txt,text/csv" hidden>
+    </div>
+    <div class="hint">Colonnes du CSV : <b>nageur ; annee ; parent ; telephone ; canal</b> (canal = <i>whatsapp</i> ou <i>sms</i>). Un nageur peut avoir plusieurs lignes (père, mère…).
+      Vous pouvez aussi saisir les numéros directement ci-dessous. 🔒 Les numéros restent dans ce navigateur sur cet ordinateur : rien n'est envoyé sur Internet par cette page.</div>
+  </div>
+
+  <div class="panel">
+    <h2>2. Message</h2>
+    <label for="intro">Phrase d'introduction — variables : {parent} {prenom} {nom}</label>
+    <textarea id="intro" rows="2"></textarea>
+    <label for="outro">Phrase de fin (facultatif)</label>
+    <input type="text" id="outro" style="width:100%">
+    <label for="sign">Signature</label>
+    <input type="text" id="sign" style="width:100%">
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="emojiSms"> Emojis (🟢🔴) aussi dans les SMS <span class="hint" style="margin:0">(un SMS avec emojis est découpé en messages plus courts)</span></label>
+    <div class="hint">Chaque course est suivie de l'écart par rapport au temps d'engagement : 🟢 + = temps gagné, 🔴 − = temps perdu. WhatsApp ne permet pas de colorer du texte : le bouton <b>🖼 Image</b> de chaque nageur copie un récap avec les temps écrits en vert / rouge, à coller (Ctrl+V) dans la conversation.</div>
+  </div>
+
+  <div class="panel">
+    <h2>3. Envoi</h2>
+    <div class="row">
+      <button class="primary" id="btnNext">Envoyer au suivant ➜</button>
+      <span class="hint" id="nextInfo" style="margin:0"></span>
+    </div>
+    <div class="hint"><b>WhatsApp</b> : s'ouvre (appli ou WhatsApp Web) avec le message déjà rédigé, il reste à appuyer sur « Envoyer ».
+      <b>SMS</b> : à utiliser depuis un téléphone (ou avec « Liaison avec le téléphone » sous Windows). Le bouton ouvre la messagerie avec le message prêt.
+      Un envoi est marqué « ✓ fait » dès que vous cliquez ; vous pouvez l'annuler.</div>
+  </div>
+
+  <div class="chips" id="chips"></div>
+  <div id="list"></div>
+</div>
+<div id="toast"></div>
+
+<script>
+const RECAP = {"competition":{"id":"2026-10-03","date":"03/10/2026","dateLong":"samedi 3 octobre 2026","nom":"Circuit Avenirs – Plot n°4 U11 (25 m)","lieu":"Bellegarde-sur-Valserine","designation":"Circuit Avenirs – Plot n°4 U11 (25 m) – Bellegarde-sur-Valserine – samedi 3 octobre 2026","signature":"Christophe – CN Bourg-en-Bresse"},"regle":"Écart = temps de la compétition − temps d'engagement du nageur sur l'épreuve (+ en vert = temps gagné, − en rouge = temps perdu ; NT = pas de temps d'engagement).","nageurs":[{"cle":"BILLAUDY|GABRIEL","nom":"BILLAUDY","prenom":"Gabriel","nomComplet":"BILLAUDY Gabriel","annee":"2016","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:48.81","tempsAff":"1:48.81","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:37.69","tempsAff":"1:37.69","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:58.92","tempsAff":"58.92","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:54.91","tempsAff":"54.91","precedent":"00:57.38","precedentAff":"57.38","precedentDate":null,"precedentLieu":null,"ecartCs":-247,"ecartAff":"+2,47 s","statut":"gagne"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:33.92","tempsAff":"3:33.92","rang":12,"equipe":["KOURTELI Melya","BILLAUDY Gabriel","CHATELET Lucie","JANICHON Ilyes"]}],"bilan":{"courses":4,"gagnes":1,"perdus":0,"egales":0,"sans_ref":3}},{"cle":"BILLET|CELESTE","nom":"BILLET","prenom":"Céleste","nomComplet":"BILLET Céleste","annee":"2016","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:47.02","tempsAff":"1:47.02","precedent":"01:51.78","precedentAff":"1:51.78","precedentDate":null,"precedentLieu":null,"ecartCs":-476,"ecartAff":"+4,76 s","statut":"gagne"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:42.81","tempsAff":"42.81","precedent":"00:42.42","precedentAff":"42.42","precedentDate":null,"precedentLieu":null,"ecartCs":39,"ecartAff":"−0,39 s","statut":"perdu"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:56.32","tempsAff":"56.32","precedent":"01:01.12","precedentAff":"1:01.12","precedentDate":null,"precedentLieu":null,"ecartCs":-480,"ecartAff":"+4,80 s","statut":"gagne"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:32.51","tempsAff":"3:32.51","rang":11,"equipe":["BILLET Céleste","DARBINIAN David","GUEDES DA SILVA Gabriela","RAPHAËL LE DOCTE Kanty"]}],"bilan":{"courses":3,"gagnes":2,"perdus":1,"egales":0,"sans_ref":0}},{"cle":"BOUVIER|JONATHAN","nom":"BOUVIER","prenom":"Jonathan","nomComplet":"BOUVIER Jonathan","annee":"2017","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:59.78","tempsAff":"1:59.78","precedent":"01:55.70","precedentAff":"1:55.70","precedentDate":null,"precedentLieu":null,"ecartCs":408,"ecartAff":"−4,08 s","statut":"perdu"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:48.83","tempsAff":"48.83","precedent":"00:52.56","precedentAff":"52.56","precedentDate":null,"precedentLieu":null,"ecartCs":-373,"ecartAff":"+3,73 s","statut":"gagne"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"01:05.08","tempsAff":"1:05.08","precedent":"01:12.22","precedentAff":"1:12.22","precedentDate":null,"precedentLieu":null,"ecartCs":-714,"ecartAff":"+7,14 s","statut":"gagne"},{"epreuve":"100 DOS","label":"100 m Dos","ordre":40100,"temps":"02:00.27","tempsAff":"2:00.27","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:28.44","tempsAff":"3:28.44","rang":9,"equipe":["BOUVIER Jonathan","EYMARD Pacôme","JAY Chloé","ROBIO Maryam"]}],"bilan":{"courses":4,"gagnes":2,"perdus":1,"egales":0,"sans_ref":1}},{"cle":"BOZON|PAUL","nom":"BOZON","prenom":"Paul","nomComplet":"BOZON Paul","annee":"2015","courses":[{"epreuve":"200 4N","label":"200 m 4 Nages","ordre":200,"temps":"03:23.64","tempsAff":"3:23.64","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:22.27","tempsAff":"1:22.27","precedent":"01:34.11","precedentAff":"1:34.11","precedentDate":null,"precedentLieu":null,"ecartCs":-1184,"ecartAff":"+11,84 s","statut":"gagne"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:52.28","tempsAff":"52.28","precedent":"00:51.62","precedentAff":"51.62","precedentDate":null,"precedentLieu":null,"ecartCs":66,"ecartAff":"−0,66 s","statut":"perdu"},{"epreuve":"100 DOS","label":"100 m Dos","ordre":40100,"temps":"01:32.73","tempsAff":"1:32.73","precedent":"01:27.91","precedentAff":"1:27.91","precedentDate":null,"precedentLieu":null,"ecartCs":482,"ecartAff":"−4,82 s","statut":"perdu"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"02:58.94","tempsAff":"2:58.94","rang":3,"equipe":["BOZON Paul","CLOSON Pierre-Elouann","LEMASLE Claire","FOREY FAURE Lola"]}],"bilan":{"courses":4,"gagnes":1,"perdus":2,"egales":0,"sans_ref":1}},{"cle":"CARENE|LYA","nom":"CARENE","prenom":"Lya","nomComplet":"CARENE Lya","annee":"2015","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:56.85","tempsAff":"1:56.85","precedent":"02:00.12","precedentAff":"2:00.12","precedentDate":null,"precedentLieu":null,"ecartCs":-327,"ecartAff":"+3,27 s","statut":"gagne"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:48.26","tempsAff":"1:48.26","precedent":"01:52.85","precedentAff":"1:52.85","precedentDate":null,"precedentLieu":null,"ecartCs":-459,"ecartAff":"+4,59 s","statut":"gagne"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"01:03.17","tempsAff":"1:03.17","precedent":"01:03.44","precedentAff":"1:03.44","precedentDate":null,"precedentLieu":null,"ecartCs":-27,"ecartAff":"+0,27 s","statut":"gagne"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"01:01.65","tempsAff":"1:01.65","precedent":"00:59.54","precedentAff":"59.54","precedentDate":null,"precedentLieu":null,"ecartCs":211,"ecartAff":"−2,11 s","statut":"perdu"}],"relais":[],"bilan":{"courses":4,"gagnes":3,"perdus":1,"egales":0,"sans_ref":0}},{"cle":"CHATELET|LUCIE","nom":"CHATELET","prenom":"Lucie","nomComplet":"CHATELET Lucie","annee":"2016","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:47.85","tempsAff":"1:47.85","precedent":"01:45.05","precedentAff":"1:45.05","precedentDate":null,"precedentLieu":null,"ecartCs":280,"ecartAff":"−2,80 s","statut":"perdu"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:43.32","tempsAff":"1:43.32","precedent":"01:49.55","precedentAff":"1:49.55","precedentDate":null,"precedentLieu":null,"ecartCs":-623,"ecartAff":"+6,23 s","statut":"gagne"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:56.27","tempsAff":"56.27","precedent":"00:57.84","precedentAff":"57.84","precedentDate":null,"precedentLieu":null,"ecartCs":-157,"ecartAff":"+1,57 s","statut":"gagne"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:55.36","tempsAff":"55.36","precedent":"00:52.81","precedentAff":"52.81","precedentDate":null,"precedentLieu":null,"ecartCs":255,"ecartAff":"−2,55 s","statut":"perdu"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:33.92","tempsAff":"3:33.92","rang":12,"equipe":["KOURTELI Melya","BILLAUDY Gabriel","CHATELET Lucie","JANICHON Ilyes"]}],"bilan":{"courses":4,"gagnes":2,"perdus":2,"egales":0,"sans_ref":0}},{"cle":"CLOSON|PIERRE ELOUANN","nom":"CLOSON","prenom":"Pierre-Elouann","nomComplet":"CLOSON Pierre-Elouann","annee":"2015","courses":[{"epreuve":"200 4N","label":"200 m 4 Nages","ordre":200,"temps":"03:16.60","tempsAff":"3:16.60","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 PAP","label":"50 m Papillon","ordre":10050,"temps":"00:41.16","tempsAff":"41.16","precedent":"00:41.21","precedentAff":"41.21","precedentDate":null,"precedentLieu":null,"ecartCs":-5,"ecartAff":"+0,05 s","statut":"gagne"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:24.06","tempsAff":"1:24.06","precedent":"01:29.32","precedentAff":"1:29.32","precedentDate":null,"precedentLieu":null,"ecartCs":-526,"ecartAff":"+5,26 s","statut":"gagne"},{"epreuve":"100 BRA","label":"100 m Brasse","ordre":30100,"temps":"01:42.96","tempsAff":"1:42.96","precedent":"01:41.61","precedentAff":"1:41.61","precedentDate":null,"precedentLieu":null,"ecartCs":135,"ecartAff":"−1,35 s","statut":"perdu"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"02:58.94","tempsAff":"2:58.94","rang":3,"equipe":["BOZON Paul","CLOSON Pierre-Elouann","LEMASLE Claire","FOREY FAURE Lola"]}],"bilan":{"courses":4,"gagnes":2,"perdus":1,"egales":0,"sans_ref":1}},{"cle":"DARBINIAN|DAVID","nom":"DARBINIAN","prenom":"David","nomComplet":"DARBINIAN David","annee":"2017","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:45.56","tempsAff":"1:45.56","precedent":"01:52.81","precedentAff":"1:52.81","precedentDate":null,"precedentLieu":null,"ecartCs":-725,"ecartAff":"+7,25 s","statut":"gagne"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:43.43","tempsAff":"1:43.43","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:55.09","tempsAff":"55.09","precedent":"00:55.73","precedentAff":"55.73","precedentDate":null,"precedentLieu":null,"ecartCs":-64,"ecartAff":"+0,64 s","statut":"gagne"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:32.51","tempsAff":"3:32.51","rang":11,"equipe":["BILLET Céleste","DARBINIAN David","GUEDES DA SILVA Gabriela","RAPHAËL LE DOCTE Kanty"]}],"bilan":{"courses":3,"gagnes":2,"perdus":0,"egales":0,"sans_ref":1}},{"cle":"DELORME|LYDIANA","nom":"DELORME","prenom":"Lydiana","nomComplet":"DELORME Lydiana","annee":"2015","courses":[{"epreuve":"200 4N","label":"200 m 4 Nages","ordre":200,"temps":"03:34.90","tempsAff":"3:34.90","precedent":"03:41.56","precedentAff":"3:41.56","precedentDate":null,"precedentLieu":null,"ecartCs":-666,"ecartAff":"+6,66 s","statut":"gagne"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:42.18","tempsAff":"42.18","precedent":"00:40.66","precedentAff":"40.66","precedentDate":null,"precedentLieu":null,"ecartCs":152,"ecartAff":"−1,52 s","statut":"perdu"},{"epreuve":"100 BRA","label":"100 m Brasse","ordre":30100,"temps":"01:55.81","tempsAff":"1:55.81","precedent":"01:48.42","precedentAff":"1:48.42","precedentDate":null,"precedentLieu":null,"ecartCs":739,"ecartAff":"−7,39 s","statut":"perdu"},{"epreuve":"100 DOS","label":"100 m Dos","ordre":40100,"temps":"01:43.69","tempsAff":"1:43.69","precedent":"01:40.86","precedentAff":"1:40.86","precedentDate":null,"precedentLieu":null,"ecartCs":283,"ecartAff":"−2,83 s","statut":"perdu"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:18.50","tempsAff":"3:18.50","rang":4,"equipe":["FOURMOND Milo","DELORME Lydiana","REYDELLET Camille","KACEMI Kaïs-Ibrahim"]}],"bilan":{"courses":4,"gagnes":1,"perdus":3,"egales":0,"sans_ref":0}},{"cle":"EL HASSOUNI|JENNA","nom":"EL HASSOUNI","prenom":"Jenna","nomComplet":"EL HASSOUNI Jenna","annee":"2017","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:59.18","tempsAff":"1:59.18","precedent":"01:57.45","precedentAff":"1:57.45","precedentDate":null,"precedentLieu":null,"ecartCs":173,"ecartAff":"−1,73 s","statut":"perdu"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:51.52","tempsAff":"1:51.52","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"01:03.96","tempsAff":"1:03.96","precedent":"01:09.81","precedentAff":"1:09.81","precedentDate":null,"precedentLieu":null,"ecartCs":-585,"ecartAff":"+5,85 s","statut":"gagne"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:57.79","tempsAff":"57.79","precedent":"00:53.67","precedentAff":"53.67","precedentDate":null,"precedentLieu":null,"ecartCs":412,"ecartAff":"−4,12 s","statut":"perdu"}],"relais":[],"bilan":{"courses":4,"gagnes":1,"perdus":2,"egales":0,"sans_ref":1}},{"cle":"EYMARD|PACOME","nom":"EYMARD","prenom":"Pacôme","nomComplet":"EYMARD Pacôme","annee":"2015","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:41.80","tempsAff":"1:41.80","precedent":"01:50.38","precedentAff":"1:50.38","precedentDate":null,"precedentLieu":null,"ecartCs":-858,"ecartAff":"+8,58 s","statut":"gagne"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:33.29","tempsAff":"1:33.29","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:54.12","tempsAff":"54.12","precedent":"00:55.17","precedentAff":"55.17","precedentDate":null,"precedentLieu":null,"ecartCs":-105,"ecartAff":"+1,05 s","statut":"gagne"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:51.50","tempsAff":"51.50","precedent":"00:50.91","precedentAff":"50.91","precedentDate":null,"precedentLieu":null,"ecartCs":59,"ecartAff":"−0,59 s","statut":"perdu"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:28.44","tempsAff":"3:28.44","rang":9,"equipe":["BOUVIER Jonathan","EYMARD Pacôme","JAY Chloé","ROBIO Maryam"]}],"bilan":{"courses":4,"gagnes":2,"perdus":1,"egales":0,"sans_ref":1}},{"cle":"FOREY FAURE|LOLA","nom":"FOREY FAURE","prenom":"Lola","nomComplet":"FOREY FAURE Lola","annee":"2015","courses":[{"epreuve":"200 4N","label":"200 m 4 Nages","ordre":200,"temps":"04:01.99","tempsAff":"4:01.99","precedent":"03:42.42","precedentAff":"3:42.42","precedentDate":null,"precedentLieu":null,"ecartCs":1957,"ecartAff":"−19,57 s","statut":"perdu"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:40.65","tempsAff":"1:40.65","precedent":"01:29.11","precedentAff":"1:29.11","precedentDate":null,"precedentLieu":null,"ecartCs":1154,"ecartAff":"−11,54 s","statut":"perdu"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:56.32","tempsAff":"56.32","precedent":"00:54.56","precedentAff":"54.56","precedentDate":null,"precedentLieu":null,"ecartCs":176,"ecartAff":"−1,76 s","statut":"perdu"},{"epreuve":"100 DOS","label":"100 m Dos","ordre":40100,"temps":"02:02.24","tempsAff":"2:02.24","precedent":"01:46.11","precedentAff":"1:46.11","precedentDate":null,"precedentLieu":null,"ecartCs":1613,"ecartAff":"−16,13 s","statut":"perdu"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"02:58.94","tempsAff":"2:58.94","rang":3,"equipe":["BOZON Paul","CLOSON Pierre-Elouann","LEMASLE Claire","FOREY FAURE Lola"]}],"bilan":{"courses":4,"gagnes":0,"perdus":4,"egales":0,"sans_ref":0}},{"cle":"FOURMOND|MILO","nom":"FOURMOND","prenom":"Milo","nomComplet":"FOURMOND Milo","annee":"2016","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:53.45","tempsAff":"1:53.45","precedent":"01:47.15","precedentAff":"1:47.15","precedentDate":null,"precedentLieu":null,"ecartCs":630,"ecartAff":"−6,30 s","statut":"perdu"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:44.43","tempsAff":"44.43","precedent":"00:43.70","precedentAff":"43.70","precedentDate":null,"precedentLieu":null,"ecartCs":73,"ecartAff":"−0,73 s","statut":"perdu"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"01:02.43","tempsAff":"1:02.43","precedent":"01:01.81","precedentAff":"1:01.81","precedentDate":null,"precedentLieu":null,"ecartCs":62,"ecartAff":"−0,62 s","statut":"perdu"},{"epreuve":"100 DOS","label":"100 m Dos","ordre":40100,"temps":"01:49.65","tempsAff":"1:49.65","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:18.50","tempsAff":"3:18.50","rang":4,"equipe":["FOURMOND Milo","DELORME Lydiana","REYDELLET Camille","KACEMI Kaïs-Ibrahim"]}],"bilan":{"courses":4,"gagnes":0,"perdus":3,"egales":0,"sans_ref":1}},{"cle":"GASQUET RODRIGUES|GINGER","nom":"GASQUET RODRIGUES","prenom":"Ginger","nomComplet":"GASQUET RODRIGUES Ginger","annee":"2016","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"02:03.55","tempsAff":"2:03.55","precedent":"01:58.89","precedentAff":"1:58.89","precedentDate":null,"precedentLieu":null,"ecartCs":466,"ecartAff":"−4,66 s","statut":"perdu"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:54.87","tempsAff":"1:54.87","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"01:05.80","tempsAff":"1:05.80","precedent":"01:04.94","precedentAff":"1:04.94","precedentDate":null,"precedentLieu":null,"ecartCs":86,"ecartAff":"−0,86 s","statut":"perdu"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"01:00.16","tempsAff":"1:00.16","precedent":"00:57.06","precedentAff":"57.06","precedentDate":null,"precedentLieu":null,"ecartCs":310,"ecartAff":"−3,10 s","statut":"perdu"}],"relais":[],"bilan":{"courses":4,"gagnes":0,"perdus":3,"egales":0,"sans_ref":1}},{"cle":"GIROUD|PAUL","nom":"GIROUD","prenom":"Paul","nomComplet":"GIROUD Paul","annee":"2015","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:36.28","tempsAff":"1:36.28","precedent":"01:35.96","precedentAff":"1:35.96","precedentDate":null,"precedentLieu":null,"ecartCs":32,"ecartAff":"−0,32 s","statut":"perdu"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:30.96","tempsAff":"1:30.96","precedent":"01:26.39","precedentAff":"1:26.39","precedentDate":null,"precedentLieu":null,"ecartCs":457,"ecartAff":"−4,57 s","statut":"perdu"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:52.06","tempsAff":"52.06","precedent":"00:51.37","precedentAff":"51.37","precedentDate":null,"precedentLieu":null,"ecartCs":69,"ecartAff":"−0,69 s","statut":"perdu"},{"epreuve":"100 DOS","label":"100 m Dos","ordre":40100,"temps":"01:50.03","tempsAff":"1:50.03","precedent":"01:41.31","precedentAff":"1:41.31","precedentDate":null,"precedentLieu":null,"ecartCs":872,"ecartAff":"−8,72 s","statut":"perdu"}],"relais":[],"bilan":{"courses":4,"gagnes":0,"perdus":4,"egales":0,"sans_ref":0}},{"cle":"GUEDES DA SILVA|GABRIELA","nom":"GUEDES DA SILVA","prenom":"Gabriela","nomComplet":"GUEDES DA SILVA Gabriela","annee":"2015","courses":[{"epreuve":"200 4N","label":"200 m 4 Nages","ordre":200,"temps":"03:59.23","tempsAff":"3:59.23","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:43.99","tempsAff":"1:43.99","precedent":"01:42.15","precedentAff":"1:42.15","precedentDate":null,"precedentLieu":null,"ecartCs":184,"ecartAff":"−1,84 s","statut":"perdu"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:57.82","tempsAff":"57.82","precedent":"00:59.58","precedentAff":"59.58","precedentDate":null,"precedentLieu":null,"ecartCs":-176,"ecartAff":"+1,76 s","statut":"gagne"},{"epreuve":"100 DOS","label":"100 m Dos","ordre":40100,"temps":"01:50.15","tempsAff":"1:50.15","precedent":"01:55.11","precedentAff":"1:55.11","precedentDate":null,"precedentLieu":null,"ecartCs":-496,"ecartAff":"+4,96 s","statut":"gagne"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:32.51","tempsAff":"3:32.51","rang":11,"equipe":["BILLET Céleste","DARBINIAN David","GUEDES DA SILVA Gabriela","RAPHAËL LE DOCTE Kanty"]}],"bilan":{"courses":4,"gagnes":2,"perdus":1,"egales":0,"sans_ref":1}},{"cle":"HALLALI|NOOR","nom":"HALLALI","prenom":"Noor","nomComplet":"HALLALI Noor","annee":"2017","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"02:07.60","tempsAff":"2:07.60","precedent":"02:08.55","precedentAff":"2:08.55","precedentDate":null,"precedentLieu":null,"ecartCs":-95,"ecartAff":"+0,95 s","statut":"gagne"},{"epreuve":"50 PAP","label":"50 m Papillon","ordre":10050,"temps":"01:00.81","tempsAff":"1:00.81","precedent":"01:08.01","precedentAff":"1:08.01","precedentDate":null,"precedentLieu":null,"ecartCs":-720,"ecartAff":"+7,20 s","statut":"gagne"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:57.32","tempsAff":"57.32","precedent":"00:59.26","precedentAff":"59.26","precedentDate":null,"precedentLieu":null,"ecartCs":-194,"ecartAff":"+1,94 s","statut":"gagne"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"01:04.36","tempsAff":"1:04.36","precedent":"01:01.73","precedentAff":"1:01.73","precedentDate":null,"precedentLieu":null,"ecartCs":263,"ecartAff":"−2,63 s","statut":"perdu"}],"relais":[],"bilan":{"courses":4,"gagnes":3,"perdus":1,"egales":0,"sans_ref":0}},{"cle":"HERITIER|LEO","nom":"HERITIER","prenom":"Léo","nomComplet":"HERITIER Léo","annee":"2017","courses":[{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:45.86","tempsAff":"45.86","precedent":"00:49.32","precedentAff":"49.32","precedentDate":null,"precedentLieu":null,"ecartCs":-346,"ecartAff":"+3,46 s","statut":"gagne"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"01:03.28","tempsAff":"1:03.28","precedent":"01:04.87","precedentAff":"1:04.87","precedentDate":null,"precedentLieu":null,"ecartCs":-159,"ecartAff":"+1,59 s","statut":"gagne"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:57.16","tempsAff":"57.16","precedent":"00:57.72","precedentAff":"57.72","precedentDate":null,"precedentLieu":null,"ecartCs":-56,"ecartAff":"+0,56 s","statut":"gagne"}],"relais":[],"bilan":{"courses":3,"gagnes":3,"perdus":0,"egales":0,"sans_ref":0}},{"cle":"JANICHON|ILYES","nom":"JANICHON","prenom":"Ilyes","nomComplet":"JANICHON Ilyes","annee":"2017","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:55.95","tempsAff":"1:55.95","precedent":"01:55.82","precedentAff":"1:55.82","precedentDate":null,"precedentLieu":null,"ecartCs":13,"ecartAff":"−0,13 s","statut":"perdu"},{"epreuve":"50 PAP","label":"50 m Papillon","ordre":10050,"temps":"00:51.15","tempsAff":"51.15","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:50.73","tempsAff":"50.73","precedent":"00:48.68","precedentAff":"48.68","precedentDate":null,"precedentLieu":null,"ecartCs":205,"ecartAff":"−2,05 s","statut":"perdu"},{"epreuve":"100 DOS","label":"100 m Dos","ordre":40100,"temps":"02:08.44","tempsAff":"2:08.44","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:33.92","tempsAff":"3:33.92","rang":12,"equipe":["KOURTELI Melya","BILLAUDY Gabriel","CHATELET Lucie","JANICHON Ilyes"]}],"bilan":{"courses":4,"gagnes":0,"perdus":2,"egales":0,"sans_ref":2}},{"cle":"JAY|CHLOE","nom":"JAY","prenom":"Chloé","nomComplet":"JAY Chloé","annee":"2016","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:51.59","tempsAff":"1:51.59","precedent":"01:50.73","precedentAff":"1:50.73","precedentDate":null,"precedentLieu":null,"ecartCs":86,"ecartAff":"−0,86 s","statut":"perdu"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:44.97","tempsAff":"1:44.97","precedent":"01:50.12","precedentAff":"1:50.12","precedentDate":null,"precedentLieu":null,"ecartCs":-515,"ecartAff":"+5,15 s","statut":"gagne"},{"epreuve":"100 BRA","label":"100 m Brasse","ordre":30100,"temps":"02:03.08","tempsAff":"2:03.08","precedent":"02:16.54","precedentAff":"2:16.54","precedentDate":null,"precedentLieu":null,"ecartCs":-1346,"ecartAff":"+13,46 s","statut":"gagne"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:55.07","tempsAff":"55.07","precedent":"00:56.25","precedentAff":"56.25","precedentDate":null,"precedentLieu":null,"ecartCs":-118,"ecartAff":"+1,18 s","statut":"gagne"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:28.44","tempsAff":"3:28.44","rang":9,"equipe":["BOUVIER Jonathan","EYMARD Pacôme","JAY Chloé","ROBIO Maryam"]}],"bilan":{"courses":4,"gagnes":3,"perdus":1,"egales":0,"sans_ref":0}},{"cle":"KACEMI|KAIS IBRAHIM","nom":"KACEMI","prenom":"Kaïs-Ibrahim","nomComplet":"KACEMI Kaïs-Ibrahim","annee":"2016","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:53.30","tempsAff":"1:53.30","precedent":"01:51.24","precedentAff":"1:51.24","precedentDate":null,"precedentLieu":null,"ecartCs":206,"ecartAff":"−2,06 s","statut":"perdu"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:40.84","tempsAff":"1:40.84","precedent":"01:42.89","precedentAff":"1:42.89","precedentDate":null,"precedentLieu":null,"ecartCs":-205,"ecartAff":"+2,05 s","statut":"gagne"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"01:06.63","tempsAff":"1:06.63","precedent":"01:03.00","precedentAff":"1:03.00","precedentDate":null,"precedentLieu":null,"ecartCs":363,"ecartAff":"−3,63 s","statut":"perdu"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:54.73","tempsAff":"54.73","precedent":"00:50.53","precedentAff":"50.53","precedentDate":null,"precedentLieu":null,"ecartCs":420,"ecartAff":"−4,20 s","statut":"perdu"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:18.50","tempsAff":"3:18.50","rang":4,"equipe":["FOURMOND Milo","DELORME Lydiana","REYDELLET Camille","KACEMI Kaïs-Ibrahim"]}],"bilan":{"courses":4,"gagnes":1,"perdus":3,"egales":0,"sans_ref":0}},{"cle":"KOURTELI|MELYA","nom":"KOURTELI","prenom":"Melya","nomComplet":"KOURTELI Melya","annee":"2015","courses":[{"epreuve":"200 4N","label":"200 m 4 Nages","ordre":200,"temps":"03:50.87","tempsAff":"3:50.87","precedent":"03:55.24","precedentAff":"3:55.24","precedentDate":null,"precedentLieu":null,"ecartCs":-437,"ecartAff":"+4,37 s","statut":"gagne"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:40.59","tempsAff":"40.59","precedent":"00:42.13","precedentAff":"42.13","precedentDate":null,"precedentLieu":null,"ecartCs":-154,"ecartAff":"+1,54 s","statut":"gagne"},{"epreuve":"100 BRA","label":"100 m Brasse","ordre":30100,"temps":"01:58.33","tempsAff":"1:58.33","precedent":"02:05.78","precedentAff":"2:05.78","precedentDate":null,"precedentLieu":null,"ecartCs":-745,"ecartAff":"+7,45 s","statut":"gagne"},{"epreuve":"100 DOS","label":"100 m Dos","ordre":40100,"temps":"01:44.60","tempsAff":"1:44.60","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:33.92","tempsAff":"3:33.92","rang":12,"equipe":["KOURTELI Melya","BILLAUDY Gabriel","CHATELET Lucie","JANICHON Ilyes"]}],"bilan":{"courses":4,"gagnes":3,"perdus":0,"egales":0,"sans_ref":1}},{"cle":"LAINE|LINA","nom":"LAINE","prenom":"Lina","nomComplet":"LAINE Lina","annee":"2016","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:51.09","tempsAff":"1:51.09","precedent":"01:48.84","precedentAff":"1:48.84","precedentDate":null,"precedentLieu":null,"ecartCs":225,"ecartAff":"−2,25 s","statut":"perdu"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:42.16","tempsAff":"1:42.16","precedent":"01:53.05","precedentAff":"1:53.05","precedentDate":null,"precedentLieu":null,"ecartCs":-1089,"ecartAff":"+10,89 s","statut":"gagne"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:55.81","tempsAff":"55.81","precedent":"00:58.75","precedentAff":"58.75","precedentDate":null,"precedentLieu":null,"ecartCs":-294,"ecartAff":"+2,94 s","statut":"gagne"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:56.69","tempsAff":"56.69","precedent":"00:53.27","precedentAff":"53.27","precedentDate":null,"precedentLieu":null,"ecartCs":342,"ecartAff":"−3,42 s","statut":"perdu"}],"relais":[],"bilan":{"courses":4,"gagnes":2,"perdus":2,"egales":0,"sans_ref":0}},{"cle":"LEMASLE|CLAIRE","nom":"LEMASLE","prenom":"Claire","nomComplet":"LEMASLE Claire","annee":"2015","courses":[{"epreuve":"200 4N","label":"200 m 4 Nages","ordre":200,"temps":"03:24.45","tempsAff":"3:24.45","precedent":"03:29.49","precedentAff":"3:29.49","precedentDate":null,"precedentLieu":null,"ecartCs":-504,"ecartAff":"+5,04 s","statut":"gagne"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:29.21","tempsAff":"1:29.21","precedent":"01:28.49","precedentAff":"1:28.49","precedentDate":null,"precedentLieu":null,"ecartCs":72,"ecartAff":"−0,72 s","statut":"perdu"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:53.82","tempsAff":"53.82","precedent":"00:54.71","precedentAff":"54.71","precedentDate":null,"precedentLieu":null,"ecartCs":-89,"ecartAff":"+0,89 s","statut":"gagne"},{"epreuve":"100 DOS","label":"100 m Dos","ordre":40100,"temps":"01:37.32","tempsAff":"1:37.32","precedent":"01:33.86","precedentAff":"1:33.86","precedentDate":null,"precedentLieu":null,"ecartCs":346,"ecartAff":"−3,46 s","statut":"perdu"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"02:58.94","tempsAff":"2:58.94","rang":3,"equipe":["BOZON Paul","CLOSON Pierre-Elouann","LEMASLE Claire","FOREY FAURE Lola"]}],"bilan":{"courses":4,"gagnes":2,"perdus":2,"egales":0,"sans_ref":0}},{"cle":"NEVERS|ELSA","nom":"NEVERS","prenom":"Elsa","nomComplet":"NEVERS Elsa","annee":"2016","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"02:01.54","tempsAff":"2:01.54","precedent":"01:59.83","precedentAff":"1:59.83","precedentDate":null,"precedentLieu":null,"ecartCs":171,"ecartAff":"−1,71 s","statut":"perdu"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:48.96","tempsAff":"1:48.96","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"01:04.44","tempsAff":"1:04.44","precedent":"01:03.85","precedentAff":"1:03.85","precedentDate":null,"precedentLieu":null,"ecartCs":59,"ecartAff":"−0,59 s","statut":"perdu"}],"relais":[],"bilan":{"courses":3,"gagnes":0,"perdus":2,"egales":0,"sans_ref":1}},{"cle":"PACCARD|MELODY","nom":"PACCARD","prenom":"Mélody","nomComplet":"PACCARD Mélody","annee":"2017","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"02:07.34","tempsAff":"2:07.34","precedent":"02:03.84","precedentAff":"2:03.84","precedentDate":null,"precedentLieu":null,"ecartCs":350,"ecartAff":"−3,50 s","statut":"perdu"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"02:02.69","tempsAff":"2:02.69","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"01:06.30","tempsAff":"1:06.30","precedent":"01:05.99","precedentAff":"1:05.99","precedentDate":null,"precedentLieu":null,"ecartCs":31,"ecartAff":"−0,31 s","statut":"perdu"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"01:01.74","tempsAff":"1:01.74","precedent":"01:01.15","precedentAff":"1:01.15","precedentDate":null,"precedentLieu":null,"ecartCs":59,"ecartAff":"−0,59 s","statut":"perdu"}],"relais":[],"bilan":{"courses":4,"gagnes":0,"perdus":3,"egales":0,"sans_ref":1}},{"cle":"RAPHAEL LE DOCTE|KANTY","nom":"RAPHAËL LE DOCTE","prenom":"Kanty","nomComplet":"RAPHAËL LE DOCTE Kanty","annee":"2017","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"02:01.60","tempsAff":"2:01.60","precedent":"02:08.06","precedentAff":"2:08.06","precedentDate":null,"precedentLieu":null,"ecartCs":-646,"ecartAff":"+6,46 s","statut":"gagne"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:51.80","tempsAff":"1:51.80","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"01:06.27","tempsAff":"1:06.27","precedent":"01:03.93","precedentAff":"1:03.93","precedentDate":null,"precedentLieu":null,"ecartCs":234,"ecartAff":"−2,34 s","statut":"perdu"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"01:00.51","tempsAff":"1:00.51","precedent":"00:59.44","precedentAff":"59.44","precedentDate":null,"precedentLieu":null,"ecartCs":107,"ecartAff":"−1,07 s","statut":"perdu"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:32.51","tempsAff":"3:32.51","rang":11,"equipe":["BILLET Céleste","DARBINIAN David","GUEDES DA SILVA Gabriela","RAPHAËL LE DOCTE Kanty"]}],"bilan":{"courses":4,"gagnes":1,"perdus":2,"egales":0,"sans_ref":1}},{"cle":"REYDELLET|CAMILLE","nom":"REYDELLET","prenom":"Camille","nomComplet":"REYDELLET Camille","annee":"2016","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:48.01","tempsAff":"1:48.01","precedent":"01:45.81","precedentAff":"1:45.81","precedentDate":null,"precedentLieu":null,"ecartCs":220,"ecartAff":"−2,20 s","statut":"perdu"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:40.63","tempsAff":"1:40.63","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"100 BRA","label":"100 m Brasse","ordre":30100,"temps":"02:01.08","tempsAff":"2:01.08","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:52.63","tempsAff":"52.63","precedent":"00:52.49","precedentAff":"52.49","precedentDate":null,"precedentLieu":null,"ecartCs":14,"ecartAff":"−0,14 s","statut":"perdu"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:18.50","tempsAff":"3:18.50","rang":4,"equipe":["FOURMOND Milo","DELORME Lydiana","REYDELLET Camille","KACEMI Kaïs-Ibrahim"]}],"bilan":{"courses":4,"gagnes":0,"perdus":2,"egales":0,"sans_ref":2}},{"cle":"ROBIO|MARYAM","nom":"ROBIO","prenom":"Maryam","nomComplet":"ROBIO Maryam","annee":"2015","courses":[{"epreuve":"200 4N","label":"200 m 4 Nages","ordre":200,"temps":"03:40.45","tempsAff":"3:40.45","precedent":"03:47.81","precedentAff":"3:47.81","precedentDate":null,"precedentLieu":null,"ecartCs":-736,"ecartAff":"+7,36 s","statut":"gagne"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:30.49","tempsAff":"1:30.49","precedent":"01:34.19","precedentAff":"1:34.19","precedentDate":null,"precedentLieu":null,"ecartCs":-370,"ecartAff":"+3,70 s","statut":"gagne"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:56.89","tempsAff":"56.89","precedent":"00:58.43","precedentAff":"58.43","precedentDate":null,"precedentLieu":null,"ecartCs":-154,"ecartAff":"+1,54 s","statut":"gagne"},{"epreuve":"100 DOS","label":"100 m Dos","ordre":40100,"temps":"01:47.10","tempsAff":"1:47.10","precedent":"01:46.73","precedentAff":"1:46.73","precedentDate":null,"precedentLieu":null,"ecartCs":37,"ecartAff":"−0,37 s","statut":"perdu"}],"relais":[{"label":"Relais 4×50 m 4 Nages mixte","temps":"03:28.44","tempsAff":"3:28.44","rang":9,"equipe":["BOUVIER Jonathan","EYMARD Pacôme","JAY Chloé","ROBIO Maryam"]}],"bilan":{"courses":4,"gagnes":3,"perdus":1,"egales":0,"sans_ref":0}},{"cle":"SHKOZA|JUSRA","nom":"SHKOZA","prenom":"Jusra","nomComplet":"SHKOZA Jusra","annee":"2017","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:56.41","tempsAff":"1:56.41","precedent":"01:59.74","precedentAff":"1:59.74","precedentDate":null,"precedentLieu":null,"ecartCs":-333,"ecartAff":"+3,33 s","statut":"gagne"},{"epreuve":"50 PAP","label":"50 m Papillon","ordre":10050,"temps":"00:59.46","tempsAff":"59.46","precedent":"01:00.17","precedentAff":"1:00.17","precedentDate":null,"precedentLieu":null,"ecartCs":-71,"ecartAff":"+0,71 s","statut":"gagne"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:48.30","tempsAff":"48.30","precedent":"00:48.11","precedentAff":"48.11","precedentDate":null,"precedentLieu":null,"ecartCs":19,"ecartAff":"−0,19 s","statut":"perdu"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"01:04.12","tempsAff":"1:04.12","precedent":"01:03.25","precedentAff":"1:03.25","precedentDate":null,"precedentLieu":null,"ecartCs":87,"ecartAff":"−0,87 s","statut":"perdu"}],"relais":[],"bilan":{"courses":4,"gagnes":2,"perdus":2,"egales":0,"sans_ref":0}},{"cle":"TOURNIER|CLARISSE","nom":"TOURNIER","prenom":"Clarisse","nomComplet":"TOURNIER Clarisse","annee":"2017","courses":[{"epreuve":"100 4N","label":"100 m 4 Nages","ordre":100,"temps":"01:56.89","tempsAff":"1:56.89","precedent":"01:55.72","precedentAff":"1:55.72","precedentDate":null,"precedentLieu":null,"ecartCs":117,"ecartAff":"−1,17 s","statut":"perdu"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:48.08","tempsAff":"48.08","precedent":"00:46.43","precedentAff":"46.43","precedentDate":null,"precedentLieu":null,"ecartCs":165,"ecartAff":"−1,65 s","statut":"perdu"},{"epreuve":"100 BRA","label":"100 m Brasse","ordre":30100,"temps":"02:19.13","tempsAff":"2:19.13","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:49.60","tempsAff":"49.60","precedent":"00:49.25","precedentAff":"49.25","precedentDate":null,"precedentLieu":null,"ecartCs":35,"ecartAff":"−0,35 s","statut":"perdu"}],"relais":[],"bilan":{"courses":4,"gagnes":0,"perdus":3,"egales":0,"sans_ref":1}}]};
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---------- stockage local (try/catch : peut être indisponible) ----------
+const store = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+};
+const K_CONTACTS = 'cnb_envoi_contacts_v1', K_SET = 'cnb_envoi_reglages_v5', K_SENT = 'cnb_envoi_envoyes_' + RECAP.competition.id;
+let contacts = store.get(K_CONTACTS, []);          // [{cle, nageur, parent, tel, canal}]
+let sent = store.get(K_SENT, {});                  // { "cle#i": "2026-10-12T15:00" }
+let S = Object.assign({
+  intro: 'Salut ! 👋 Le récap de {prenom} {nom} est là 🔥',
+  outro: '',
+  signature: RECAP.competition.signature || '', emojiSms: true
+}, store.get(K_SET, {}));
+let filter = 'all';
+
+// ---------- noms ----------
+const norm = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim();
+const isUp = w => w === w.toUpperCase() && /[A-ZÀ-Ý]/.test(w);
+function keyOf(full){ const t = String(full).trim().split(/\s+/); return norm(t.filter(isUp).join(' ')) + '|' + norm(t.filter(w=>!isUp(w)).join(' ')); }
+
+// ---------- téléphone ----------
+function normPhone(raw){
+  if (!raw) return null;
+  let s = String(raw).trim().replace(/[^\d+]/g,'');
+  if (!s) return null;
+  if (s.startsWith('00')) s = '+' + s.slice(2);
+  else if (s.startsWith('+')) {}
+  else if (s.startsWith('0')) s = '+33' + s.slice(1);
+  else if (s.startsWith('33') && s.length === 11) s = '+' + s;
+  else if (s.length === 9) s = '+33' + s;
+  else s = '+' + s;
+  s = s.replace(/^\+330/, '+33');
+  return /^\+\d{10,15}$/.test(s) ? s : null;
+}
+
+// ---------- message ----------
+const rangFr = n => n === 1 ? '1er' : n + 'e';
+const pl = (n, a, b) => n > 1 ? b : a;
+function buildMessage(n, canal, parent){
+  const em = canal === 'whatsapp' || S.emojiSms;
+  const B = s => canal === 'whatsapp' ? '*' + s + '*' : s;
+  const fill = t => {
+    t = (t || '').replace(/\{parent\}/g, parent || '').replace(/\{prenom\}/g, n.prenom).replace(/\{nom\}/g, n.nom);
+    if (!em) t = t.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}️‍]/gu, '');
+    return t.replace(/\s+([,.])/g, '$1').replace(/ {2,}/g, ' ').trim();
+  };
+  const L = [fill(S.intro), '', (em ? '🏊 ' : '') + RECAP.competition.designation, ''];
+  n.courses.forEach(c => {
+    const tail = c.statut === 'gagne' ? (em ? '🟢 ' : '') + c.ecartAff
+               : c.statut === 'perdu' ? (em ? '🔴 ' : '') + c.ecartAff
+               : c.statut === 'egale' ? (em ? '🔵 ' : '') + '='
+               : '';
+    L.push(`${em ? '•' : '-'} ${c.label} → ${B(c.tempsAff)}${tail ? '  ' + tail : ''}`);
+  });
+  n.relais.forEach(r => L.push(`${em ? '•' : '-'} ${r.label} → ${B(r.tempsAff)}${r.rang ? ' (' + rangFr(r.rang) + ')' : ''}${em ? ' 🏁' : ''}`));
+  const out = fill(S.outro); if (out) L.push('', out);
+  if (S.signature) { if (!out) L.push(''); L.push(S.signature); }
+  return L.join('\n');
+}
+
+
+// ---------- image du récap (temps en vert / rouge) ----------
+function drawRecap(n){
+  const W = 760, P = 28, DPR = 2, ROW = 60, GREEN = '#16a34a', RED = '#dc2626', NAVY = '#1e3a5f', MUTE = '#64748b';
+  const F = (w, px) => `${w} ${px}px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif`;
+  const probe = document.createElement('canvas').getContext('2d'); probe.font = F(500, 17);
+  const words = RECAP.competition.designation.split(' '); const lines = []; let cur = '';
+  words.forEach(w => { const t = cur ? cur + ' ' + w : w; if (probe.measureText(t).width > W - 2 * P && cur) { lines.push(cur); cur = w; } else cur = t; });
+  if (cur) lines.push(cur);
+  const HEAD = 24 + 40 + 12 + lines.length * 24 + 18, rows = n.courses.length + n.relais.length;
+  const H = HEAD + 34 + rows * ROW + (RECAP.competition.signature ? 56 : 24);
+  const c = document.createElement('canvas'); c.width = W * DPR; c.height = H * DPR;
+  const x = c.getContext('2d'); x.scale(DPR, DPR);
+  x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+  x.fillStyle = NAVY; x.fillRect(0, 0, W, HEAD);
+  x.fillStyle = '#fff'; x.textBaseline = 'alphabetic';
+  x.font = F(800, 30); const nomW = x.measureText(n.nom + ' ').width; x.fillText(n.nom, P, 24 + 32);
+  x.font = F(600, 30); x.fillText(n.prenom, P + nomW, 24 + 32);
+  x.font = F(500, 17); x.globalAlpha = .9; lines.forEach((l, i) => x.fillText(l, P, 24 + 40 + 12 + 18 + i * 24)); x.globalAlpha = 1;
+  let y = HEAD + 24; x.fillStyle = MUTE; x.font = F(700, 13);
+  x.textAlign = 'left'; x.fillText('ÉPREUVE', P, y);
+  x.textAlign = 'right'; x.fillText('TEMPS', 470, y); x.fillText('ENGAGEMENT', 595, y); x.fillText('ÉCART', W - P, y);
+  y += 10;
+  const line = yy => { x.fillStyle = '#e2e8f0'; x.fillRect(P, yy, W - 2 * P, 1); };
+  line(y);
+  n.courses.forEach(co => {
+    const col = co.statut === 'gagne' ? GREEN : co.statut === 'perdu' ? RED : co.statut === 'egale' ? '#2563eb' : '#0f172a';
+    const base = y + ROW / 2 + 9;
+    x.textAlign = 'left'; x.fillStyle = '#0f172a'; x.font = F(700, 20); x.fillText(co.label, P, base);
+    x.textAlign = 'right'; x.fillStyle = col; x.font = F(800, 26); x.fillText(co.tempsAff, 470, base);
+    x.fillStyle = MUTE; x.font = F(500, 18); x.fillText(co.precedentAff || '—', 595, base);
+    x.fillStyle = col; x.font = F(800, 22); x.fillText(co.ecartAff || 'NT', W - P, base);
+    y += ROW; line(y);
+  });
+  n.relais.forEach(r => {
+    const base = y + ROW / 2 + 9;
+    x.textAlign = 'left'; x.fillStyle = '#0f172a'; x.font = F(700, 18); x.fillText(r.label, P, base);
+    x.textAlign = 'right'; x.fillStyle = MUTE; x.font = F(800, 24); x.fillText(r.tempsAff, 470, base);
+    x.font = F(700, 18); x.fillText(r.rang ? (r.rang === 1 ? '1er' : r.rang + 'e') : '', W - P, base);
+    y += ROW; line(y);
+  });
+  if (RECAP.competition.signature) { x.textAlign = 'left'; x.fillStyle = MUTE; x.font = F(600, 16); x.fillText(S.signature || RECAP.competition.signature, P, y + 36); }
+  return c;
+}
+async function copyImage(k){
+  const n = RECAP.nageurs.find(z => z.cle === k); if (!n) return;
+  const blob = await new Promise(r => drawRecap(n).toBlob(r, 'image/png'));
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    toast('Image copiée : ouvrez la conversation WhatsApp puis collez-la (Ctrl+V)');
+  } catch (e) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'recap_' + n.nom + '_' + n.prenom + '.png'; a.click();
+    toast('Copie impossible : image téléchargée à la place');
+  }
+}
+
+// ---------- contacts ----------
+const forSw = k => contacts.map((c, i) => ({ c, i })).filter(x => x.c.cle === k);
+function saveContacts(){ store.set(K_CONTACTS, contacts); }
+function parseCSV(text){
+  text = text.replace(/^﻿/, '');
+  const first = text.split(/\r?\n/)[0] || '';
+  const delim = [';', '\t', ','].map(d => [d, first.split(d).length]).sort((a, b) => b[1] - a[1])[0][0];
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) { if (ch === '"') { if (text[i+1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === delim) { row.push(cur); cur = ''; }
+    else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i+1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+    else cur += ch;
+  }
+  if (cur || row.length) { row.push(cur); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim()));
+}
+function importCSV(text){
+  const rows = parseCSV(text); if (!rows.length) return toast('Fichier vide');
+  const h = rows[0].map(x => norm(x).toLowerCase());
+  const hasHead = h.some(x => /nageur|enfant|nom|tel|parent/.test(x));
+  const idx = (re, d) => { const i = h.findIndex(x => re.test(x)); return hasHead ? i : d; };
+  const iN = idx(/nageur|enfant|^nom/, 0), iP = idx(/parent|contact|resp/, 2), iT = idx(/tel|mobile|portable|num/, 3), iC = idx(/canal|mode|appli/, 4);
+  const known = new Map(RECAP.nageurs.map(n => [n.cle, n]));
+  const out = []; let unknown = [], noTel = 0;
+  rows.slice(hasHead ? 1 : 0).forEach(r => {
+    const nageur = (r[iN] || '').trim(); if (!nageur) return;
+    const cle = keyOf(nageur); if (!known.has(cle)) { unknown.push(nageur); return; }
+    const tel = (r[iT] || '').trim(); if (!tel) { noTel++; return; }
+    const canalRaw = norm(r[iC] || '').toLowerCase();
+    out.push({ cle, nageur: known.get(cle).nomComplet, parent: (r[iP] || '').trim(), tel, canal: /sms/.test(canalRaw) ? 'sms' : 'whatsapp' });
+  });
+  contacts = out; saveContacts(); render();
+  toast(`${out.length} contact(s) importé(s)` + (unknown.length ? ` · ${unknown.length} nageur(s) inconnu(s) ignoré(s)` : ''));
+}
+function exportCSV(){
+  const lines = ['nageur;annee;parent;telephone;canal'];
+  RECAP.nageurs.forEach(n => {
+    const cs = forSw(n.cle);
+    if (!cs.length) lines.push([n.nomComplet, n.annee, '', '', 'whatsapp'].join(';'));
+    cs.forEach(x => lines.push([n.nomComplet, n.annee, x.c.parent, x.c.tel, x.c.canal].map(v => String(v).replace(/;/g, ',')).join(';')));
+  });
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'contacts_parents.csv'; a.click();
+}
+
+// ---------- envoi ----------
+function urlFor(n, c){
+  const phone = normPhone(c.tel); if (!phone) return null;
+  const msg = buildMessage(n, c.canal, c.parent);
+  return c.canal === 'sms' ? `sms:${phone}?&body=${encodeURIComponent(msg)}` : `https://wa.me/${phone.slice(1)}?text=${encodeURIComponent(msg)}`;
+}
+function sendTo(k, i){
+  const n = RECAP.nageurs.find(x => x.cle === k), c = contacts[i]; if (!n || !c) return;
+  const url = urlFor(n, c); if (!url) return toast('Numéro invalide pour ' + n.nomComplet);
+  sent[k + '#' + i] = new Date().toISOString(); store.set(K_SENT, sent);
+  if (c.canal === 'sms') location.href = url; else window.open(url, '_blank', 'noopener');
+  render();
+}
+function pending(){
+  const out = [];
+  RECAP.nageurs.forEach(n => forSw(n.cle).forEach(x => { if (normPhone(x.c.tel) && !sent[n.cle + '#' + x.i]) out.push({ k: n.cle, i: x.i, n }); }));
+  return out;
+}
+
+// ---------- affichage ----------
+function toast(t){ const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), 3200); }
+function badge(b){
+  let h = `<span class="badge">${b.courses} course${pl(b.courses,'','s')}</span>`;
+  return h;
+}
+function swHTML(n){
+  const cs = forSw(n.cle);
+  const ctRows = cs.map(({ c, i }) => {
+    const ph = normPhone(c.tel), done = sent[n.cle + '#' + i];
+    return `<div class="ct" data-k="${esc(n.cle)}" data-i="${i}">
+      <input type="text" data-f="parent" placeholder="Parent (facultatif)" value="${esc(c.parent)}">
+      <input type="tel" data-f="tel" placeholder="06 12 34 56 78" value="${esc(c.tel)}">
+      <select data-f="canal"><option value="whatsapp"${c.canal==='whatsapp'?' selected':''}>WhatsApp</option><option value="sms"${c.canal==='sms'?' selected':''}>SMS</option></select>
+      ${ph ? `<button class="${c.canal==='sms'?'sms':'wa'}" data-act="send">${c.canal==='sms'?'Envoyer le SMS':'Envoyer sur WhatsApp'}</button>` : `<span class="bad">${c.tel ? 'numéro invalide' : 'numéro manquant'}</span>`}
+      ${done ? `<span class="ok">✓ fait</span> <button class="ghost" data-act="undo">annuler</button>` : ''}
+      <button class="ghost" data-act="del" title="Supprimer ce contact">✕</button></div>`;
+  }).join('');
+  const prev = buildMessage(n, (cs[0] && cs[0].c.canal) || 'whatsapp', (cs[0] && cs[0].c.parent) || '');
+  return `<div class="sw" data-k="${esc(n.cle)}"><div class="hd">
+      <div class="nm">${esc(n.nom)} ${esc(n.prenom)}<small>${esc(n.annee)}</small></div>
+      ${badge(n.bilan)}
+      <button class="ghost" data-act="img" title="Image avec les temps en vert / rouge, à coller dans WhatsApp">🖼 Image</button><button class="ghost" data-act="prev">Aperçu</button><button class="ghost" data-act="add">+ parent</button></div>
+    ${ctRows}
+    <div class="pre"><pre>${esc(prev)}</pre><button class="ghost" data-act="copy">Copier le message</button></div></div>`;
+}
+function render(){
+  const nSw = RECAP.nageurs.length, withTel = contacts.filter(c => normPhone(c.tel)).length;
+  const nSent = Object.keys(sent).length, left = pending().length;
+  $('#sub').textContent = RECAP.competition.designation;
+  $('#stats').innerHTML = `<span>${nSw} nageurs</span><span>${withTel} numéro(s) valide(s)</span><span>${nSent} envoyé(s)</span><span>${left} à envoyer</span>`;
+  $('#nextInfo').textContent = left ? `Prochain : ${pending()[0].n.nomComplet}` : 'Rien à envoyer pour le moment';
+  $('#btnNext').disabled = !left;
+  const F = { all: 'Tous', todo: 'À envoyer', done: 'Envoyés', none: 'Sans numéro' };
+  $('#chips').innerHTML = Object.entries(F).map(([k, v]) => `<span class="chip${filter===k?' on':''}" data-f="${k}">${v}</span>`).join('');
+  const keep = n => {
+    const cs = forSw(n.cle);
+    if (filter === 'none') return !cs.some(x => normPhone(x.c.tel));
+    if (filter === 'todo') return cs.some(x => normPhone(x.c.tel) && !sent[n.cle + '#' + x.i]);
+    if (filter === 'done') return cs.some(x => sent[n.cle + '#' + x.i]);
+    return true;
+  };
+  const open = new Set([...document.querySelectorAll('.pre.open')].map(e => e.closest('.sw').dataset.k));
+  $('#list').innerHTML = RECAP.nageurs.filter(keep).map(swHTML).join('') || '<div class="panel hint">Aucun nageur dans ce filtre.</div>';
+  open.forEach(k => { const e = document.querySelector(`.sw[data-k="${CSS.escape(k)}"] .pre`); if (e) e.classList.add('open'); });
+}
+
+// ---------- événements ----------
+$('#list').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const sw = b.closest('.sw'), k = sw.dataset.k, ct = b.closest('.ct'), i = ct ? +ct.dataset.i : null;
+  const act = b.dataset.act, n = RECAP.nageurs.find(x => x.cle === k);
+  if (act === 'send') sendTo(k, i);
+  else if (act === 'undo') { delete sent[k + '#' + i]; store.set(K_SENT, sent); render(); }
+  else if (act === 'del') { contacts.splice(i, 1); sent = {}; store.set(K_SENT, sent); saveContacts(); render(); toast('Contact supprimé (statuts d\'envoi réinitialisés)'); }
+  else if (act === 'add') { contacts.push({ cle: k, nageur: n.nomComplet, parent: '', tel: '', canal: 'whatsapp' }); saveContacts(); render(); }
+  else if (act === 'img') copyImage(k);
+  else if (act === 'prev') sw.querySelector('.pre').classList.toggle('open');
+  else if (act === 'copy') { const t = sw.querySelector('pre').textContent; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Message copié'), () => toast('Copie impossible : sélectionnez le texte manuellement')); }
+});
+$('#list').addEventListener('change', e => {
+  const f = e.target.dataset.f, ct = e.target.closest('.ct'); if (!f || !ct) return;
+  contacts[+ct.dataset.i][f] = e.target.value.trim(); saveContacts(); render();
+});
+$('#chips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) { filter = c.dataset.f; render(); } });
+$('#btnNext').addEventListener('click', () => { const p = pending()[0]; if (p) sendTo(p.k, p.i); });
+$('#btnImport').addEventListener('click', () => $('#file').click());
+$('#file').addEventListener('change', e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => importCSV(String(r.result)); r.readAsText(f, 'utf-8'); e.target.value = ''; });
+$('#btnExport').addEventListener('click', exportCSV);
+$('#intro').value = S.intro; $('#outro').value = S.outro; $('#sign').value = S.signature; $('#emojiSms').checked = !!S.emojiSms;
+const saveSet = () => { S = { intro: $('#intro').value, outro: $('#outro').value, signature: $('#sign').value, emojiSms: $('#emojiSms').checked }; store.set(K_SET, S); render(); };
+['#intro', '#outro', '#sign'].forEach(s => $(s).addEventListener('input', saveSet)); $('#emojiSms').addEventListener('change', saveSet);
+document.title = 'Envoi récaps ' + RECAP.competition.date + ' – CN Bourg-en-Bresse';
+render();
+</script>
+</body>
+</html>
