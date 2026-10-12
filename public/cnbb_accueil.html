@@ -101,7 +101,7 @@
   .container { position: relative; z-index: 1; }
 
   .container {
-    max-width: 920px;
+    max-width: 1100px;
     width: 100%;
     text-align: center;
   }
@@ -187,6 +187,9 @@
   .card-competition .card-icon { background: linear-gradient(135deg,#f59e0b,#d97706); box-shadow: 0 4px 14px rgba(245,158,11,0.45); }
   .card-competition .card-btn { background: linear-gradient(135deg,#f59e0b,#d97706); }
   .card-competition .card-btn:hover { background: #b45309; }
+  .card-recaps .card-icon { background: linear-gradient(135deg,#8b5cf6,#6d28d9); box-shadow: 0 4px 14px rgba(124,58,237,0.45); }
+  .card-recaps .card-btn { background: linear-gradient(135deg,#8b5cf6,#6d28d9); color: #fff; }
+  .card-recaps .card-btn:hover { background: #5b21b6; }
   .comp-badge { display:inline-block; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; margin-bottom:6px; letter-spacing:0.5px; }
   .comp-name { font-size:16px; font-weight:800; color:#1e3a5f; line-height:1.2; margin-bottom:8px; }
   .comp-info { display:flex; flex-direction:column; gap:4px; margin-bottom:4px; }
@@ -639,6 +642,14 @@ td.col-holiday.checked .cell-inner{
       <div class="card-desc">Prochaine compétition · Programme &amp; accès</div>
       <span class="card-btn" style="display:block;text-align:center;">Accéder →</span>
     </div>
+
+    <!-- Récaps -->
+    <a class="card card-recaps" href="cnbb_recaps.html" style="text-decoration:none;">
+      <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></div>
+      <div class="card-title">RÉCAPS</div>
+      <div class="card-desc">Récap de la dernière compétition · Envoi aux parents</div>
+      <span class="card-btn" style="display:block;text-align:center;">Accéder →</span>
+    </a>
 
   </div>
 
