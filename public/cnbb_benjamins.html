@@ -161,6 +161,13 @@ td.col-holiday.checked .cell-inner{background:linear-gradient(135deg,#00ff6a 0%,
 .mpp-modal-tbl td{padding:7px 8px;border-bottom:0.5px solid #f3f4f6;}
 .mpp-modal-tbl tr:last-child td{border-bottom:none;}
 .mpp-hint{font-size:13px;color:#111827;margin:0 0 10px;padding:8px 12px;background:rgba(253,224,71,.12);border-radius:8px;border-left:3px solid #fde047;display:none;}
+
+/* Dispense exceptionnelle : case rouge = seance non comptee dans le % */
+td.pres-cell.disp .cell-inner,td.col-holiday.disp .cell-inner{background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%)!important;border-color:#b91c1c!important;box-shadow:0 0 8px rgba(239,68,68,0.6),0 2px 4px rgba(150,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.35)!important;}
+td.pres-cell.disp .cell-inner::after{content:'D';display:block;font-size:11px;font-weight:900;color:#fff;line-height:20px;}
+body.dispmode td.pres-cell:hover .cell-inner{border-color:#f87171;background:#fee2e2;}
+body.dispmode td.pres-cell.disp:hover .cell-inner{background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%)!important;}
+#disp-btn.on{background:#dc2626!important;color:#fff!important;border-color:#991b1b!important;}
 </style>
 
 <!-- ===== RESPONSIVE MOBILE (aligne sur cnbb_accueil.html) ===== -->
@@ -364,6 +371,8 @@ td.col-holiday.checked .cell-inner{background:linear-gradient(135deg,#00ff6a 0%,
   <div class="stat-item"><strong id="stat-swimmers">19</strong>nageurs</div>
   <div class="stat-item" id="sync-status" style="font-weight:600;"></div>
   <button type="button" onclick="resortPresence()" style="border:1px solid #c4b5fd;background:#f5f3ff;color:#4c1d95;font-weight:700;font-size:12px;border-radius:8px;padding:5px 10px;cursor:pointer;">&#8635; Trier par %</button>
+  <button type="button" id="disp-btn" onclick="toggleDispMode()" title="Marquer une dispense exceptionnelle : la case devient rouge et la seance n'est plus comptee dans le %" style="border:1px solid #fca5a5;background:#fef2f2;color:#b91c1c;font-weight:700;font-size:12px;border-radius:8px;padding:5px 10px;cursor:pointer;">&#128308; Dispense exceptionnelle</button>
+  <div class="stat-item" id="disp-hint" style="display:none;color:#b91c1c;font-weight:600;">Touchez une case pour la mettre en rouge (dispense, non comptée dans le %). Retouchez-la pour l'annuler.</div>
 </div>
 <div class="table-wrap">
   <div class="table-inner">
@@ -1184,7 +1193,7 @@ function startDateFor(idx) {
 }
 function swimmerTotal(idx) {
   const start = startDateFor(idx);
-  return presence[idx].reduce((s,v,j) => s + (v && DATES[j].full <= TODAY && DATES[j].full >= start ? 1 : 0), 0);
+  return presence[idx].reduce((s,v,j) => s + (v && !isDisp(idx, j) && DATES[j].full <= TODAY && DATES[j].full >= start ? 1 : 0), 0);
 }
 // Jours d'entrainement (0=Lu,1=Ma,2=Me,3=Je,4=Ve) reellement suivis par
 // chaque generation : les 2015 nagent Lu/Ma/Je/Ve, les 2014 Lu/Ma/Me/Ve.
@@ -1208,7 +1217,7 @@ function weeklyPctForSwimmer(idx) {
   const relDays = relevantDaysFor(idx);
   const passedIdxs = DATES
     .map((dt,j) => ({dt,j}))
-    .filter(o => (relDays.includes(o.dt.day) || o.dt.stage) && o.dt.full <= TODAY && o.dt.full >= startDateFor(idx))
+    .filter(o => (relDays.includes(o.dt.day) || o.dt.stage) && o.dt.full <= TODAY && o.dt.full >= startDateFor(idx) && !isDisp(idx, o.j))
     .map(o => o.j);
   if (passedIdxs.length === 0) return null;
   const attended = passedIdxs.reduce((s,j) => s + (presence[idx][j] ? 1 : 0), 0);
@@ -1235,6 +1244,59 @@ const DATES = [{d:"14/09",day:0,full:"2026-09-14"},{d:"15/09",day:1,full:"2026-0
 // Ordre d'affichage : par date puis heure. Les numeros de colonne (donnees enregistrees) ne changent pas.
 const DATE_ORDER = DATES.map((_, j) => j).sort((a, b) => ((DATES[a].full + (DATES[a].t || '00:00')).localeCompare(DATES[b].full + (DATES[b].t || '00:00'))) || (a - b));
 let presence = [];
+
+// ── Dispenses exceptionnelles ──────────────────────────────────────────────
+// Case rouge = dispense : la seance n'est comptee ni en presence ni en absence
+// (retiree du numerateur ET du denominateur du %).
+// Stockage : dans le meme store que les presences, a l'indice de colonne
+// j + DISP_OFFSET (aucune modification du serveur necessaire).
+const DISP_OFFSET = 250;
+let disp = [];
+let dispMode = false;
+function isDisp(i, j) { return !!(disp[i] && disp[i][j]); }
+function packedPresence() {
+  return presence.map((row, i) => {
+    const r = row.slice(0, DATES.length);
+    (disp[i] || []).forEach((v, j) => { if (v) r[j + DISP_OFFSET] = true; });
+    return r;
+  });
+}
+function toggleDispMode() {
+  dispMode = !dispMode;
+  document.body.classList.toggle('dispmode', dispMode);
+  const b = document.getElementById('disp-btn');
+  if (b) { b.classList.toggle('on', dispMode); b.innerHTML = dispMode ? '&#128308; Mode dispense : ACTIF (terminer)' : '&#128308; Dispense exceptionnelle'; }
+  const h = document.getElementById('disp-hint');
+  if (h) h.style.display = dispMode ? '' : 'none';
+}
+async function pushCell(i, jj, value) {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({i, j: jj, value})
+    });
+    if (!res.ok) throw new Error('status ' + res.status);
+    syncOk = true;
+  } catch(e) {
+    console.warn('Échec de synchronisation de la dispense.', e);
+    syncOk = false;
+  }
+  setSyncIndicator();
+}
+async function toggleDispense(i, j) {
+  if (!disp[i]) disp[i] = [];
+  const nv = !disp[i][j];
+  disp[i][j] = nv;
+  const wasPresent = !!presence[i][j];
+  if (nv && wasPresent) presence[i][j] = false; // une case rouge n'est pas une presence
+  saveLocalCache();
+  const cell = document.querySelector(`td[data-i="${i}"][data-j="${j}"]`);
+  if (cell) cell.classList.toggle('checked', !!presence[i][j]);
+  refreshRowCol(i, j);
+  await pushCell(i, j + DISP_OFFSET, nv);
+  if (nv && wasPresent) await pushCell(i, j, false);
+}
 let syncOk = true;
 const STORAGE_KEY = 'cnbb_benjamins_presence_2026_2027';
 const API_URL = '/api/presence?group=benjamins';
@@ -1243,6 +1305,14 @@ function emptyPresence() {
   return SWIMMERS.map(() => new Array(DATES.length).fill(false));
 }
 function normalizePresence() {
+  // Extraction des dispenses (colonnes j + DISP_OFFSET) puis retour des lignes a DATES.length
+  disp = [];
+  for (let idx = 0; idx < presence.length; idx++) {
+    const raw = Array.isArray(presence[idx]) ? presence[idx] : [];
+    disp[idx] = [];
+    for (let j = 0; j < DATES.length; j++) disp[idx][j] = raw[j + DISP_OFFSET] === true;
+    if (raw.length > DATES.length) presence[idx] = raw.slice(0, DATES.length);
+  }
   while (presence.length < SWIMMERS.length) presence.push([]);
   for (let idx = 0; idx < presence.length; idx++) {
     if (!Array.isArray(presence[idx])) presence[idx] = [];
@@ -1251,7 +1321,7 @@ function normalizePresence() {
   }
 }
 function saveLocalCache() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(presence)); } catch(e) {}
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(packedPresence())); } catch(e) {}
 }
 function setSyncIndicator() {
   const el = document.getElementById('sync-status');
@@ -1306,7 +1376,7 @@ function buildTable() {
     rows += `<tr class="swimmer-row" data-idx="${i}">
       <td class="col-name"><span class="group-badge" style="background:${color}">${sw.g}${sw.y.slice(2)}</span>${sw.n}</td>`;
     DATE_ORDER.forEach(j => { const dt = DATES[j];
-      const checked = presence[i][j] ? ' checked' : '';
+      const checked = (presence[i][j] ? ' checked' : '') + (isDisp(i, j) ? ' disp' : '');
       const holC = dt.hol ? ' col-holiday' : (dt.stage ? ' col-holiday col-stage' : '');
       rows += `<td class="pres-cell day-${dt.day}${checked}${holC}" data-i="${i}" data-j="${j}" ${(dt.tip||dt.hol)?'title="'+(dt.tip||dt.hol)+'"':''}><span class="cell-inner"></span></td>`;
     });
@@ -1338,9 +1408,9 @@ function updateStats() {
   const grand = presence.reduce((s,row) => s+row.reduce((a,v)=>a+(v?1:0),0), 0);
   document.getElementById('stat-total').textContent = grand;
 }
-async function togglePresence(i,j) {
-  presence[i][j] = !presence[i][j];
-  saveLocalCache();
+function refreshRowCol(i, j) {
+  const _c = document.querySelector(`td[data-i="${i}"][data-j="${j}"]`);
+  if (_c) _c.classList.toggle('disp', isDisp(i, j));
   const cell = document.querySelector(`td[data-i="${i}"][data-j="${j}"]`);
   if (cell) cell.classList.toggle('checked', presence[i][j]);
   const rowTot = swimmerTotal(i);
@@ -1363,6 +1433,13 @@ async function togglePresence(i,j) {
   const fpEl = document.getElementById('footer-pct');
   if (fpEl) fpEl.textContent = avgPct();
   updateStats();
+}
+async function togglePresence(i,j) {
+  if (dispMode) return toggleDispense(i, j);
+  if (isDisp(i, j)) return; // case rouge : modifiable seulement en mode dispense
+  presence[i][j] = !presence[i][j];
+  saveLocalCache();
+  refreshRowCol(i, j);
 
   // Push this single change to the shared server store.
   try {
