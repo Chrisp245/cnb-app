@@ -1387,7 +1387,7 @@ function buildTable() {
     const tot = swimmerTotal(i);
     const wp = weeklyPctForSwimmer(i);
     const pct = wp === null ? 0 : wp;
-    const pctColor = pct>=80?'#16a34a':pct>=60?'#d97706':(pct>0?'#dc2626':'#9ca3af');
+    const pctColor = pct>=75?'#16a34a':pct>=50?'#d97706':(pct>0?'#dc2626':'#9ca3af');
     rows += `<td class="col-total" id="row-total-${i}">${tot}</td>
       <td class="col-pct" id="row-pct-${i}" style="color:${pctColor}">${wp!==null?pct+'%':'–'}</td></tr>`;
   });
@@ -1432,7 +1432,7 @@ function refreshRowCol(i, j) {
     const wp = weeklyPctForSwimmer(idx);
     const p = wp === null ? 0 : wp;
     pctEl.textContent = wp!==null?p+'%':'–';
-    pctEl.style.color = p>=80?'#16a34a':p>=60?'#d97706':(p>0?'#dc2626':'#9ca3af');
+    pctEl.style.color = p>=75?'#16a34a':p>=50?'#d97706':(p>0?'#dc2626':'#9ca3af');
   });
   const fpEl = document.getElementById('footer-pct');
   if (fpEl) fpEl.textContent = avgPct();
