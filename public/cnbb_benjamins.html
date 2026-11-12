@@ -610,7 +610,7 @@ const MONTH_NAMES = {'01':'Janvier','02':'Février','03':'Mars','04':'Avril','05
 const BENJ_COMPETITIONS = [
   {d:'2026-10-11', prog:'94488', ffn:'https://www.liveffn.com/cgi-bin/resultats.php?competition=94488&langue=fra', lbl:'Dimanche 11 octobre 2026', name:'Interclubs U15 / Meeting de rentrée (U12 et +)', lieu:'Oyonnax'},
   {d:'2026-11-08', prog:'94998', ffn:'https://www.liveffn.com/cgi-bin/resultats.php?competition=94998&langue=fra', lbl:'Dimanche 8 novembre 2026', name:'Interclubs départementaux TC', lieu:"Carré d'eau", home:true},
-  {d:'2026-11-22', lbl:'Dimanche 22 novembre 2026', name:'Meeting départemental U12 & U13', lieu:'Ferney-Voltaire'},
+  {d:'2026-11-22', ffn:'https://www.liveffn.com/cgi-bin/resultats.php?competition=94999&langue=fra', lbl:'Dimanche 22 novembre 2026', name:'Meeting départemental U12 & U13', lieu:'Ferney-Voltaire'},
   {d:'2026-12-06', lbl:'Dimanche 6 décembre 2026', name:'Meeting départemental (U12 et +)', lieu:'Ambérieu-en-Bugey'},
   {d:'2026-12-17', lbl:'Jeudi 17 – samedi 19 décembre 2026', name:'Championnats de France U12-U13', lieu:'Cholet'},
   {d:'2027-01-31', lbl:'Dimanche 31 janvier 2027', name:'½ fond (50m) le matin + Championnat départemental sprint (50m) l’après-midi — U12 et +', lieu:'Oyonnax'},
@@ -643,14 +643,14 @@ function buildCompList() {
     const isNext = upcoming && c.d === upcoming.d;
     const isPast = c.d < TODAY;
     html += `
-      <div style="background:#fff;border-radius:14px;box-shadow:0 3px 14px rgba(0,0,0,${isPast?'0.04':'0.09'});padding:16px 18px;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;opacity:${isPast && !c.prog ? '0.55' : '1'};border:2px solid ${isNext?'#f59e0b':'transparent'};">
+      <div style="background:#fff;border-radius:14px;box-shadow:0 3px 14px rgba(0,0,0,${isPast?'0.04':'0.09'});padding:16px 18px;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;opacity:${isPast && !c.prog && !c.recap ? '0.55' : '1'};border:2px solid ${isNext?'#f59e0b':'transparent'};">
         <div style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-radius:10px;padding:8px 4px;font-size:16px;font-weight:800;text-align:center;min-width:52px;line-height:1.15;">${parseInt(dd,10)}<div style="font-size:9px;font-weight:700;letter-spacing:0.4px;">${MONTH_ABBR[m]}</div></div>
         <div style="flex:1;min-width:170px;text-align:left;">
           ${isNext ? '<div style="font-size:10px;font-weight:800;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">⚡ Prochaine compétition</div>' : ''}
           <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:3px;">${c.name}</div>
           <div style="font-size:12px;color:#64748b;">📅 ${c.lbl} &nbsp;·&nbsp; 📍 ${c.lieu}${c.home ? ' <span style="background:#ede9fe;color:#6d28d9;font-size:10px;font-weight:800;padding:1px 7px;border-radius:8px;margin-left:4px;">🏠 Domicile</span>' : ''}</div>
         </div>
-        ${isPast && (c.prog || c.ffn) ? `<div style="align-self:center;margin-left:auto;display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;justify-content:flex-end;">${c.prog ? `<a href="#" onclick="openChrono('${c.prog}'); return false;" style="display:flex;align-items:center;gap:4px;text-decoration:none;color:#fff;background:linear-gradient(135deg,#059669,#10b981);border-radius:12px;padding:10px 12px;font-size:12px;font-weight:800;box-shadow:0 4px 12px rgba(5,150,105,0.35);">📋 Programme</a>` : ''}${c.ffn ? `<a href="${c.ffn}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:4px;text-decoration:none;color:#fff;background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border-radius:12px;padding:10px 12px;font-size:12px;font-weight:800;box-shadow:0 4px 12px rgba(29,78,216,0.35);">Résultats FFN ↗</a>` : ''}</div>` : ''}
+        ${(isPast && (c.prog || c.ffn)) || c.recap ? `<div style="align-self:center;margin-left:auto;display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;justify-content:flex-end;">${isPast && c.prog ? `<a href="#" onclick="openChrono('${c.prog}'); return false;" style="display:flex;align-items:center;gap:4px;text-decoration:none;color:#fff;background:linear-gradient(135deg,#059669,#10b981);border-radius:12px;padding:10px 12px;font-size:12px;font-weight:800;box-shadow:0 4px 12px rgba(5,150,105,0.35);">📋 Programme</a>` : ''}${isPast && c.ffn ? `<a href="${c.ffn}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:4px;text-decoration:none;color:#fff;background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border-radius:12px;padding:10px 12px;font-size:12px;font-weight:800;box-shadow:0 4px 12px rgba(29,78,216,0.35);">Résultats FFN ↗</a>` : ''}${c.recap ? `<a href="${c.recap}" title="Récap de la compétition et envoi aux parents" style="flex-shrink:0;text-decoration:none;text-align:center;color:#fff;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:12px;padding:10px 12px;font-size:12px;font-weight:800;line-height:1.25;box-shadow:0 4px 12px rgba(124,58,237,0.4);"><span style="font-size:20px;display:block;">📊</span>Récap</a>` : ''}</div>` : ''}
       </div>`;
   });
   wrap.innerHTML = html;
