@@ -69,7 +69,7 @@ th.day-0{background:linear-gradient(180deg,#4c1d95 0%,#6d28d9 100%);}
 th.day-1{background:linear-gradient(180deg,#065f46 0%,#047857 100%);}
 th.day-4{background:linear-gradient(180deg,#831843 0%,#9d174d 100%);}th.day-2{background:linear-gradient(180deg,#1e3a8a 0%,#2563eb 100%);}th.day-3{background:linear-gradient(180deg,#9a3412 0%,#ea580c 100%);}
 th.col-total{background:#4c1d95;color:#fbbf24;font-size:10px;font-weight:700;text-align:center;padding:6px 4px;min-width:42px;width:42px;border-left:2px solid rgba(255,255,255,0.2);border-bottom:2px solid #cbd5e1;vertical-align:bottom;position:sticky;right:48px;z-index:15;}
-/* % sans tenir compte des dispenses (affichage seul, n'intervient pas dans le classement) */
+/* % avec dispenses (ligne secondaire, affichage seul : n'intervient pas dans le classement) */
 .pct-nd{display:block;font-size:9px;font-weight:600;color:#6b7280;white-space:nowrap;line-height:1.15;margin-top:1px;}
 th.col-pct{background:#4c1d95;color:#fbbf24;font-size:10px;font-weight:700;text-align:center;padding:6px 4px;min-width:48px;width:48px;border-left:2px solid rgba(255,255,255,0.2);border-bottom:2px solid #cbd5e1;vertical-align:bottom;position:sticky;right:0;z-index:15;}
 tr.swimmer-row:nth-child(even) td{background:#f8fafc;}
@@ -1207,7 +1207,7 @@ function startDateFor(idx) {
 }
 function swimmerTotal(idx) {
   const start = startDateFor(idx);
-  return presence[idx].reduce((s,v,j) => s + (v && !isDisp(idx, j) && !DATES[j].off && DATES[j].full <= TODAY && DATES[j].full >= start ? 1 : 0), 0);
+  return presence[idx].reduce((s,v,j) => s + (v && !DATES[j].off && DATES[j].full <= TODAY && DATES[j].full >= start ? 1 : 0), 0);
 }
 // Jours d'entrainement (0=Lu,1=Ma,2=Me,3=Je,4=Ve) reellement suivis par
 // chaque generation : les 2015 nagent Lu/Ma/Je/Ve, les 2014 Lu/Ma/Me/Ve.
@@ -1227,24 +1227,33 @@ function relevantDaysFor(idx) {
 // % jour par jour : cumul (seances presentes / seances deja passees sur les
 // jours de la generation) recalcule a chaque seance, sans le decoupage par
 // semaine (qui faisait retomber le % a 0 des le lundi d'une semaine neuve).
-function weeklyPctForSwimmer(idx, ignoreDisp) {
+function weeklyPctForSwimmer(idx, withDisp) {
   const relDays = relevantDaysFor(idx);
   const passedIdxs = DATES
     .map((dt,j) => ({dt,j}))
-    .filter(o => !o.dt.off && (relDays.includes(o.dt.day) || o.dt.stage) && o.dt.full <= TODAY && o.dt.full >= startDateFor(idx) && (ignoreDisp || !isDisp(idx, o.j)))
+    .filter(o => !o.dt.off && (relDays.includes(o.dt.day) || o.dt.stage) && o.dt.full <= TODAY && o.dt.full >= startDateFor(idx) && (!withDisp || !isDisp(idx, o.j)))
     .map(o => o.j);
   if (passedIdxs.length === 0) return null;
   const attended = passedIdxs.reduce((s,j) => s + (presence[idx][j] ? 1 : 0), 0);
   return Math.round((attended / passedIdxs.length) * 100);
 }
-// % de presence SANS tenir compte des dispenses exceptionnelles (affichage seul :
-// le classement reste base sur le % actuel).
-function pctNdHtml(idx) {
+// Par defaut, le % et le classement NE TIENNENT PAS COMPTE des dispenses exceptionnelles
+// (une seance dispensee compte comme une seance normale). Le % "avec dispenses"
+// (seances dispensees retirees du calcul) s'affiche en petit dessous, uniquement pour les
+// nageurs concernes. Affichage seul : il n'intervient pas dans le tri.
+function pctDispHtml(idx) {
   let has = false;
   for (let j = 0; j < DATES.length; j++) { if (isDisp(idx, j)) { has = true; break; } }
   if (!has) return '';
   const v = weeklyPctForSwimmer(idx, true);
-  return v === null ? '' : '<span class="pct-nd" title="% de presence sans tenir compte des dispenses exceptionnelles">sans disp. ' + v + '%</span>';
+  return v === null ? '' : '<span class="pct-nd" title="% de presence en retirant les seances en dispense exceptionnelle">avec disp. ' + v + '%</span>';
+}
+// Couleur du % de presence : vert fonce de 100 a 80, vert de 80 a 70,
+// orange de 70 a 50, rouge en dessous de 50 (gris si aucune seance a compter).
+// Bornes : 80 inclus dans le vert fonce, 70 inclus dans le vert, 50 inclus dans l'orange.
+function pctColorOf(p, hasData) {
+  if (!hasData) return '#9ca3af';
+  return p >= 80 ? '#14532d' : p >= 70 ? '#16a34a' : p >= 50 ? '#d97706' : '#dc2626';
 }
 // Ordre d'affichage du tableau de presence : meilleur % de presence en premier.
 // Egalite : plus de seances suivies d'abord, puis ordre alphabetique (DISPLAY_ORDER).
@@ -1406,9 +1415,9 @@ function buildTable() {
     const tot = swimmerTotal(i);
     const wp = weeklyPctForSwimmer(i);
     const pct = wp === null ? 0 : wp;
-    const pctColor = pct>=75?'#16a34a':pct>=50?'#d97706':(pct>0?'#dc2626':'#9ca3af');
+    const pctColor = pctColorOf(pct, wp!==null);
     rows += `<td class="col-total" id="row-total-${i}">${tot}</td>
-      <td class="col-pct" id="row-pct-${i}" style="color:${pctColor}">${wp!==null?pct+'%':'–'}${pctNdHtml(i)}</td></tr>`;
+      <td class="col-pct" id="row-pct-${i}" style="color:${pctColor}">${wp!==null?pct+'%':'–'}${pctDispHtml(i)}</td></tr>`;
   });
   tbody.innerHTML = rows;
   let fRow = '<tr><td class="col-name">Total séance</td>';
@@ -1450,8 +1459,8 @@ function refreshRowCol(i, j) {
     if (!pctEl) return;
     const wp = weeklyPctForSwimmer(idx);
     const p = wp === null ? 0 : wp;
-    pctEl.innerHTML = (wp!==null?p+'%':'–') + pctNdHtml(idx);
-    pctEl.style.color = p>=75?'#16a34a':p>=50?'#d97706':(p>0?'#dc2626':'#9ca3af');
+    pctEl.innerHTML = (wp!==null?p+'%':'–') + pctDispHtml(idx);
+    pctEl.style.color = pctColorOf(p, wp!==null);
   });
   const fpEl = document.getElementById('footer-pct');
   if (fpEl) fpEl.textContent = avgPct();

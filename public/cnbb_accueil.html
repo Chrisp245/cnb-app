@@ -510,7 +510,7 @@ td.col-total{
   position:sticky;right:48px;
   background:#fff;z-index:10;
 }
-/* % sans tenir compte des dispenses (affichage seul, n'intervient pas dans le classement) */
+/* % avec dispenses (ligne secondaire, affichage seul : n'intervient pas dans le classement) */
 .pct-nd{display:block;font-size:9px;font-weight:600;color:#6b7280;white-space:nowrap;line-height:1.15;margin-top:1px;}
 td.col-pct{
   text-align:center;font-size:13px;font-weight:700;
@@ -804,30 +804,36 @@ function isExcluded(j, year) {
 const TODAY = new Date().toISOString().slice(0, 10);
 // Date de debut du calcul du % pour les nageurs arrives en cours de saison
 const PCT_START = {'BORGIS Noélie':'2026-10-12'};
-function swimmerActiveSessions(year, name, idx) {
+function swimmerActiveSessions(year, name, idx, withDisp) {
   const st = PCT_START[name] || '';
-  return DATES.filter((dt, j) => !isExcluded(j, year) && dt.full <= TODAY && dt.full >= st && !(idx !== undefined && isDisp(idx, j))).length;
+  return DATES.filter((dt, j) => !isExcluded(j, year) && dt.full <= TODAY && dt.full >= st && !(withDisp && idx !== undefined && isDisp(idx, j))).length;
 }
-function swimmerTotal(idx, year) {
+function swimmerTotal(idx, year, withDisp) {
   const st = PCT_START[SWIMMERS[idx].n] || '';
-  return presence[idx].reduce((s, v, j) => s + (v && !isDisp(idx, j) && !isExcluded(j, year) && DATES[j].full <= TODAY && DATES[j].full >= st ? 1 : 0), 0);
+  return presence[idx].reduce((s, v, j) => s + (v && !(withDisp && isDisp(idx, j)) && !isExcluded(j, year) && DATES[j].full <= TODAY && DATES[j].full >= st ? 1 : 0), 0);
 }
-// % de presence SANS tenir compte des dispenses exceptionnelles (les seances dispensees
-// redeviennent des seances normales). Affichage seul : le classement reste base sur le % actuel.
-function pctSansDispense(idx) {
+// Par defaut, le % et le classement NE TIENNENT PAS COMPTE des dispenses exceptionnelles
+// (une seance dispensee compte comme une seance normale). Le % "avec dispenses"
+// (seances dispensees retirees du calcul) s'affiche en petit dessous, uniquement pour les
+// nageurs concernes. Affichage seul : il n'intervient pas dans le tri.
+function pctAvecDispense(idx) {
   let has = false;
   for (let j = 0; j < DATES.length; j++) { if (isDisp(idx, j)) { has = true; break; } }
   if (!has) return null;
   const sw = SWIMMERS[idx];
-  const st = PCT_START[sw.n] || '';
-  const act = DATES.filter((dt, j) => !isExcluded(j, sw.y) && dt.full <= TODAY && dt.full >= st).length;
-  if (act === 0) return null;
-  const tot = presence[idx].reduce((a, v, j) => a + (v && !isExcluded(j, sw.y) && DATES[j].full <= TODAY && DATES[j].full >= st ? 1 : 0), 0);
-  return Math.round(tot / act * 100);
+  const act = swimmerActiveSessions(sw.y, sw.n, idx, true);
+  return act > 0 ? Math.round(swimmerTotal(idx, sw.y, true) / act * 100) : null;
 }
-function pctNdHtml(idx) {
-  const v = pctSansDispense(idx);
-  return v === null ? '' : '<span class="pct-nd" title="% de presence sans tenir compte des dispenses exceptionnelles">sans disp. ' + v + '%</span>';
+function pctDispHtml(idx) {
+  const v = pctAvecDispense(idx);
+  return v === null ? '' : '<span class="pct-nd" title="% de presence en retirant les seances en dispense exceptionnelle">avec disp. ' + v + '%</span>';
+}
+// Couleur du % de presence : vert fonce de 100 a 80, vert de 80 a 70,
+// orange de 70 a 50, rouge en dessous de 50 (gris si aucune seance a compter).
+// Bornes : 80 inclus dans le vert fonce, 70 inclus dans le vert, 50 inclus dans l'orange.
+function pctColorOf(p, hasData) {
+  if (!hasData) return '#9ca3af';
+  return p >= 80 ? '#14532d' : p >= 70 ? '#16a34a' : p >= 50 ? '#d97706' : '#dc2626';
 }
 // Ordre d'affichage du tableau de presence : meilleur % de presence en premier.
 // Egalite : plus de seances suivies d'abord, puis ordre de la liste SWIMMERS.
@@ -1007,8 +1013,8 @@ function buildTable() {
     rows += `<td class="col-total" id="row-total-${i}">${tot}</td>`;
     const activeSessions = swimmerActiveSessions(sw.y, sw.n, i);
     const pct = activeSessions > 0 ? Math.round(tot / activeSessions * 100) : 0;
-    const pctColor = pct >= 75 ? '#16a34a' : pct >= 50 ? '#d97706' : (pct > 0 ? '#dc2626' : '#9ca3af');
-    rows += `<td class="col-pct" id="row-pct-${i}" style="color:${pctColor}">${activeSessions > 0 ? pct+'%' : '–'}${pctNdHtml(i)}</td>`;
+    const pctColor = pctColorOf(pct, activeSessions > 0);
+    rows += `<td class="col-pct" id="row-pct-${i}" style="color:${pctColor}">${activeSessions > 0 ? pct+'%' : '–'}${pctDispHtml(i)}</td>`;
     rows += '</tr>';
   });
   tbody.innerHTML = rows;
@@ -1070,8 +1076,8 @@ function refreshRowCol(i, j) {
     const t = swimmerTotal(idx, sw.y);
     const active = swimmerActiveSessions(sw.y, sw.n, idx);
     const p = active > 0 ? Math.round(t / active * 100) : 0;
-    pctEl.innerHTML = (active > 0 ? p+'%' : '–') + pctNdHtml(idx);
-    pctEl.style.color = p >= 75 ? '#16a34a' : p >= 50 ? '#d97706' : (p > 0 ? '#dc2626' : '#9ca3af');
+    pctEl.innerHTML = (active > 0 ? p+'%' : '–') + pctDispHtml(idx);
+    pctEl.style.color = pctColorOf(p, active > 0);
   });
   const fpEl = document.getElementById('footer-pct');
   if (fpEl) fpEl.textContent = avgPct();
