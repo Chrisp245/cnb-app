@@ -510,6 +510,8 @@ td.col-total{
   position:sticky;right:48px;
   background:#fff;z-index:10;
 }
+/* % sans tenir compte des dispenses (affichage seul, n'intervient pas dans le classement) */
+.pct-nd{display:block;font-size:9px;font-weight:600;color:#6b7280;white-space:nowrap;line-height:1.15;margin-top:1px;}
 td.col-pct{
   text-align:center;font-size:13px;font-weight:700;
   color:#0f172a;
@@ -810,6 +812,23 @@ function swimmerTotal(idx, year) {
   const st = PCT_START[SWIMMERS[idx].n] || '';
   return presence[idx].reduce((s, v, j) => s + (v && !isDisp(idx, j) && !isExcluded(j, year) && DATES[j].full <= TODAY && DATES[j].full >= st ? 1 : 0), 0);
 }
+// % de presence SANS tenir compte des dispenses exceptionnelles (les seances dispensees
+// redeviennent des seances normales). Affichage seul : le classement reste base sur le % actuel.
+function pctSansDispense(idx) {
+  let has = false;
+  for (let j = 0; j < DATES.length; j++) { if (isDisp(idx, j)) { has = true; break; } }
+  if (!has) return null;
+  const sw = SWIMMERS[idx];
+  const st = PCT_START[sw.n] || '';
+  const act = DATES.filter((dt, j) => !isExcluded(j, sw.y) && dt.full <= TODAY && dt.full >= st).length;
+  if (act === 0) return null;
+  const tot = presence[idx].reduce((a, v, j) => a + (v && !isExcluded(j, sw.y) && DATES[j].full <= TODAY && DATES[j].full >= st ? 1 : 0), 0);
+  return Math.round(tot / act * 100);
+}
+function pctNdHtml(idx) {
+  const v = pctSansDispense(idx);
+  return v === null ? '' : '<span class="pct-nd" title="% de presence sans tenir compte des dispenses exceptionnelles">sans disp. ' + v + '%</span>';
+}
 // Ordre d'affichage du tableau de presence : meilleur % de presence en premier.
 // Egalite : plus de seances suivies d'abord, puis ordre de la liste SWIMMERS.
 // Seul l'affichage est trie : les presences restent enregistrees par numero de nageur.
@@ -989,7 +1008,7 @@ function buildTable() {
     const activeSessions = swimmerActiveSessions(sw.y, sw.n, i);
     const pct = activeSessions > 0 ? Math.round(tot / activeSessions * 100) : 0;
     const pctColor = pct >= 75 ? '#16a34a' : pct >= 50 ? '#d97706' : (pct > 0 ? '#dc2626' : '#9ca3af');
-    rows += `<td class="col-pct" id="row-pct-${i}" style="color:${pctColor}">${activeSessions > 0 ? pct+'%' : '–'}</td>`;
+    rows += `<td class="col-pct" id="row-pct-${i}" style="color:${pctColor}">${activeSessions > 0 ? pct+'%' : '–'}${pctNdHtml(i)}</td>`;
     rows += '</tr>';
   });
   tbody.innerHTML = rows;
@@ -1051,7 +1070,7 @@ function refreshRowCol(i, j) {
     const t = swimmerTotal(idx, sw.y);
     const active = swimmerActiveSessions(sw.y, sw.n, idx);
     const p = active > 0 ? Math.round(t / active * 100) : 0;
-    pctEl.textContent = active > 0 ? p+'%' : '–';
+    pctEl.innerHTML = (active > 0 ? p+'%' : '–') + pctNdHtml(idx);
     pctEl.style.color = p >= 75 ? '#16a34a' : p >= 50 ? '#d97706' : (p > 0 ? '#dc2626' : '#9ca3af');
   });
   const fpEl = document.getElementById('footer-pct');
