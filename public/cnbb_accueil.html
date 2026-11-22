@@ -1238,7 +1238,7 @@ td.clickable:active .perf-badge {
 /* Modal */
 .modal-bg {
   display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.45); z-index: 1000;
+  background: rgba(0,0,0,.45); z-index: 10000;
   align-items: center; justify-content: center; padding: 16px;
 }
 .modal-bg.open { display: flex; }
@@ -2258,6 +2258,19 @@ function ccMatchRoster(rowText) {
   });
   return best ? best.name : null;
 }
+// ── Clic sur un nageur : historique de ses performances dans l'épreuve ──
+function ccKeyN(s) { return ccNorm(s).split(' ').sort().join(' '); }
+function ccHistFor(name, i) {
+  const p = CC_PROGRAM[i]; if (!p) return null;
+  const ev = p.ev.replace('Brasse', 'Bra').replace(/\.$/, '');
+  const ei = E.findIndex(x => x.replace(/\.$/, '') === ev); if (ei < 0) return null;
+  const k = ccKeyN(name);
+  const si = swimmers.findIndex(s => ccKeyN(s.n) === k); if (si < 0) return null;
+  const h = history[si] && history[si][ei]; if (!h || !h.length) return null;
+  const pf = swimmers[si].p[ei];
+  return { sw: swimmers[si], ei, h, c: pf ? pc(pf.p) : null };
+}
+function ccOpenHist(name, i) { const r = ccHistFor(name, i); if (r) openModal(r.sw, r.ei, r.h, r.c); }
 function ccParseLiveEvent(html) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   const out = [];
@@ -2309,9 +2322,10 @@ function ccRenderLive() {
         const d = rc - eg.cs;
         delta = `<span class="${d <= 0 ? 'cc-res-fast' : 'cc-res-slow'}">${d <= 0 ? '−' : '+'}${(Math.abs(d)/100).toFixed(2)}</span>`;
       }
+      const hf = ccHistFor(r.name, i);
       h += `<div class="cc-res-row">
         <div class="cc-res-lane">${r.rank ? r.rank + '.' : ''}</div>
-        <div class="cc-res-name">${r.name}<div class="cc-res-eng">Engagement : <b>${eg.txt}</b></div></div>
+        <div class="cc-res-name${hf?' cc-hist':''}"${hf?` data-n="${r.name.replace(/"/g,'&quot;')}" data-i="${i}" onclick="ccOpenHist(this.dataset.n, +this.dataset.i)" title="Historique de ${r.name} dans cette épreuve"`:''}>${r.name}${hf?'<span class="cc-hist-ico">📈</span>':''}<div class="cc-res-eng">Engagement : <b>${eg.txt}</b></div></div>
         <div class="cc-res-time">${r.time || r.flag || '—'}</div>
         <div class="cc-res-delta">${delta}</div><span class="cc-res-del-sp"></span></div>`;
     });
@@ -2657,9 +2671,10 @@ function ccRenderResults() {
         delta = `<span class="${d <= 0 ? 'cc-res-fast' : 'cc-res-slow'}">${d <= 0 ? '−' : '+'}${(Math.abs(d)/100).toFixed(2)}</span>`;
       }
     }
+    const hf = ccHistFor(name, evIdx);
     return `<div class="cc-res-row">
       <div class="cc-res-lane">${laneTxt}</div>
-      <div class="cc-res-name">${name}<div class="cc-res-eng">Engagement : <b>${eg.txt}</b></div></div>
+      <div class="cc-res-name${hf?' cc-hist':''}"${hf?` data-n="${name.replace(/"/g,'&quot;')}" data-i="${evIdx}" onclick="ccOpenHist(this.dataset.n, +this.dataset.i)" title="Historique de ${name} dans cette épreuve"`:''}>${name}${hf?'<span class="cc-hist-ico">📈</span>':''}<div class="cc-res-eng">Engagement : <b>${eg.txt}</b></div></div>
       <div class="cc-res-time${r ? '' : ' cc-res-empty'}">${r ? r.time : '—'}</div>
       <div class="cc-res-delta">${delta}</div>
       ${r ? `<button class="cc-res-del" onclick="ccDelResult(${gi})">✕</button>` : '<span class="cc-res-del-sp"></span>'}
@@ -2790,6 +2805,9 @@ function ccClearResults() {
 .cc-res-lane{font-size:11px;color:rgba(255,255,255,0.35);width:32px;flex-shrink:0;}
 .cc-res-time{font-size:18px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;min-width:76px;}
 .cc-res-name{flex:1;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);}
+.cc-res-name.cc-hist{cursor:pointer;}
+.cc-res-name.cc-hist:hover{color:#fff;}
+.cc-hist-ico{font-size:11px;opacity:.6;margin-left:6px;}
 .cc-res-del{background:none;border:none;color:rgba(255,255,255,0.2);cursor:pointer;font-size:14px;padding:2px;}
 .cc-res-eng{font-size:11px;font-weight:500;color:rgba(255,255,255,0.45);margin-top:2px;}
 .cc-res-eng b{color:#fbbf24;font-weight:700;font-variant-numeric:tabular-nums;}

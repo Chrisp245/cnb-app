@@ -267,6 +267,9 @@ body.dispmode td.pres-cell.disp:hover .cell-inner{background:linear-gradient(135
 .cc-res-lane{font-size:11px;color:rgba(255,255,255,0.35);width:32px;flex-shrink:0;}
 .cc-res-time{font-size:18px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;min-width:76px;}
 .cc-res-name{flex:1;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);}
+.cc-res-name.cc-hist{cursor:pointer;}
+.cc-res-name.cc-hist:hover{color:#fff;}
+.cc-hist-ico{font-size:11px;opacity:.6;margin-left:6px;}
 .cc-res-eng{font-size:11px;font-weight:500;color:rgba(255,255,255,0.45);margin-top:2px;}
 .cc-res-eng b{color:#fbbf24;font-weight:700;font-variant-numeric:tabular-nums;}
 .cc-res-delta{font-size:12px;font-weight:700;min-width:44px;text-align:right;font-variant-numeric:tabular-nums;}
@@ -1702,6 +1705,34 @@ function ccParseLiveEvent(html) {
   });
   return out;
 }
+// ── Clic sur un nageur : historique de ses performances dans l'épreuve ──
+function ccKeyN(s) { return ccNorm(s).split(' ').sort().join(' '); }
+function ccHistFor(name, i) {
+  const p = CC_PROGRAM[i]; if (!p) return null;
+  const ev = p.ev.replace('Brasse', 'Bra').replace(/\.$/, '');
+  const k = ccKeyN(name);
+  if (FR_EVENTS.indexOf(ev) >= 0) {                                   // 2013-2014 : historique du Championnat de France (25 m + 50 m)
+    const sw = FR_SWIMMERS.find(s => ccKeyN(s.n) === k);
+    if (sw) {
+      const perf50 = sw.q && sw.q[ev];
+      const h50 = (FR_HISTORY50[sw.n] && FR_HISTORY50[sw.n][ev]) || (perf50 ? [{t: perf50.t, p: perf50.p, d: '', l: '', b: 50}] : []);
+      const h = ((FR_HISTORY[sw.n] && FR_HISTORY[sw.n][ev]) || []).concat(h50);
+      if (h.length) return { kind: 'fr', sw, ev, h, c: sw.p[ev] ? pc(sw.p[ev].p) : null };
+    }
+  }
+  const ei = E.findIndex(x => x.replace(/\.$/, '') === ev);          // 2014-2015 : tableau des performances
+  const si = mppSwimmers.findIndex(s => ccKeyN(s.n) === k);
+  if (ei >= 0 && si >= 0) {
+    const h = mppHistory[si] && mppHistory[si][ei];
+    if (h && h.length) { const pf = mppSwimmers[si].p[ei]; return { kind: 'mpp', sw: mppSwimmers[si], ei, h, c: pf ? pc(pf.p) : null }; }
+  }
+  return null;
+}
+function ccOpenHist(name, i) {
+  const r = ccHistFor(name, i); if (!r) return;
+  if (r.kind === 'fr') { buildFranceTable(); openFranceModal(r.sw, r.ev, r.h, r.c); }
+  else { buildMPPTable(); openMPPModal(r.sw, r.ei, r.h, r.c); }
+}
 async function ccLiveRefresh() {
   if (ccLiveBusy) return;
   ccLiveBusy = true;
@@ -1736,9 +1767,10 @@ function ccRenderLive() {
         const d = rc - eg.cs;
         delta = `<span class="${d <= 0 ? 'cc-res-fast' : 'cc-res-slow'}">${d <= 0 ? '−' : '+'}${(Math.abs(d) / 100).toFixed(2)}</span>`;
       }
+      const hf = ccHistFor(r.name, i);
       h += `<div class="cc-res-row">
         <div class="cc-res-lane">${r.rank ? r.rank + '.' : ''}</div>
-        <div class="cc-res-name">${r.name}<div class="cc-res-eng">Engagement : <b>${eg.txt}</b></div></div>
+        <div class="cc-res-name${hf?' cc-hist':''}"${hf?` data-n="${r.name.replace(/"/g,'&quot;')}" data-i="${i}" onclick="ccOpenHist(this.dataset.n, +this.dataset.i)" title="Historique de ${r.name} dans cette épreuve"`:''}>${r.name}${hf?'<span class="cc-hist-ico">📈</span>':''}<div class="cc-res-eng">Engagement : <b>${eg.txt}</b></div></div>
         <div class="cc-res-time">${r.time || r.flag || '—'}</div>
         <div class="cc-res-delta">${delta}</div></div>`;
     });
