@@ -1728,10 +1728,11 @@ function ccHistFor(name, i) {
   }
   return null;
 }
+function ccHoist(id) { const e = document.getElementById(id); if (e && e.parentNode !== document.body) document.body.appendChild(e); }   // la fenetre est dans un ecran cache : on la place au premier plan
 function ccOpenHist(name, i) {
   const r = ccHistFor(name, i); if (!r) return;
-  if (r.kind === 'fr') { buildFranceTable(); openFranceModal(r.sw, r.ev, r.h, r.c); }
-  else { buildMPPTable(); openMPPModal(r.sw, r.ei, r.h, r.c); }
+  if (r.kind === 'fr') { buildFranceTable(); ccHoist('franceModalBg'); openFranceModal(r.sw, r.ev, r.h, r.c); }
+  else { buildMPPTable(); ccHoist('mppModalBg'); openMPPModal(r.sw, r.ei, r.h, r.c); }
 }
 async function ccLiveRefresh() {
   if (ccLiveBusy) return;

@@ -2270,7 +2270,8 @@ function ccHistFor(name, i) {
   const pf = swimmers[si].p[ei];
   return { sw: swimmers[si], ei, h, c: pf ? pc(pf.p) : null };
 }
-function ccOpenHist(name, i) { const r = ccHistFor(name, i); if (r) openModal(r.sw, r.ei, r.h, r.c); }
+function ccHoist(id) { const e = document.getElementById(id); if (e && e.parentNode !== document.body) document.body.appendChild(e); }   // la fenetre est dans un ecran cache : on la place au premier plan
+function ccOpenHist(name, i) { const r = ccHistFor(name, i); if (r) { ccHoist('modalBg'); openModal(r.sw, r.ei, r.h, r.c); } }
 function ccParseLiveEvent(html) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   const out = [];
