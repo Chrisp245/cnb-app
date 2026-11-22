@@ -427,7 +427,7 @@ th.col-total{
   border-left:2px solid rgba(255,255,255,0.2);
   border-bottom:2px solid #cbd5e1;
   vertical-align:bottom;
-  position:sticky;right:48px;z-index:15;
+  position:sticky;right:var(--pctw,48px);z-index:15;
 }
 th.col-pct{
   background:#1e3a8a;color:#fbbf24;font-size:10px;font-weight:700;
@@ -507,7 +507,7 @@ td.col-total{
   border-left:2px solid #e2e8f0;
   border-bottom:1px solid #f1f5f9;
   padding:5px 4px;
-  position:sticky;right:48px;
+  position:sticky;right:var(--pctw,48px);
   background:#fff;z-index:10;
 }
 /* % avec dispenses (ligne secondaire, affichage seul : n'intervient pas dans le classement) */
@@ -974,6 +974,25 @@ async function loadState() {
   }
   setSyncIndicator();
 }
+// Colonne Total collee a gauche de la colonne % : son decalage suit la largeur reelle du % (qui s'elargit avec la ligne "avec disp.")
+function syncStickyPct() {
+  const th = document.querySelector('#presence-table th.col-pct');
+  const tb = document.getElementById('presence-table');
+  if (!th || !tb) return;
+  const w = th.getBoundingClientRect().width;
+  if (w > 0) tb.style.setProperty('--pctw', Math.ceil(w) + 'px');
+}
+let _pctRO = null;
+function watchStickyPct() {
+  syncStickyPct();
+  if (window.ResizeObserver) {
+    if (_pctRO) _pctRO.disconnect();
+    _pctRO = new ResizeObserver(syncStickyPct);
+    const th = document.querySelector('#presence-table th.col-pct');
+    if (th) _pctRO.observe(th);
+  }
+}
+window.addEventListener('resize', syncStickyPct);
 function buildTable() {
   const thead = document.getElementById('thead');
   const tbody = document.getElementById('tbody');
@@ -1043,6 +1062,7 @@ function buildTable() {
   fRow += '</tr>';
   tfoot.innerHTML = fRow;
   updateStats();
+  watchStickyPct();
 }
 function updateStats() {
   const grand = presence.reduce((s,row) => s+row.reduce((a,v)=>a+(v?1:0),0), 0);
@@ -1740,7 +1760,7 @@ const PERF_C=[
   {mn:100,mx:199,bg:'#7dd3fc',tx:'#0c4a6e',label:'100–199'},
   {mn:200,mx:299,bg:'#2563eb',tx:'#eff6ff',label:'200–299'},
   {mn:300,mx:399,bg:'#8b5cf6',tx:'#f5f3ff',label:'300–399'},
-  {mn:400,mx:499,bg:'#991b1b',tx:'#fee2e2',label:'400–499'},
+  {mn:400,mx:499,bg:'#fca5a5',tx:'#7f1d1d',label:'400–499'},
   {mn:500,mx:599,bg:'#ef4444',tx:'#fff1f2',label:'500–599'},
   {mn:600,mx:699,bg:'#fb923c',tx:'#7c2d12',label:'600–699'},
   {mn:700,mx:799,bg:'#fde047',tx:'#713f12',label:'700–799'},
@@ -2814,7 +2834,7 @@ function ccClearResults() {
     font-size: 10px;
   }
   td.col-name .group-badge { font-size: 9px; padding: 1px 4px; }
-  th.col-total, td.col-total { min-width: 34px; width: 34px; font-size: 12px; right: 40px; }
+  th.col-total, td.col-total { min-width: 34px; width: 34px; font-size: 12px; right: var(--pctw,40px); }
   th.col-pct,   td.col-pct   { min-width: 40px; width: 40px; font-size: 11px; }
   tfoot tr td.col-total { font-size: 13px; }
   tfoot tr td.col-pct   { font-size: 11px; }
