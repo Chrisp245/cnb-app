@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Envoi des récaps aux parents – CN Bourg-en-Bresse</title>
+<style>
+:root{--navy:#1e3a5f;--bg:#eef2f7;--card:#fff;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--green:#16a34a;--green-bg:#dcfce7;--red:#dc2626;--red-bg:#fee2e2;--wa:#25d366;--sms:#2563eb;--amber:#f59e0b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.bar{position:sticky;top:0;z-index:5;background:var(--navy);color:#fff;padding:12px 16px}
+.bar h1{font-size:16px;margin:0;font-weight:700}
+.bar .sub{font-size:12.5px;opacity:.85;margin-top:2px}
+.bar .stats{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;font-size:12.5px}
+.bar .stats span{background:rgba(255,255,255,.14);padding:3px 10px;border-radius:999px}
+.wrap{max-width:980px;margin:14px auto 60px;padding:0 16px}
+.panel{background:var(--card);border-radius:14px;box-shadow:0 2px 10px rgba(15,23,42,.07);padding:14px 16px;margin-bottom:14px}
+.panel h2{font-size:14px;margin:0 0 8px;text-transform:uppercase;letter-spacing:.5px;color:var(--mute)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button,.btn{font:inherit;font-weight:700;font-size:14px;border:0;border-radius:10px;padding:8px 14px;cursor:pointer;background:#e2e8f0;color:var(--ink)}
+button.primary{background:var(--amber);color:#1c1100}
+button.wa{background:var(--wa);color:#04210f} button.sms{background:var(--sms);color:#fff}
+button.ghost{background:transparent;border:1px solid var(--line);font-weight:600}
+button:disabled{opacity:.45;cursor:not-allowed}
+input[type=text],input[type=tel],select,textarea{font:inherit;border:1px solid #cbd5e1;border-radius:9px;padding:7px 10px;background:#fff;color:var(--ink);min-width:0}
+textarea{width:100%;resize:vertical}
+label{font-size:13px;color:var(--mute);display:block;margin:8px 0 3px}
+.hint{font-size:12.5px;color:var(--mute);margin-top:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.chip{padding:6px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:600;cursor:pointer}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.sw{background:var(--card);border-radius:14px;box-shadow:0 2px 10px rgba(15,23,42,.07);margin-bottom:10px;overflow:hidden}
+.sw .hd{display:flex;gap:10px;align-items:center;padding:11px 14px;flex-wrap:wrap}
+.sw .nm{font-weight:800;flex:1 1 200px}
+.sw .nm small{font-weight:500;color:var(--mute);margin-left:6px}
+.badge{font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:#f1f5f9;color:var(--mute)}
+.badge.g{background:var(--green-bg);color:var(--green)} .badge.r{background:var(--red-bg);color:var(--red)}
+.ct{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 14px;border-top:1px solid var(--line);background:#fafcff}
+.ct input[type=text]{width:160px} .ct input[type=tel]{width:160px}
+.ct .ok{color:var(--green);font-weight:700;font-size:13px}
+.ct .bad{color:var(--red);font-size:12.5px}
+.pre{padding:0 14px 12px;display:none}
+.pre.open{display:block}
+.pre pre{white-space:pre-wrap;background:#0f172a;color:#e2e8f0;padding:12px 14px;border-radius:10px;font:13px/1.5 ui-monospace,Consolas,monospace;margin:10px 0 6px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;max-width:90vw}
+#toast.on{opacity:1}
+@media(max-width:560px){.ct input[type=text],.ct input[type=tel]{width:100%}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <a href="cnbb_benjamins.html" style="color:#fff;opacity:.85;text-decoration:none;font-size:13px;display:inline-block;margin-bottom:6px">← Benjamins</a>
+  <h1>Envoi des récaps aux parents</h1>
+  <div class="sub" id="sub"></div>
+  <div class="stats" id="stats"></div>
+</div>
+<div class="wrap">
+
+  <div class="panel">
+    <h2>1. Contacts des parents</h2>
+    <div class="row">
+      <button class="primary" id="btnImport">Importer un fichier CSV…</button>
+      <button id="btnExport">Télécharger le modèle / exporter</button>
+      <input type="file" id="file" accept=".csv,.txt,text/csv" hidden>
+    </div>
+    <div class="hint">Colonnes du CSV : <b>nageur ; annee ; parent ; telephone ; canal</b> (canal = <i>whatsapp</i> ou <i>sms</i>). Un nageur peut avoir plusieurs lignes (père, mère…).
+      Vous pouvez aussi saisir les numéros directement ci-dessous. 🔒 Les numéros restent dans ce navigateur sur cet ordinateur : rien n'est envoyé sur Internet par cette page.</div>
+  </div>
+
+  <div class="panel">
+    <h2>2. Message</h2>
+    <label for="intro">Phrase d'introduction — variables : {parent} {prenom} {nom}</label>
+    <textarea id="intro" rows="2"></textarea>
+    <label for="outro">Phrase de fin (facultatif)</label>
+    <input type="text" id="outro" style="width:100%">
+    <label for="sign">Signature</label>
+    <input type="text" id="sign" style="width:100%">
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="imgWa"> <b>WhatsApp : envoyer l'image</b> (temps en vert / rouge) au lieu du texte <span class="hint" style="margin:0">(l'image est copiée, WhatsApp s'ouvre sur la bonne conversation : Ctrl+V puis Envoyer)</span></label>
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="emojiSms"> Emojis (🟢🔴) aussi dans les SMS <span class="hint" style="margin:0">(un SMS avec emojis est découpé en messages plus courts)</span></label>
+    <div class="hint">Chaque course est suivie de l'écart par rapport au temps d'engagement : 🟢 + = temps gagné, 🔴 − = temps perdu. WhatsApp ne permet pas de colorer du texte : le bouton <b>🖼 Image</b> de chaque nageur copie un récap avec les temps écrits en vert / rouge, à coller (Ctrl+V) dans la conversation.</div>
+  </div>
+
+  <div class="panel">
+    <h2>3. Envoi</h2>
+    <div class="row">
+      <button class="primary" id="btnNext">Envoyer au suivant ➜</button>
+      <span class="hint" id="nextInfo" style="margin:0"></span>
+    </div>
+    <div class="hint"><b>WhatsApp</b> : s'ouvre (appli ou WhatsApp Web) avec le message déjà rédigé, il reste à appuyer sur « Envoyer ».
+      <b>SMS</b> : à utiliser depuis un téléphone (ou avec « Liaison avec le téléphone » sous Windows). Le bouton ouvre la messagerie avec le message prêt.
+      Un envoi est marqué « ✓ fait » dès que vous cliquez ; vous pouvez l'annuler.</div>
+  </div>
+
+  <div class="chips" id="chips"></div>
+  <div id="list"></div>
+</div>
+<div id="toast"></div>
+
+<script>
+const RECAP = {"competition":{"id":"2026-11-22","date":"22/11/2026","dateLong":"dimanche 22 novembre 2026","nom":"Meeting départemental U12 & U13","lieu":"Ferney-Voltaire","designation":"Meeting départemental U12 & U13 – Ferney-Voltaire – dimanche 22 novembre 2026","signature":"Christophe – CN Bourg-en-Bresse"},"regle":"Écart = temps de la compétition − meilleur temps précédent du nageur sur la même épreuve (historique de l'appli).","nageurs":[{"cle":"AZZAZ|LYLIA","nom":"AZZAZ","prenom":"Lylia","nomComplet":"AZZAZ Lylia","annee":"2014","courses":[{"epreuve":"200 4N","label":"200 m 4 Nages","ordre":200,"temps":"03:20.21","tempsAff":"3:20.21","precedent":"03:23.14","precedentAff":"3:23.14","precedentDate":"26/04/2026","precedentLieu":"BELLEGARDE-SUR-VALSERINE","ecartCs":-293,"ecartAff":"+2,93 s","statut":"gagne"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:36.00","tempsAff":"36.00","precedent":"00:35.04","precedentAff":"35.04","precedentDate":"29/03/2026","precedentLieu":"BOURG-EN-BRESSE","ecartCs":96,"ecartAff":"−0,96 s","statut":"perdu"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:20.93","tempsAff":"1:20.93","precedent":"01:21.07","precedentAff":"1:21.07","precedentDate":"29/03/2026","precedentLieu":"BOURG-EN-BRESSE","ecartCs":-14,"ecartAff":"+0,14 s","statut":"gagne"},{"epreuve":"200 NL","label":"200 m Nage libre","ordre":20200,"temps":"02:59.65","tempsAff":"2:59.65","precedent":"02:57.60","precedentAff":"2:57.60","precedentDate":"08/11/2026","precedentLieu":"BOURG-EN-BRESSE","ecartCs":205,"ecartAff":"−2,05 s","statut":"perdu"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:41.13","tempsAff":"41.13","precedent":"00:41.90","precedentAff":"41.90","precedentDate":"26/04/2026","precedentLieu":"BELLEGARDE-SUR-VALSERINE","ecartCs":-77,"ecartAff":"+0,77 s","statut":"gagne"},{"epreuve":"100 DOS","label":"100 m Dos","ordre":40100,"temps":"01:29.45","tempsAff":"1:29.45","precedent":"01:46.98","precedentAff":"1:46.98","precedentDate":"06/04/2025","precedentLieu":"ANNECY","ecartCs":-1753,"ecartAff":"+17,53 s","statut":"gagne"}],"relais":[],"bilan":{"courses":6,"gagnes":4,"perdus":2,"egales":0,"sans_ref":0}},{"cle":"BIZAUD|SONIA","nom":"BIZAUD","prenom":"Sonia","nomComplet":"BIZAUD Sonia","annee":"2014","courses":[{"epreuve":"50 PAP","label":"50 m Papillon","ordre":10050,"temps":"00:37.48","tempsAff":"37.48","precedent":"00:36.16","precedentAff":"36.16","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":132,"ecartAff":"−1,32 s","statut":"perdu"},{"epreuve":"100 PAP","label":"100 m Papillon","ordre":10100,"temps":"01:36.14","tempsAff":"1:36.14","precedent":"01:27.34","precedentAff":"1:27.34","precedentDate":"06/12/2025","precedentLieu":"BELLEGARDE-SUR-VALSERINE","ecartCs":880,"ecartAff":"−8,80 s","statut":"perdu"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:31.82","tempsAff":"31.82","precedent":"00:32.17","precedentAff":"32.17","precedentDate":"23/05/2026","precedentLieu":"BOURGOIN-JALLIEU","ecartCs":-35,"ecartAff":"+0,35 s","statut":"gagne"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:12.20","tempsAff":"1:12.20","precedent":"01:12.15","precedentAff":"1:12.15","precedentDate":"24/05/2026","precedentLieu":"BOURGOIN-JALLIEU","ecartCs":5,"ecartAff":"−0,05 s","statut":"perdu"},{"epreuve":"200 NL","label":"200 m Nage libre","ordre":20200,"temps":"02:46.20","tempsAff":"2:46.20","precedent":"02:45.30","precedentAff":"2:45.30","precedentDate":"23/05/2026","precedentLieu":"BOURGOIN-JALLIEU","ecartCs":90,"ecartAff":"−0,90 s","statut":"perdu"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:41.81","tempsAff":"41.81","precedent":"00:40.37","precedentAff":"40.37","precedentDate":"29/03/2026","precedentLieu":"BOURG-EN-BRESSE","ecartCs":144,"ecartAff":"−1,44 s","statut":"perdu"}],"relais":[],"bilan":{"courses":6,"gagnes":1,"perdus":5,"egales":0,"sans_ref":0}},{"cle":"DONNIER VALENTIN|ZELIE","nom":"DONNIER VALENTIN","prenom":"Zélie","nomComplet":"DONNIER VALENTIN Zélie","annee":"2013","courses":[{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:13.40","tempsAff":"1:13.40","precedent":"01:09.87","precedentAff":"1:09.87","precedentDate":"26/04/2026","precedentLieu":"BELLEGARDE-SUR-VALSERINE","ecartCs":353,"ecartAff":"−3,53 s","statut":"perdu"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:39.48","tempsAff":"39.48","precedent":"00:39.57","precedentAff":"39.57","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-9,"ecartAff":"+0,09 s","statut":"gagne"},{"epreuve":"100 BRA","label":"100 m Brasse","ordre":30100,"temps":"01:28.78","tempsAff":"1:28.78","precedent":"01:27.45","precedentAff":"1:27.45","precedentDate":"23/11/2025","precedentLieu":"BOURG-EN-BRESSE","ecartCs":133,"ecartAff":"−1,33 s","statut":"perdu"}],"relais":[],"bilan":{"courses":3,"gagnes":1,"perdus":2,"egales":0,"sans_ref":0}},{"cle":"DUPRAT PAKULA|ROBIN","nom":"DUPRAT PAKULA","prenom":"Robin","nomComplet":"DUPRAT PAKULA Robin","annee":"2014","courses":[{"epreuve":"200 4N","label":"200 m 4 Nages","ordre":200,"temps":"03:19.40","tempsAff":"3:19.40","precedent":"03:18.23","precedentAff":"3:18.23","precedentDate":"29/03/2026","precedentLieu":"BOURG-EN-BRESSE","ecartCs":117,"ecartAff":"−1,17 s","statut":"perdu"},{"epreuve":"50 PAP","label":"50 m Papillon","ordre":10050,"temps":"00:40.08","tempsAff":"40.08","precedent":"00:41.52","precedentAff":"41.52","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-144,"ecartAff":"+1,44 s","statut":"gagne"},{"epreuve":"100 PAP","label":"100 m Papillon","ordre":10100,"temps":"01:45.70","tempsAff":"1:45.70","precedent":"01:55.49","precedentAff":"1:55.49","precedentDate":"06/04/2025","precedentLieu":"ANNECY","ecartCs":-979,"ecartAff":"+9,79 s","statut":"gagne"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:34.15","tempsAff":"34.15","precedent":"00:34.93","precedentAff":"34.93","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-78,"ecartAff":"+0,78 s","statut":"gagne"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:15.20","tempsAff":"1:15.20","precedent":"01:20.59","precedentAff":"1:20.59","precedentDate":"24/05/2025","precedentLieu":"ISSOIRE","ecartCs":-539,"ecartAff":"+5,39 s","statut":"gagne"},{"epreuve":"200 NL","label":"200 m Nage libre","ordre":20200,"temps":"02:49.03","tempsAff":"2:49.03","precedent":"02:51.75","precedentAff":"2:51.75","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-272,"ecartAff":"+2,72 s","statut":"gagne"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:42.62","tempsAff":"42.62","precedent":"00:42.11","precedentAff":"42.11","precedentDate":"06/12/2025","precedentLieu":"BELLEGARDE-SUR-VALSERINE","ecartCs":51,"ecartAff":"−0,51 s","statut":"perdu"}],"relais":[],"bilan":{"courses":7,"gagnes":5,"perdus":2,"egales":0,"sans_ref":0}},{"cle":"DUSSURGET|BASTIEN","nom":"DUSSURGET","prenom":"Bastien","nomComplet":"DUSSURGET Bastien","annee":"2013","courses":[{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:30.02","tempsAff":"30.02","precedent":"00:32.19","precedentAff":"32.19","precedentDate":"23/11/2025","precedentLieu":"BOURG-EN-BRESSE","ecartCs":-217,"ecartAff":"+2,17 s","statut":"gagne"},{"epreuve":"400 NL","label":"400 m Nage libre","ordre":20400,"temps":"05:21.15","tempsAff":"5:21.15","precedent":"05:21.85","precedentAff":"5:21.85","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-70,"ecartAff":"+0,70 s","statut":"gagne"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:38.32","tempsAff":"38.32","precedent":"00:38.02","precedentAff":"38.02","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":30,"ecartAff":"−0,30 s","statut":"perdu"},{"epreuve":"100 BRA","label":"100 m Brasse","ordre":30100,"temps":"01:28.92","tempsAff":"1:28.92","precedent":"01:29.18","precedentAff":"1:29.18","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-26,"ecartAff":"+0,26 s","statut":"gagne"},{"epreuve":"200 BRA","label":"200 m Brasse","ordre":30200,"temps":"03:11.03","tempsAff":"3:11.03","precedent":"03:05.45","precedentAff":"3:05.45","precedentDate":"08/11/2026","precedentLieu":"BOURG-EN-BRESSE","ecartCs":558,"ecartAff":"−5,58 s","statut":"perdu"}],"relais":[],"bilan":{"courses":5,"gagnes":3,"perdus":2,"egales":0,"sans_ref":0}},{"cle":"ESSADKI|MAISSANE","nom":"ESSADKI","prenom":"Maïssane","nomComplet":"ESSADKI Maïssane","annee":"2014","courses":[{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:35.99","tempsAff":"35.99","precedent":"00:36.47","precedentAff":"36.47","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-48,"ecartAff":"+0,48 s","statut":"gagne"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:18.47","tempsAff":"1:18.47","precedent":"01:26.95","precedentAff":"1:26.95","precedentDate":"26/04/2026","precedentLieu":"BELLEGARDE-SUR-VALSERINE","ecartCs":-848,"ecartAff":"+8,48 s","statut":"gagne"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:45.58","tempsAff":"45.58","precedent":"00:50.18","precedentAff":"50.18","precedentDate":"29/03/2026","precedentLieu":"BOURG-EN-BRESSE","ecartCs":-460,"ecartAff":"+4,60 s","statut":"gagne"},{"epreuve":"100 BRA","label":"100 m Brasse","ordre":30100,"temps":"01:43.00","tempsAff":"1:43.00","precedent":"01:46.64","precedentAff":"1:46.64","precedentDate":"09/11/2025","precedentLieu":"OYONNAX","ecartCs":-364,"ecartAff":"+3,64 s","statut":"gagne"},{"epreuve":"200 BRA","label":"200 m Brasse","ordre":30200,"temps":"03:33.49","tempsAff":"3:33.49","precedent":"03:45.56","precedentAff":"3:45.56","precedentDate":"21/06/2026","precedentLieu":"OYONNAX","ecartCs":-1207,"ecartAff":"+12,07 s","statut":"gagne"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:44.91","tempsAff":"44.91","precedent":"00:46.10","precedentAff":"46.10","precedentDate":"26/04/2026","precedentLieu":"BELLEGARDE-SUR-VALSERINE","ecartCs":-119,"ecartAff":"+1,19 s","statut":"gagne"}],"relais":[],"bilan":{"courses":6,"gagnes":6,"perdus":0,"egales":0,"sans_ref":0}},{"cle":"JAY|MAELYS","nom":"JAY","prenom":"Maëlys","nomComplet":"JAY Maëlys","annee":"2013","courses":[{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:35.48","tempsAff":"35.48","precedent":"00:36.45","precedentAff":"36.45","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-97,"ecartAff":"+0,97 s","statut":"gagne"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:45.82","tempsAff":"45.82","precedent":"00:45.14","precedentAff":"45.14","precedentDate":"29/03/2026","precedentLieu":"BOURG-EN-BRESSE","ecartCs":68,"ecartAff":"−0,68 s","statut":"perdu"},{"epreuve":"100 BRA","label":"100 m Brasse","ordre":30100,"temps":"01:41.94","tempsAff":"1:41.94","precedent":"01:39.56","precedentAff":"1:39.56","precedentDate":"09/11/2025","precedentLieu":"OYONNAX","ecartCs":238,"ecartAff":"−2,38 s","statut":"perdu"},{"epreuve":"200 BRA","label":"200 m Brasse","ordre":30200,"temps":"03:33.50","tempsAff":"3:33.50","precedent":"03:34.41","precedentAff":"3:34.41","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-91,"ecartAff":"+0,91 s","statut":"gagne"}],"relais":[],"bilan":{"courses":4,"gagnes":2,"perdus":2,"egales":0,"sans_ref":0}},{"cle":"JOUCHOUX|LENNY","nom":"JOUCHOUX","prenom":"Lenny","nomComplet":"JOUCHOUX Lenny","annee":"2013","courses":[{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:33.08","tempsAff":"33.08","precedent":"00:31.95","precedentAff":"31.95","precedentDate":"26/04/2026","precedentLieu":"BELLEGARDE-SUR-VALSERINE","ecartCs":113,"ecartAff":"−1,13 s","statut":"perdu"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:11.35","tempsAff":"1:11.35","precedent":"01:09.89","precedentAff":"1:09.89","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":146,"ecartAff":"−1,46 s","statut":"perdu"},{"epreuve":"200 NL","label":"200 m Nage libre","ordre":20200,"temps":"02:33.77","tempsAff":"2:33.77","precedent":"02:29.66","precedentAff":"2:29.66","precedentDate":"26/04/2026","precedentLieu":"BELLEGARDE-SUR-VALSERINE","ecartCs":411,"ecartAff":"−4,11 s","statut":"perdu"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:36.86","tempsAff":"36.86","precedent":"00:34.40","precedentAff":"34.40","precedentDate":"23/05/2026","precedentLieu":"BOURGOIN-JALLIEU","ecartCs":246,"ecartAff":"−2,46 s","statut":"perdu"},{"epreuve":"100 DOS","label":"100 m Dos","ordre":40100,"temps":"01:20.61","tempsAff":"1:20.61","precedent":"01:17.98","precedentAff":"1:17.98","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":263,"ecartAff":"−2,63 s","statut":"perdu"},{"epreuve":"200 DOS","label":"200 m Dos","ordre":40200,"temps":"02:55.12","tempsAff":"2:55.12","precedent":"02:46.48","precedentAff":"2:46.48","precedentDate":"23/05/2026","precedentLieu":"BOURGOIN-JALLIEU","ecartCs":864,"ecartAff":"−8,64 s","statut":"perdu"}],"relais":[],"bilan":{"courses":6,"gagnes":0,"perdus":6,"egales":0,"sans_ref":0}},{"cle":"OMRANI|NASSIM","nom":"OMRANI","prenom":"Nassim","nomComplet":"OMRANI Nassim","annee":"2014","courses":[{"epreuve":"200 4N","label":"200 m 4 Nages","ordre":200,"temps":"03:07.22","tempsAff":"3:07.22","precedent":"03:12.15","precedentAff":"3:12.15","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-493,"ecartAff":"+4,93 s","statut":"gagne"},{"epreuve":"50 PAP","label":"50 m Papillon","ordre":10050,"temps":"00:36.09","tempsAff":"36.09","precedent":"00:38.48","precedentAff":"38.48","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-239,"ecartAff":"+2,39 s","statut":"gagne"},{"epreuve":"100 PAP","label":"100 m Papillon","ordre":10100,"temps":"01:29.46","tempsAff":"1:29.46","precedent":"01:30.59","precedentAff":"1:30.59","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-113,"ecartAff":"+1,13 s","statut":"gagne"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:31.87","tempsAff":"31.87","precedent":"00:33.99","precedentAff":"33.99","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-212,"ecartAff":"+2,12 s","statut":"gagne"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:11.81","tempsAff":"1:11.81","precedent":"01:17.95","precedentAff":"1:17.95","precedentDate":"06/12/2025","precedentLieu":"BELLEGARDE-SUR-VALSERINE","ecartCs":-614,"ecartAff":"+6,14 s","statut":"gagne"},{"epreuve":"200 NL","label":"200 m Nage libre","ordre":20200,"temps":"02:37.99","tempsAff":"2:37.99","precedent":"02:45.00","precedentAff":"2:45.00","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-701,"ecartAff":"+7,01 s","statut":"gagne"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:40.99","tempsAff":"40.99","precedent":"00:39.46","precedentAff":"39.46","precedentDate":"24/05/2026","precedentLieu":"BOURGOIN-JALLIEU","ecartCs":153,"ecartAff":"−1,53 s","statut":"perdu"}],"relais":[],"bilan":{"courses":7,"gagnes":6,"perdus":1,"egales":0,"sans_ref":0}},{"cle":"POMATHIOS|LORIS","nom":"POMATHIOS","prenom":"Loris","nomComplet":"POMATHIOS Loris","annee":"2014","courses":[{"epreuve":"200 4N","label":"200 m 4 Nages","ordre":200,"temps":"03:48.71","tempsAff":"3:48.71","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:41.48","tempsAff":"41.48","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:31.02","tempsAff":"1:31.02","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"200 NL","label":"200 m Nage libre","ordre":20200,"temps":"03:22.87","tempsAff":"3:22.87","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:46.97","tempsAff":"46.97","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"},{"epreuve":"100 DOS","label":"100 m Dos","ordre":40100,"temps":"01:39.29","tempsAff":"1:39.29","precedent":null,"precedentAff":null,"precedentDate":null,"precedentLieu":null,"ecartCs":null,"ecartAff":null,"statut":"nt"}],"relais":[],"bilan":{"courses":6,"gagnes":0,"perdus":0,"egales":0,"sans_ref":6}},{"cle":"RAPHAEL LE DOCTE|TIANAO","nom":"RAPHAËL LE DOCTE","prenom":"Tianao","nomComplet":"RAPHAËL LE DOCTE Tianao","annee":"2014","courses":[{"epreuve":"200 4N","label":"200 m 4 Nages","ordre":200,"temps":"03:17.01","tempsAff":"3:17.01","precedent":"03:20.24","precedentAff":"3:20.24","precedentDate":"29/03/2026","precedentLieu":"BOURG-EN-BRESSE","ecartCs":-323,"ecartAff":"+3,23 s","statut":"gagne"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:34.21","tempsAff":"34.21","precedent":"00:33.68","precedentAff":"33.68","precedentDate":"23/05/2026","precedentLieu":"BOURGOIN-JALLIEU","ecartCs":53,"ecartAff":"−0,53 s","statut":"perdu"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:14.87","tempsAff":"1:14.87","precedent":"01:18.70","precedentAff":"1:18.70","precedentDate":"26/04/2026","precedentLieu":"BELLEGARDE-SUR-VALSERINE","ecartCs":-383,"ecartAff":"+3,83 s","statut":"gagne"},{"epreuve":"50 BRA","label":"50 m Brasse","ordre":30050,"temps":"00:42.30","tempsAff":"42.30","precedent":"00:42.44","precedentAff":"42.44","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-14,"ecartAff":"+0,14 s","statut":"gagne"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:43.73","tempsAff":"43.73","precedent":"00:44.02","precedentAff":"44.02","precedentDate":"26/04/2026","precedentLieu":"BELLEGARDE-SUR-VALSERINE","ecartCs":-29,"ecartAff":"+0,29 s","statut":"gagne"}],"relais":[],"bilan":{"courses":5,"gagnes":4,"perdus":1,"egales":0,"sans_ref":0}},{"cle":"RIBEYRON|AGATHE","nom":"RIBEYRON","prenom":"Agathe","nomComplet":"RIBEYRON Agathe","annee":"2013","courses":[{"epreuve":"50 PAP","label":"50 m Papillon","ordre":10050,"temps":"00:35.20","tempsAff":"35.20","precedent":"00:34.91","precedentAff":"34.91","precedentDate":"07/12/2025","precedentLieu":"OYONNAX","ecartCs":29,"ecartAff":"−0,29 s","statut":"perdu"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:31.90","tempsAff":"31.90","precedent":"00:32.00","precedentAff":"32.00","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-10,"ecartAff":"+0,10 s","statut":"gagne"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:09.44","tempsAff":"1:09.44","precedent":"01:08.42","precedentAff":"1:08.42","precedentDate":"06/12/2025","precedentLieu":"OYONNAX","ecartCs":102,"ecartAff":"−1,02 s","statut":"perdu"},{"epreuve":"200 NL","label":"200 m Nage libre","ordre":20200,"temps":"02:30.86","tempsAff":"2:30.86","precedent":"02:28.94","precedentAff":"2:28.94","precedentDate":"07/12/2025","precedentLieu":"OYONNAX","ecartCs":192,"ecartAff":"−1,92 s","statut":"perdu"},{"epreuve":"400 NL","label":"400 m Nage libre","ordre":20400,"temps":"05:18.34","tempsAff":"5:18.34","precedent":"05:14.84","precedentAff":"5:14.84","precedentDate":"08/11/2026","precedentLieu":"BOURG-EN-BRESSE","ecartCs":350,"ecartAff":"−3,50 s","statut":"perdu"}],"relais":[],"bilan":{"courses":5,"gagnes":1,"perdus":4,"egales":0,"sans_ref":0}},{"cle":"TARTAGLIONE|JADE","nom":"TARTAGLIONE","prenom":"Jade","nomComplet":"TARTAGLIONE Jade","annee":"2014","courses":[{"epreuve":"50 PAP","label":"50 m Papillon","ordre":10050,"temps":"00:36.69","tempsAff":"36.69","precedent":"00:38.11","precedentAff":"38.11","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-142,"ecartAff":"+1,42 s","statut":"gagne"},{"epreuve":"100 PAP","label":"100 m Papillon","ordre":10100,"temps":"01:29.59","tempsAff":"1:29.59","precedent":"01:30.70","precedentAff":"1:30.70","precedentDate":"26/04/2026","precedentLieu":"BELLEGARDE-SUR-VALSERINE","ecartCs":-111,"ecartAff":"+1,11 s","statut":"gagne"},{"epreuve":"50 NL","label":"50 m Nage libre","ordre":20050,"temps":"00:31.14","tempsAff":"31.14","precedent":"00:31.85","precedentAff":"31.85","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-71,"ecartAff":"+0,71 s","statut":"gagne"},{"epreuve":"100 NL","label":"100 m Nage libre","ordre":20100,"temps":"01:09.45","tempsAff":"1:09.45","precedent":"01:14.45","precedentAff":"1:14.45","precedentDate":"26/04/2026","precedentLieu":"BELLEGARDE-SUR-VALSERINE","ecartCs":-500,"ecartAff":"+5,00 s","statut":"gagne"},{"epreuve":"200 NL","label":"200 m Nage libre","ordre":20200,"temps":"02:36.15","tempsAff":"2:36.15","precedent":"02:41.93","precedentAff":"2:41.93","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":-578,"ecartAff":"+5,78 s","statut":"gagne"},{"epreuve":"50 DOS","label":"50 m Dos","ordre":40050,"temps":"00:39.96","tempsAff":"39.96","precedent":"00:39.49","precedentAff":"39.49","precedentDate":"11/10/2026","precedentLieu":"OYONNAX","ecartCs":47,"ecartAff":"−0,47 s","statut":"perdu"}],"relais":[],"bilan":{"courses":6,"gagnes":5,"perdus":1,"egales":0,"sans_ref":0}}]};
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---------- stockage local (try/catch : peut être indisponible) ----------
+const store = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+};
+const K_CONTACTS = 'cnb_envoi_contacts_v1', K_SET = 'cnb_envoi_reglages_v5', K_SENT = 'cnb_envoi_envoyes_' + RECAP.competition.id;
+let contacts = store.get(K_CONTACTS, []);          // [{cle, nageur, parent, tel, canal}]
+let sent = store.get(K_SENT, {});                  // { "cle#i": "2026-10-12T15:00" }
+let S = Object.assign({
+  intro: 'Salut ! 👋 Le récap de {prenom} {nom} est là 🔥',
+  outro: '',
+  signature: RECAP.competition.signature || '', emojiSms: true, imgWa: true
+}, store.get(K_SET, {}));
+let filter = 'all';
+
+// ---------- noms ----------
+const norm = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim();
+const isUp = w => w === w.toUpperCase() && /[A-ZÀ-Ý]/.test(w);
+function keyOf(full){ const t = String(full).trim().split(/\s+/); return norm(t.filter(isUp).join(' ')) + '|' + norm(t.filter(w=>!isUp(w)).join(' ')); }
+
+// ---------- téléphone ----------
+function normPhone(raw){
+  if (!raw) return null;
+  let s = String(raw).trim().replace(/[^\d+]/g,'');
+  if (!s) return null;
+  if (s.startsWith('00')) s = '+' + s.slice(2);
+  else if (s.startsWith('+')) {}
+  else if (s.startsWith('0')) s = '+33' + s.slice(1);
+  else if (s.startsWith('33') && s.length === 11) s = '+' + s;
+  else if (s.length === 9) s = '+33' + s;
+  else s = '+' + s;
+  s = s.replace(/^\+330/, '+33');
+  return /^\+\d{10,15}$/.test(s) ? s : null;
+}
+
+// ---------- message ----------
+const rangFr = n => n === 1 ? '1er' : n + 'e';
+const pl = (n, a, b) => n > 1 ? b : a;
+function buildMessage(n, canal, parent){
+  const em = canal === 'whatsapp' || S.emojiSms;
+  const B = s => canal === 'whatsapp' ? '*' + s + '*' : s;
+  const fill = t => {
+    t = (t || '').replace(/\{parent\}/g, parent || '').replace(/\{prenom\}/g, n.prenom).replace(/\{nom\}/g, n.nom);
+    if (!em) t = t.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}️‍]/gu, '');
+    return t.replace(/\s+([,.])/g, '$1').replace(/ {2,}/g, ' ').trim();
+  };
+  const L = [fill(S.intro), '', (em ? '🏊 ' : '') + RECAP.competition.designation, ''];
+  n.courses.forEach(c => {
+    const tail = c.statut === 'gagne' ? (em ? '🟢 ' : '') + c.ecartAff
+               : c.statut === 'perdu' ? (em ? '🔴 ' : '') + c.ecartAff
+               : c.statut === 'egale' ? (em ? '🔵 ' : '') + '='
+               : '';
+    L.push(`${em ? '•' : '-'} ${c.label} → ${B(c.tempsAff)}${tail ? '  ' + tail : ''}`);
+  });
+  n.relais.forEach(r => L.push(`${em ? '•' : '-'} ${r.label} → ${B(r.tempsAff)}${r.rang ? ' (' + rangFr(r.rang) + ')' : ''}${em ? ' 🏁' : ''}`));
+  const out = fill(S.outro); if (out) L.push('', out);
+  if (S.signature) { if (!out) L.push(''); L.push(S.signature); }
+  return L.join('\n');
+}
+
+
+// ---------- image du récap (temps en vert / rouge) ----------
+function drawRecap(n){
+  const W = 760, P = 28, DPR = 2, ROW = 60, GREEN = '#16a34a', RED = '#dc2626', NAVY = '#1e3a5f', MUTE = '#64748b';
+  const F = (w, px) => `${w} ${px}px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif`;
+  const probe = document.createElement('canvas').getContext('2d'); probe.font = F(500, 17);
+  const words = RECAP.competition.designation.split(' '); const lines = []; let cur = '';
+  words.forEach(w => { const t = cur ? cur + ' ' + w : w; if (probe.measureText(t).width > W - 2 * P && cur) { lines.push(cur); cur = w; } else cur = t; });
+  if (cur) lines.push(cur);
+  const HEAD = 24 + 40 + 12 + lines.length * 24 + 18, rows = n.courses.length + n.relais.length;
+  const H = HEAD + 34 + rows * ROW + (RECAP.competition.signature ? 56 : 24);
+  const c = document.createElement('canvas'); c.width = W * DPR; c.height = H * DPR;
+  const x = c.getContext('2d'); x.scale(DPR, DPR);
+  x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+  x.fillStyle = NAVY; x.fillRect(0, 0, W, HEAD);
+  x.fillStyle = '#fff'; x.textBaseline = 'alphabetic';
+  x.font = F(800, 30); const nomW = x.measureText(n.nom + ' ').width; x.fillText(n.nom, P, 24 + 32);
+  x.font = F(600, 30); x.fillText(n.prenom, P + nomW, 24 + 32);
+  x.font = F(500, 17); x.globalAlpha = .9; lines.forEach((l, i) => x.fillText(l, P, 24 + 40 + 12 + 18 + i * 24)); x.globalAlpha = 1;
+  let y = HEAD + 24; x.fillStyle = MUTE; x.font = F(700, 13);
+  x.textAlign = 'left'; x.fillText('ÉPREUVE', P, y);
+  x.textAlign = 'right'; x.fillText('TEMPS', 470, y); x.fillText('ENGAGEMENT', 595, y); x.fillText('ÉCART', W - P, y);
+  y += 10;
+  const line = yy => { x.fillStyle = '#e2e8f0'; x.fillRect(P, yy, W - 2 * P, 1); };
+  line(y);
+  n.courses.forEach(co => {
+    const col = co.statut === 'gagne' ? GREEN : co.statut === 'perdu' ? RED : co.statut === 'egale' ? '#2563eb' : '#0f172a';
+    const base = y + ROW / 2 + 9;
+    x.textAlign = 'left'; x.fillStyle = '#0f172a'; x.font = F(700, 20); x.fillText(co.label, P, base);
+    x.textAlign = 'right'; x.fillStyle = col; x.font = F(800, 26); x.fillText(co.tempsAff, 470, base);
+    x.fillStyle = MUTE; x.font = F(500, 18); x.fillText(co.precedentAff || '—', 595, base);
+    x.fillStyle = col; x.font = F(800, 22); x.fillText(co.ecartAff || 'NT', W - P, base);
+    y += ROW; line(y);
+  });
+  n.relais.forEach(r => {
+    const base = y + ROW / 2 + 9;
+    x.textAlign = 'left'; x.fillStyle = '#0f172a'; x.font = F(700, 18); x.fillText(r.label, P, base);
+    x.textAlign = 'right'; x.fillStyle = MUTE; x.font = F(800, 24); x.fillText(r.tempsAff, 470, base);
+    x.font = F(700, 18); x.fillText(r.rang ? (r.rang === 1 ? '1er' : r.rang + 'e') : '', W - P, base);
+    y += ROW; line(y);
+  });
+  if (RECAP.competition.signature) { x.textAlign = 'left'; x.fillStyle = MUTE; x.font = F(600, 16); x.fillText(S.signature || RECAP.competition.signature, P, y + 36); }
+  return c;
+}
+async function copyImage(k, quiet){
+  const n = RECAP.nageurs.find(z => z.cle === k); if (!n) return false;
+  const blob = await new Promise(r => drawRecap(n).toBlob(r, 'image/png'));
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    toast(quiet ? 'Image copiée → dans WhatsApp : Ctrl+V puis Envoyer' : 'Image copiée : ouvrez la conversation WhatsApp puis collez-la (Ctrl+V)');
+    return true;
+  } catch (e) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'recap_' + n.nom + '_' + n.prenom + '.png'; a.click();
+    toast('Copie impossible : image téléchargée, à glisser dans WhatsApp');
+    return false;
+  }
+}
+
+// ---------- contacts ----------
+const forSw = k => contacts.map((c, i) => ({ c, i })).filter(x => x.c.cle === k);
+function saveContacts(){ store.set(K_CONTACTS, contacts); }
+function parseCSV(text){
+  text = text.replace(/^﻿/, '');
+  const first = text.split(/\r?\n/)[0] || '';
+  const delim = [';', '\t', ','].map(d => [d, first.split(d).length]).sort((a, b) => b[1] - a[1])[0][0];
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) { if (ch === '"') { if (text[i+1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === delim) { row.push(cur); cur = ''; }
+    else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i+1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+    else cur += ch;
+  }
+  if (cur || row.length) { row.push(cur); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim()));
+}
+function importCSV(text){
+  const rows = parseCSV(text); if (!rows.length) return toast('Fichier vide');
+  const h = rows[0].map(x => norm(x).toLowerCase());
+  const hasHead = h.some(x => /nageur|enfant|nom|tel|parent/.test(x));
+  const idx = (re, d) => { const i = h.findIndex(x => re.test(x)); return hasHead ? i : d; };
+  const iN = idx(/nageur|enfant|^nom/, 0), iP = idx(/parent|contact|resp/, 2), iT = idx(/tel|mobile|portable|num/, 3), iC = idx(/canal|mode|appli/, 4);
+  const known = new Map(RECAP.nageurs.map(n => [n.cle, n]));
+  const out = []; let unknown = [], noTel = 0;
+  rows.slice(hasHead ? 1 : 0).forEach(r => {
+    const nageur = (r[iN] || '').trim(); if (!nageur) return;
+    const cle = keyOf(nageur); if (!known.has(cle)) { unknown.push(nageur); return; }
+    const tel = (r[iT] || '').trim(); if (!tel) { noTel++; return; }
+    const canalRaw = norm(r[iC] || '').toLowerCase();
+    out.push({ cle, nageur: known.get(cle).nomComplet, parent: (r[iP] || '').trim(), tel, canal: /sms/.test(canalRaw) ? 'sms' : 'whatsapp' });
+  });
+  contacts = out; saveContacts(); render();
+  toast(`${out.length} contact(s) importé(s)` + (unknown.length ? ` · ${unknown.length} nageur(s) inconnu(s) ignoré(s)` : ''));
+}
+function exportCSV(){
+  const lines = ['nageur;annee;parent;telephone;canal'];
+  RECAP.nageurs.forEach(n => {
+    const cs = forSw(n.cle);
+    if (!cs.length) lines.push([n.nomComplet, n.annee, '', '', 'whatsapp'].join(';'));
+    cs.forEach(x => lines.push([n.nomComplet, n.annee, x.c.parent, x.c.tel, x.c.canal].map(v => String(v).replace(/;/g, ',')).join(';')));
+  });
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'contacts_parents.csv'; a.click();
+}
+
+// ---------- envoi ----------
+function urlFor(n, c){
+  const phone = normPhone(c.tel); if (!phone) return null;
+  if (c.canal !== 'sms' && S.imgWa) return `https://wa.me/${phone.slice(1)}`;
+  const msg = buildMessage(n, c.canal, c.parent);
+  return c.canal === 'sms' ? `sms:${phone}?&body=${encodeURIComponent(msg)}` : `https://wa.me/${phone.slice(1)}?text=${encodeURIComponent(msg)}`;
+}
+async function sendTo(k, i){
+  const n = RECAP.nageurs.find(x => x.cle === k), c = contacts[i]; if (!n || !c) return;
+  const url = urlFor(n, c); if (!url) return toast('Numéro invalide pour ' + n.nomComplet);
+  sent[k + '#' + i] = new Date().toISOString(); store.set(K_SENT, sent);
+  if (c.canal !== 'sms' && S.imgWa) await copyImage(k, true);
+  if (c.canal === 'sms') location.href = url; else window.open(url, '_blank', 'noopener');
+  render();
+}
+function pending(){
+  const out = [];
+  RECAP.nageurs.forEach(n => forSw(n.cle).forEach(x => { if (normPhone(x.c.tel) && !sent[n.cle + '#' + x.i]) out.push({ k: n.cle, i: x.i, n }); }));
+  return out;
+}
+
+// ---------- affichage ----------
+function toast(t){ const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), 3200); }
+function badge(b){
+  let h = `<span class="badge">${b.courses} course${pl(b.courses,'','s')}</span>`;
+  return h;
+}
+function swHTML(n){
+  const cs = forSw(n.cle);
+  const ctRows = cs.map(({ c, i }) => {
+    const ph = normPhone(c.tel), done = sent[n.cle + '#' + i];
+    return `<div class="ct" data-k="${esc(n.cle)}" data-i="${i}">
+      <input type="text" data-f="parent" placeholder="Parent (facultatif)" value="${esc(c.parent)}">
+      <input type="tel" data-f="tel" placeholder="06 12 34 56 78" value="${esc(c.tel)}">
+      <select data-f="canal"><option value="whatsapp"${c.canal==='whatsapp'?' selected':''}>WhatsApp</option><option value="sms"${c.canal==='sms'?' selected':''}>SMS</option></select>
+      ${ph ? `<button class="${c.canal==='sms'?'sms':'wa'}" data-act="send">${c.canal==='sms'?'Envoyer le SMS':(S.imgWa?'Envoyer l\'image sur WhatsApp':'Envoyer sur WhatsApp')}</button>` : `<span class="bad">${c.tel ? 'numéro invalide' : 'numéro manquant'}</span>`}
+      ${done ? `<span class="ok">✓ fait</span> <button class="ghost" data-act="undo">annuler</button>` : ''}
+      <button class="ghost" data-act="del" title="Supprimer ce contact">✕</button></div>`;
+  }).join('');
+  const prev = buildMessage(n, (cs[0] && cs[0].c.canal) || 'whatsapp', (cs[0] && cs[0].c.parent) || '');
+  return `<div class="sw" data-k="${esc(n.cle)}"><div class="hd">
+      <div class="nm">${esc(n.nom)} ${esc(n.prenom)}<small>${esc(n.annee)}</small></div>
+      ${badge(n.bilan)}
+      <button class="ghost" data-act="img" title="Image avec les temps en vert / rouge, à coller dans WhatsApp">🖼 Image</button><button class="ghost" data-act="prev">Aperçu</button><button class="ghost" data-act="add">+ parent</button></div>
+    ${ctRows}
+    <div class="pre"><pre>${esc(prev)}</pre><button class="ghost" data-act="copy">Copier le message</button></div></div>`;
+}
+function render(){
+  const nSw = RECAP.nageurs.length, withTel = contacts.filter(c => normPhone(c.tel)).length;
+  const nSent = Object.keys(sent).length, left = pending().length;
+  $('#sub').textContent = RECAP.competition.designation;
+  $('#stats').innerHTML = `<span>${nSw} nageurs</span><span>${withTel} numéro(s) valide(s)</span><span>${nSent} envoyé(s)</span><span>${left} à envoyer</span>`;
+  $('#nextInfo').textContent = left ? `Prochain : ${pending()[0].n.nomComplet}` : 'Rien à envoyer pour le moment';
+  $('#btnNext').disabled = !left;
+  const F = { all: 'Tous', todo: 'À envoyer', done: 'Envoyés', none: 'Sans numéro' };
+  $('#chips').innerHTML = Object.entries(F).map(([k, v]) => `<span class="chip${filter===k?' on':''}" data-f="${k}">${v}</span>`).join('');
+  const keep = n => {
+    const cs = forSw(n.cle);
+    if (filter === 'none') return !cs.some(x => normPhone(x.c.tel));
+    if (filter === 'todo') return cs.some(x => normPhone(x.c.tel) && !sent[n.cle + '#' + x.i]);
+    if (filter === 'done') return cs.some(x => sent[n.cle + '#' + x.i]);
+    return true;
+  };
+  const open = new Set([...document.querySelectorAll('.pre.open')].map(e => e.closest('.sw').dataset.k));
+  $('#list').innerHTML = RECAP.nageurs.filter(keep).map(swHTML).join('') || '<div class="panel hint">Aucun nageur dans ce filtre.</div>';
+  open.forEach(k => { const e = document.querySelector(`.sw[data-k="${CSS.escape(k)}"] .pre`); if (e) e.classList.add('open'); });
+}
+
+// ---------- événements ----------
+$('#list').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const sw = b.closest('.sw'), k = sw.dataset.k, ct = b.closest('.ct'), i = ct ? +ct.dataset.i : null;
+  const act = b.dataset.act, n = RECAP.nageurs.find(x => x.cle === k);
+  if (act === 'send') sendTo(k, i);
+  else if (act === 'undo') { delete sent[k + '#' + i]; store.set(K_SENT, sent); render(); }
+  else if (act === 'del') { contacts.splice(i, 1); sent = {}; store.set(K_SENT, sent); saveContacts(); render(); toast('Contact supprimé (statuts d\'envoi réinitialisés)'); }
+  else if (act === 'add') { contacts.push({ cle: k, nageur: n.nomComplet, parent: '', tel: '', canal: 'whatsapp' }); saveContacts(); render(); }
+  else if (act === 'img') copyImage(k);
+  else if (act === 'prev') sw.querySelector('.pre').classList.toggle('open');
+  else if (act === 'copy') { const t = sw.querySelector('pre').textContent; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Message copié'), () => toast('Copie impossible : sélectionnez le texte manuellement')); }
+});
+$('#list').addEventListener('change', e => {
+  const f = e.target.dataset.f, ct = e.target.closest('.ct'); if (!f || !ct) return;
+  contacts[+ct.dataset.i][f] = e.target.value.trim(); saveContacts(); render();
+});
+$('#chips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) { filter = c.dataset.f; render(); } });
+$('#btnNext').addEventListener('click', () => { const p = pending()[0]; if (p) sendTo(p.k, p.i); });
+$('#btnImport').addEventListener('click', () => $('#file').click());
+$('#file').addEventListener('change', e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => importCSV(String(r.result)); r.readAsText(f, 'utf-8'); e.target.value = ''; });
+$('#btnExport').addEventListener('click', exportCSV);
+$('#intro').value = S.intro; $('#outro').value = S.outro; $('#sign').value = S.signature; $('#emojiSms').checked = !!S.emojiSms; $('#imgWa').checked = !!S.imgWa;
+const saveSet = () => { S = { intro: $('#intro').value, outro: $('#outro').value, signature: $('#sign').value, emojiSms: $('#emojiSms').checked, imgWa: $('#imgWa').checked }; store.set(K_SET, S); render(); };
+['#intro', '#outro', '#sign'].forEach(s => $(s).addEventListener('input', saveSet)); $('#emojiSms').addEventListener('change', saveSet); $('#imgWa').addEventListener('change', saveSet);
+document.title = 'Envoi récaps ' + RECAP.competition.date + ' – CN Bourg-en-Bresse';
+render();
+</script>
+</body>
+</html>
