@@ -1111,16 +1111,16 @@ const TODAY = new Date().toISOString().slice(0,10);
 
 // ── DONNÉES MPP ──
 const PERF_C=[
-  {mn:0,  mx:99, bg:'#dcfce7',tx:'#166534',label:'0–99'},
-  {mn:100,mx:199,bg:'#86efac',tx:'#14532d',label:'100–199'},
-  {mn:200,mx:299,bg:'#16a34a',tx:'#f0fdf4',label:'200–299'},
-  {mn:300,mx:399,bg:'#fde047',tx:'#713f12',label:'300–399'},
-  {mn:400,mx:499,bg:'#fb923c',tx:'#7c2d12',label:'400–499'},
-  {mn:500,mx:599,bg:'#fca5a5',tx:'#7f1d1d',label:'500–599'},
-  {mn:600,mx:699,bg:'#ef4444',tx:'#fff1f2',label:'600–699'},
-  {mn:700,mx:799,bg:'#b91c1c',tx:'#fee2e2',label:'700–799'},
-  {mn:800,mx:899,bg:'#e9d5ff',tx:'#581c87',label:'800–899'},
-  {mn:900,mx:999,bg:'#a855f7',tx:'#faf5ff',label:'900–999'},
+  {mn:0,mx:99,bg:'#9ca3af',tx:'#111827',label:'0–99'},
+  {mn:100,mx:199,bg:'#7dd3fc',tx:'#0c4a6e',label:'100–199'},
+  {mn:200,mx:299,bg:'#2563eb',tx:'#eff6ff',label:'200–299'},
+  {mn:300,mx:399,bg:'#8b5cf6',tx:'#f5f3ff',label:'300–399'},
+  {mn:400,mx:499,bg:'#991b1b',tx:'#fee2e2',label:'400–499'},
+  {mn:500,mx:599,bg:'#ef4444',tx:'#fff1f2',label:'500–599'},
+  {mn:600,mx:699,bg:'#fb923c',tx:'#7c2d12',label:'600–699'},
+  {mn:700,mx:799,bg:'#fde047',tx:'#713f12',label:'700–799'},
+  {mn:800,mx:899,bg:'#16a34a',tx:'#f0fdf4',label:'800–899'},
+  {mn:900,mx:999,bg:'#14532d',tx:'#f0fdf4',label:'900–999'},
 ];
 const MPP_NAME_C={'F2015':'#db2777','F2014':'#881337','H2015':'#1d4ed8','H2014':'#172554'};
 function pc(p){if(p===null||p===undefined)return {bg:'#f3f4f6',tx:'#374151'};return PERF_C.find(x=>p>=x.mn&&p<=x.mx)||PERF_C[PERF_C.length-1];}
