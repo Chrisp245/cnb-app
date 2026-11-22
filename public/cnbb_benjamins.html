@@ -1797,7 +1797,7 @@ function ccLiveStart() {
   const on = document.getElementById('cc-live-on');
   if (on && !on.checked) return;
   ccLiveRefresh();
-  ccLiveTimer = setInterval(ccLiveRefresh, 30000);
+  ccLiveTimer = setInterval(ccLiveRefresh, 60000);
 }
 function ccLiveToggle() { ccLiveStart(); }
 ccSelectProg('94999');
